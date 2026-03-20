@@ -12,18 +12,38 @@ import EmojiPicker from "@/components/EmojiPicker";
 const destinations = ["New York", "Praha", "Tokio", "Londýn", "Barcelona", "Řím"];
 
 const interestTags = [
-  { id: "culture", label: "🎭 Kultura", emoji: "🎭" },
-  { id: "museums", label: "🏛️ Muzea", emoji: "🏛️" },
-  { id: "sport", label: "⚽ Sport", emoji: "⚽" },
-  { id: "food", label: "🍽️ Jídlo", emoji: "🍽️" },
-  { id: "nature", label: "🌿 Příroda", emoji: "🌿" },
-  { id: "nightlife", label: "🌙 Noční život", emoji: "🌙" },
-  { id: "shopping", label: "🛍️ Nákupy", emoji: "🛍️" },
-  { id: "history", label: "📜 Historie", emoji: "📜" },
-  { id: "architecture", label: "🏗️ Architektura", emoji: "🏗️" },
-  { id: "adventure", label: "🧗 Dobrodružství", emoji: "🧗" },
-  { id: "relax", label: "🧘 Relax", emoji: "🧘" },
-  { id: "family", label: "👨‍👩‍👧 Rodina", emoji: "👨‍👩‍👧" },
+  // Aktivity
+  { id: "culture", label: "🎭 Kultura" },
+  { id: "museums", label: "🏛️ Muzea" },
+  { id: "sport", label: "⚽ Sport" },
+  { id: "nature", label: "🌿 Příroda" },
+  { id: "adventure", label: "🧗 Dobrodružství" },
+  { id: "nightlife", label: "🌙 Noční život" },
+  { id: "shopping", label: "🛍️ Nákupy" },
+  { id: "history", label: "📜 Historie" },
+  { id: "architecture", label: "🏗️ Architektura" },
+  { id: "relax", label: "🧘 Relax & wellness" },
+  { id: "beaches", label: "🏖️ Pláže" },
+  { id: "hiking", label: "🥾 Turistika" },
+  // Jídlo & pití
+  { id: "food", label: "🍽️ Gastronomie" },
+  { id: "streetfood", label: "🌮 Street food" },
+  { id: "wine", label: "🍷 Víno & degustace" },
+  { id: "cafes", label: "☕ Kavárny" },
+  // Styl cestování
+  { id: "budget", label: "💰 Budget friendly" },
+  { id: "luxury", label: "💎 Luxus" },
+  { id: "offbeat", label: "🗺️ Off the beaten path" },
+  { id: "romantic", label: "💕 Romantika" },
+  { id: "family", label: "👨‍👩‍👧 S dětmi" },
+  { id: "solo", label: "🎒 Sólo cestování" },
+  // Zážitky
+  { id: "photography", label: "📸 Fotogenická místa" },
+  { id: "local", label: "🏘️ Lokální zážitky" },
+  { id: "markets", label: "🧺 Trhy & bleší trhy" },
+  { id: "art", label: "🎨 Umění & galerie" },
+  { id: "music", label: "🎵 Hudba & koncerty" },
+  { id: "viewpoints", label: "🌅 Vyhlídky" },
 ];
 
 interface NewTripModalProps {
