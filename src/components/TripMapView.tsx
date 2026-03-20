@@ -142,10 +142,7 @@ const TripMapView = ({
               return (
                 <button
                   key={place.id}
-                  className={`flex-shrink-0 bg-card rounded-xl shadow-card w-[130px] text-left transition-all ${
-                    isActive && !pCfg ? "ring-2 ring-primary" : isActive && pCfg ? "ring-2" : ""
-                  }`}
-                  style={isActive && pCfg ? { boxShadow: `0 0 0 2px ${pCfg.color}` } : undefined}
+                  className="flex-shrink-0 bg-card rounded-xl shadow-card w-[130px] text-left transition-all"
                   onClick={() => {
                     setActiveIndex(i);
                     onPlaceClick(place.id);
