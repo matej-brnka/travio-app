@@ -132,28 +132,26 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
           </div>
 
           {/* Emoji + Time range */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Emoji</p>
               <EmojiPicker value={place.emoji || ""} onChange={(emoji) => updatePlace(trip.id, place.id, { emoji: emoji || undefined })} />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">🕘 Čas (rezervace)</p>
-              <div className="flex gap-1.5 items-center">
+              <p className="text-xs font-medium text-foreground mb-1">🕘 Čas / rezervace</p>
+              <div className="flex gap-2 items-center">
                 <Input
                   type="time"
                   value={place.timeFrom || ""}
                   onChange={(e) => updatePlace(trip.id, place.id, { timeFrom: e.target.value || undefined })}
-                  className="text-sm h-9 px-2"
-                  placeholder="Od"
+                  className="text-sm h-10 flex-1"
                 />
-                <span className="text-muted-foreground text-xs">–</span>
+                <span className="text-muted-foreground font-medium">–</span>
                 <Input
                   type="time"
                   value={place.timeTo || ""}
                   onChange={(e) => updatePlace(trip.id, place.id, { timeTo: e.target.value || undefined })}
-                  className="text-sm h-9 px-2"
-                  placeholder="Do"
+                  className="text-sm h-10 flex-1"
                 />
               </div>
             </div>
