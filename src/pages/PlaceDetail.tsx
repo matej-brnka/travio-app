@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Place } from "@/data/mockData";
+import { Place, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { format, parseISO } from "date-fns";
 import { cs } from "date-fns/locale";
+import EmojiPicker from "@/components/EmojiPicker";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import { toast } from "sonner";
 import {
