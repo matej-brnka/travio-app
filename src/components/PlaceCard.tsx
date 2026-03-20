@@ -18,6 +18,8 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
       ? "🎫 potřeba"
       : null;
 
+  const pCfg = place.priority ? priorityConfig[place.priority] : null;
+
   return (
     <div
       className={`w-full bg-card rounded-lg shadow-card p-4 flex items-center gap-2 ${
