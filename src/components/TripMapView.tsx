@@ -182,7 +182,7 @@ const TripMapView = ({
                 <span className="text-3xl text-primary/50 hover:text-primary transition-colors">+</span>
               </button>
             )}
-        </div>
+          </div>
       )}
     </div>
   );
