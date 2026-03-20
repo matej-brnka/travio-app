@@ -9,6 +9,7 @@ export const priorityConfig: Record<string, { label: string; emoji: string; colo
 export interface Place {
   id: string;
   name: string;
+  emoji?: string;
   address?: string;
   website?: string;
   lat?: number;
@@ -19,6 +20,8 @@ export interface Place {
   note?: string;
   priority?: PlacePriority;
   time?: string;
+  timeFrom?: string;
+  timeTo?: string;
 }
 
 export interface Day {
