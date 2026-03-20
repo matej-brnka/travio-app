@@ -71,12 +71,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      <button
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center text-2xl hover:bg-accent/90 transition-colors z-50"
-        onClick={() => setShowNewTrip(true)}
-      >
-        +
-      </button>
 
       <NewTripModal
         open={showNewTrip}
