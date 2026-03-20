@@ -25,6 +25,7 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
       className={`w-full bg-card rounded-lg shadow-card p-4 flex items-center gap-2 ${
         place.visited ? "opacity-60" : ""
       }`}
+      style={pCfg ? { borderLeft: `3px solid ${pCfg.color}` } : undefined}
     >
       {/* Reorder buttons */}
       {!readOnly && (
