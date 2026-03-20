@@ -126,7 +126,7 @@ const TripMapView = ({
             {places.map((place, i) => (
               <button
                 key={place.id}
-                className={`flex-shrink-0 bg-card rounded-lg shadow-card p-3 min-w-[180px] text-left transition-all ${
+                className={`flex-shrink-0 bg-card rounded-lg shadow-card p-3 min-w-[160px] text-left transition-all ${
                   activeIndex === i ? "border-2 border-primary" : "border border-transparent"
                 }`}
                 onClick={() => {
@@ -140,9 +140,6 @@ const TripMapView = ({
                   </span>
                   <span className="text-sm font-bold text-foreground truncate">{place.name}</span>
                 </div>
-                {place.address && (
-                  <p className="text-xs text-muted-foreground mt-1 truncate">{place.address}</p>
-                )}
               </button>
             ))}
           </div>
