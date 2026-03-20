@@ -49,6 +49,7 @@ const TripDetail = () => {
   const currentDay = isUnassigned ? null : trip.days[selectedDayIndex];
   const currentPlaces = isUnassigned ? trip.unassigned : currentDay?.places || [];
   const totalDays = trip.days.length;
+  const totalNights = totalDays > 0 ? totalDays - 1 : 0;
   const currentDayId = isUnassigned ? null : currentDay?.id || null;
 
   const toggleView = (view: "list" | "map") => {
@@ -199,7 +200,7 @@ const TripDetail = () => {
           </h1>
           <p className="text-xs text-muted-foreground">
             {format(parseISO(trip.dateFrom), "d. M.", { locale: cs })} –{" "}
-            {format(parseISO(trip.dateTo), "d. M. yyyy", { locale: cs })} • {totalDays} dní
+            {format(parseISO(trip.dateTo), "d. M. yyyy", { locale: cs })} • {totalDays} dní · {totalNights} nocí
           </p>
         </div>
         <DropdownMenu>
@@ -270,7 +271,7 @@ const TripDetail = () => {
                 <h1 className="text-xl font-bold text-foreground">{trip.name}</h1>
                 <p className="text-sm text-muted-foreground">
                   {format(parseISO(trip.dateFrom), "d. MMMM", { locale: cs })} –{" "}
-                  {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní
+                  {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní · {totalNights} nocí
                 </p>
               </div>
             </div>

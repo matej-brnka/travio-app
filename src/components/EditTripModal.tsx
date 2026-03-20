@@ -31,6 +31,8 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
   }, [open, trip]);
 
   const totalDays =
+    dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) + 1 : 0;
+  const totalNights =
     dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) : 0;
   const isValid = name.trim() && dateFrom && dateTo && totalDays > 0;
 
@@ -70,11 +72,17 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
           <div>
             <Label className="text-foreground text-sm">Datum cesty</Label>
             <div className="grid grid-cols-2 gap-3 mt-1">
-              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="text-sm" />
-              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="text-sm" />
+              <div>
+                <span className="text-xs text-muted-foreground">Datum odjezdu</span>
+                <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="text-sm mt-0.5" />
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground">Datum příjezdu</span>
+                <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="text-sm mt-0.5" />
+              </div>
             </div>
             {totalDays > 0 && (
-              <p className="text-sm text-muted-foreground mt-2">📅 {totalDays} dní</p>
+              <p className="text-sm text-muted-foreground mt-2">📅 {totalDays} dní · {totalNights} nocí</p>
             )}
           </div>
 

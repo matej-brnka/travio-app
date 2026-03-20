@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { Trip, Place, mockTrips } from "@/data/mockData";
+import { differenceInDays, parseISO, addDays, format } from "date-fns";
 
 interface TripContextType {
   trips: Trip[];
@@ -162,7 +163,30 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
   const updateTrip = useCallback(
     (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => {
       setTrips((prev) =>
-        prev.map((trip) => (trip.id === tripId ? { ...trip, ...updates } : trip))
+        prev.map((trip) => {
+          if (trip.id !== tripId) return trip;
+          const updated = { ...trip, ...updates };
+          // Recalculate days if dates changed
+          if (updates.dateFrom || updates.dateTo) {
+            const from = updated.dateFrom;
+            const to = updated.dateTo;
+            const newTotalDays = differenceInDays(parseISO(to), parseISO(from)) + 1;
+            if (newTotalDays > 0 && newTotalDays !== trip.days.length) {
+              const newDays = Array.from({ length: newTotalDays }, (_, i) => {
+                const date = format(addDays(parseISO(from), i), "yyyy-MM-dd");
+                // Preserve existing day data if available
+                const existing = trip.days[i];
+                if (existing) return { ...existing, date };
+                return { id: `day-${Date.now()}-${i}`, date, places: [] };
+              });
+              // Move places from removed days to unassigned
+              const removedPlaces = trip.days.slice(newTotalDays).flatMap((d) => d.places);
+              updated.days = newDays;
+              updated.unassigned = [...updated.unassigned, ...removedPlaces];
+            }
+          }
+          return updated;
+        })
       );
     },
     []
