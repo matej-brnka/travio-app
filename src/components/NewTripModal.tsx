@@ -84,6 +84,8 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   // +1 to include the last day
   const totalDays =
     dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) + 1 : 0;
+  const totalNights =
+    dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) : 0;
 
   const isValid = destination.trim() && dateFrom && dateTo && totalDays > 0;
 
