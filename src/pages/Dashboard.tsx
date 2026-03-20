@@ -27,13 +27,6 @@ const Dashboard = () => {
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
             U
           </div>
-          <Button
-            size="sm"
-            className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-md"
-            onClick={() => setShowNewTrip(true)}
-          >
-            <Plus className="w-4 h-4 mr-1" /> Nová
-          </Button>
         </div>
       </div>
 
