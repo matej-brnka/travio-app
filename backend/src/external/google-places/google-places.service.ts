@@ -54,16 +54,12 @@ export class GooglePlacesService {
 
       if (searchData.status === 'ZERO_RESULTS' || !searchData.results?.length) return [];
 
-      const top5 = searchData.results.slice(0, 5);
-
       const results = await Promise.all(
-        top5.map(async (r: any) => {
+        searchData.results.slice(0, 5).map(async (r: any) => {
           try {
             const detailUrl = `${BASE}/details/json?place_id=${r.place_id}&fields=name,formatted_address,geometry,website,opening_hours,place_id&key=${this.apiKey}&language=cs`;
-            const detailRes = await fetch(detailUrl);
-            const detailData: any = await detailRes.json();
+            const detailData: any = await (await fetch(detailUrl)).json();
             const d = detailData.result ?? r;
-
             return {
               googlePlaceId: r.place_id,
               name: d.name ?? r.name,
