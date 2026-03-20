@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 interface TripMapViewProps {
   places: Place[];
   onPlaceClick: (placeId: string) => void;
+  onAddPlace?: () => void;
   className?: string;
   hideBottomCards?: boolean;
 }
