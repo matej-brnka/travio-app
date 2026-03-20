@@ -28,6 +28,25 @@ interface PlaceDetailPanelProps {
   onNavigatePlace?: (placeId: string) => void;
 }
 
+/** Auto-saving note field with debounce */
+const NoteField = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const [local, setLocal] = useState(value);
+  useEffect(() => { setLocal(value); }, [value]);
+  useEffect(() => {
+    if (local === value) return;
+    const t = setTimeout(() => onChange(local), 500);
+    return () => clearTimeout(t);
+  }, [local]);
+  return (
+    <Textarea
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      placeholder="Přidej poznámku k tomuto místu…"
+      className="min-h-[80px] text-sm resize-none"
+    />
+  );
+};
+
 const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDetailPanelProps) => {
   const { updatePlace, deletePlace, movePlace } = useTripContext();
 
