@@ -4,8 +4,10 @@ import { useTripContext } from "@/context/TripContext";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
 import { cs } from "date-fns/locale";
-import { X, StickyNote } from "lucide-react";
+import { X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import EmojiPicker from "@/components/EmojiPicker";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import { toast } from "sonner";
 import {
