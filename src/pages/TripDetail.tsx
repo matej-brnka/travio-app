@@ -30,7 +30,7 @@ const TripDetail = () => {
   const viewParam = searchParams.get("view");
   const savedView = typeof window !== "undefined" ? localStorage.getItem("travio-view-mode") as "list" | "map" | null : null;
   const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : savedView ? savedView : (isMobile ? "map" : "list");
-  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip } = useTripContext();
+  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, addDayToTrip } = useTripContext();
 
   const trip = getTrip(id || "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -125,6 +125,16 @@ const TripDetail = () => {
         {trip.unassigned.length > 0 && (
           <span className="ml-1 opacity-50 font-normal">({trip.unassigned.length})</span>
         )}
+      </button>
+      <button
+        className="flex-shrink-0 w-8 h-8 rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-center text-lg font-medium"
+        onClick={() => {
+          addDayToTrip(trip.id);
+          toast.success("Den přidán! 📅");
+        }}
+        title="Přidat den"
+      >
+        +
       </button>
     </div>
   );
@@ -347,6 +357,16 @@ const TripDetail = () => {
                       {trip.unassigned.length}
                     </span>
                   )}
+                </button>
+                <button
+                  className="text-left px-3 py-2 rounded-md text-sm transition-colors text-muted-foreground hover:bg-muted hover:text-primary flex items-center gap-2"
+                  onClick={() => {
+                    addDayToTrip(trip.id);
+                    toast.success("Den přidán! 📅");
+                  }}
+                >
+                  <span className="text-lg font-medium">+</span>
+                  <span>Přidat den</span>
                 </button>
               </div>
             </div>

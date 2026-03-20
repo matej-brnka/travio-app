@@ -13,6 +13,7 @@ interface TripContextType {
   deletePlace: (tripId: string, placeId: string) => void;
   addTrip: (trip: Trip) => void;
   updateTrip: (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => void;
+  addDayToTrip: (tripId: string) => void;
 }
 
 const TripContext = createContext<TripContextType | null>(null);
@@ -192,6 +193,22 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
+  const addDayToTrip = useCallback((tripId: string) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const lastDay = trip.days[trip.days.length - 1];
+        const nextDate = lastDay
+          ? format(addDays(parseISO(lastDay.date), 1), "yyyy-MM-dd")
+          : trip.dateFrom;
+        return {
+          ...trip,
+          days: [...trip.days, { id: `day-${Date.now()}`, date: nextDate, places: [] }],
+        };
+      })
+    );
+  }, []);
+
   return (
     <TripContext.Provider
       value={{
@@ -205,6 +222,7 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
         deletePlace,
         addTrip,
         updateTrip,
+        addDayToTrip,
       }}
     >
       {children}
