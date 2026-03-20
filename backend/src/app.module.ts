@@ -7,6 +7,7 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { AuthModule } from './auth/auth.module';
 import { TripsModule } from './trips/trips.module';
 import { DaysModule } from './days/days.module';
+import { PlacesModule } from './places/places.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { DaysModule } from './days/days.module';
     AuthModule,
     TripsModule,
     DaysModule,
+    PlacesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
