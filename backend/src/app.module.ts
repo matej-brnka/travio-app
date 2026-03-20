@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { TripsModule } from './trips/trips.module';
 import { DaysModule } from './days/days.module';
 import { PlacesModule } from './places/places.module';
+import { GooglePlacesModule } from './external/google-places/google-places.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PlacesModule } from './places/places.module';
     TripsModule,
     DaysModule,
     PlacesModule,
+    GooglePlacesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
