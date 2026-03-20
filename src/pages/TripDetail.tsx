@@ -107,6 +107,9 @@ const TripDetail = () => {
           onClick={() => setSelectedDayIndex(i)}
         >
           Den {i + 1}
+          {day.places.length > 0 && (
+            <span className="ml-1 opacity-50 font-normal">({day.places.length})</span>
+          )}
         </button>
       ))}
       <button
@@ -116,6 +119,9 @@ const TripDetail = () => {
         onClick={() => setSelectedDayIndex(trip.days.length)}
       >
         ⚡ Volné
+        {trip.unassigned.length > 0 && (
+          <span className="ml-1 opacity-50 font-normal">({trip.unassigned.length})</span>
+        )}
       </button>
     </div>
   );
