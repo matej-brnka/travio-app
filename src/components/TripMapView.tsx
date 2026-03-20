@@ -183,6 +183,7 @@ const TripMapView = ({
               </button>
             )}
           </div>
+        </div>
       )}
     </div>
   );
