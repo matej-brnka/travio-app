@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { X } from "lucide-react";
 import { searchPlaces } from "@/api/search";
 
 export interface PlaceData {
@@ -62,12 +61,9 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] p-0">
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] p-0 lg:rounded-2xl lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-md">
+        <div className="px-5 pt-5 pb-3">
           <h2 className="text-foreground text-lg font-bold">📍 Přidat místo</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         <div className="px-5 pb-6 space-y-4">
