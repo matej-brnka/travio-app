@@ -27,7 +27,8 @@ const TripDetail = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
-  const viewMode = searchParams.get("view") === "map" ? "map" : "list";
+  const viewParam = searchParams.get("view");
+  const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : (isMobile ? "map" : "list");
   const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip } = useTripContext();
 
   const trip = getTrip(id || "");
