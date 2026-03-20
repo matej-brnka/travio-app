@@ -245,6 +245,7 @@ const TripDetail = () => {
             <TripMapView
               places={currentPlaces}
               onPlaceClick={handlePlaceClick}
+              onAddPlace={() => setShowAddPlace(true)}
               className="w-full h-full"
             />
           </div>
