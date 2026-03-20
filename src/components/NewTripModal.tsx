@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { differenceInDays, parseISO, addDays, format } from "date-fns";
+import EmojiPicker from "@/components/EmojiPicker";
 
 const destinations = ["New York", "Praha", "Tokio", "Londýn", "Barcelona", "Řím"];
 
@@ -14,13 +15,6 @@ interface NewTripModalProps {
   onClose: () => void;
   onCreate: (trip: Trip) => void;
 }
-
-const EMOJI_OPTIONS = [
-  // Cestování
-  "✈️", "🗽", "🏔️", "🏖️", "🌍", "🏛️", "🎭", "🌸", "🏕️", "🚗", "🎿", "🌴", "🗼", "🏰", "🎢",
-  // Vlaječky
-  "🇨🇿", "🇸🇰", "🇩🇪", "🇦🇹", "🇮🇹", "🇫🇷", "🇪🇸", "🇬🇧", "🇺🇸", "🇬🇷", "🇭🇷", "🇵🇹", "🇯🇵", "🇹🇭", "🇦🇺", "🇧🇷", "🇲🇽", "🇹🇷", "🇪🇬", "🇮🇸",
-];
 
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [destination, setDestination] = useState("");
