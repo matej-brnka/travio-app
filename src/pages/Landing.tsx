@@ -25,7 +25,7 @@ const Landing = () => {
       <div className="px-6 md:px-12 lg:px-20 pt-12 pb-10 md:pt-20 md:pb-16 max-w-5xl mx-auto">
         {/* Hero */}
         <motion.section
-          className="text-center md:text-left md:flex-1"
+          className="text-center md:max-w-2xl md:mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
