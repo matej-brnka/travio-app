@@ -144,6 +144,14 @@ const PlaceDetail = () => {
           </div>
         )}
 
+        {googleMapsUrl && (
+          <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="block mb-5">
+            <Button variant="outline" className="w-full rounded-md border-primary text-primary py-5">
+              🗺️ Navigovat (Google Maps)
+            </Button>
+          </a>
+        )}
+
         <hr className="border-border my-5" />
 
         {/* Move to day - INLINE */}
