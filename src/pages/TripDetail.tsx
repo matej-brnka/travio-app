@@ -11,6 +11,8 @@ import AddPlaceSheet from "@/components/AddPlaceSheet";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import EditTripModal from "@/components/EditTripModal";
 import TripMapView from "@/components/TripMapView";
+import PlaceDetailPanel from "@/components/PlaceDetailPanel";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
