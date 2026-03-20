@@ -33,7 +33,7 @@ const Landing = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-foreground mb-3">
             ✈️ Plánuj výlety<br />jako profík
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xs md:max-w-md mx-auto md:mx-0">
+          <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xs md:max-w-md mx-auto">
             Místa, mapy, itinerář – vše na jednom místě. Plánuj chytře, cestuj bez stresu.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
