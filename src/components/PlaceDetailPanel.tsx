@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { Place, Trip } from "@/data/mockData";
+import { Place, Trip, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
