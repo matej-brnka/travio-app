@@ -59,6 +59,8 @@ CREATE TABLE trips (
   date_to     DATE NOT NULL,
   interests   TEXT[],
   share_token TEXT UNIQUE,           -- pro anonymní sdílení
+  center_lat  FLOAT,                 -- souřadnice destinace (z Google Places)
+  center_lng  FLOAT,
   created_at  TIMESTAMPTZ DEFAULT now(),
   updated_at  TIMESTAMPTZ DEFAULT now()
 );
@@ -115,7 +117,8 @@ CREATE TABLE places (
 | PATCH | /api/trips/:id/days/:dayId/reorder | Změna pořadí míst |
 | GET | /api/trips/:id/share | Vygeneruj/vrať share token |
 | GET | /api/shared/:token | Veřejný read-only detail cesty |
-| GET | /api/places/search?q= | Google Places autocomplete |
+| GET | /api/places/search?q=&centerLat=&centerLng= | Vyhledávání míst (location bias) |
+| GET | /api/places/search-destinations?q= | Vyhledávání destinací (města, státy, regiony) |
 | GET | /api/weather?lat=&lng=&date= | Počasí z yr.no |
 | POST | /api/trips/:id/ai-generate | AI generování itineráře |
 
