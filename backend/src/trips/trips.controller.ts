@@ -1,0 +1,37 @@
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { TripsService } from './trips.service';
+import { CreateTripDto } from './dto/create-trip.dto';
+import { UpdateTripDto } from './dto/update-trip.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+
+@UseGuards(JwtAuthGuard)
+@Controller('trips')
+export class TripsController {
+  constructor(private trips: TripsService) {}
+
+  @Get()
+  findAll(@CurrentUser() user: { userId: string }) {
+    return this.trips.findAll(user.userId);
+  }
+
+  @Post()
+  create(@CurrentUser() user: { userId: string }, @Body() dto: CreateTripDto) {
+    return this.trips.create(user.userId, dto);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string, @CurrentUser() user: { userId: string }) {
+    return this.trips.findOne(id, user.userId);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @CurrentUser() user: { userId: string }, @Body() dto: UpdateTripDto) {
+    return this.trips.update(id, user.userId, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @CurrentUser() user: { userId: string }) {
+    return this.trips.remove(id, user.userId);
+  }
+}
