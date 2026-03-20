@@ -15,7 +15,12 @@ interface NewTripModalProps {
   onCreate: (trip: Trip) => void;
 }
 
-const EMOJI_OPTIONS = ["✈️", "🗽", "🏔️", "🏖️", "🌍", "🏛️", "🎭", "🌸", "🏕️", "🚗", "🎿", "🌴", "🗼", "🏰", "🎢"];
+const EMOJI_OPTIONS = [
+  // Cestování
+  "✈️", "🗽", "🏔️", "🏖️", "🌍", "🏛️", "🎭", "🌸", "🏕️", "🚗", "🎿", "🌴", "🗼", "🏰", "🎢",
+  // Vlaječky
+  "🇨🇿", "🇸🇰", "🇩🇪", "🇦🇹", "🇮🇹", "🇫🇷", "🇪🇸", "🇬🇧", "🇺🇸", "🇬🇷", "🇭🇷", "🇵🇹", "🇯🇵", "🇹🇭", "🇦🇺", "🇧🇷", "🇲🇽", "🇹🇷", "🇪🇬", "🇮🇸",
+];
 
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [destination, setDestination] = useState("");
