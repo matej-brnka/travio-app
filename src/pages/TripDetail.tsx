@@ -345,7 +345,7 @@ const TripDetail = () => {
             </div>
           </aside>
 
-          {/* Right: full map */}
+          {/* Center: full map */}
           <main className="flex-1 relative">
             <TripMapView
               places={currentPlaces}
@@ -354,6 +354,18 @@ const TripDetail = () => {
               hideBottomCards
             />
           </main>
+
+          {/* Right: place detail panel */}
+          {selectedPlaceId && trip && (
+            <aside className="w-[380px] flex-shrink-0 border-l border-border bg-card/50">
+              <PlaceDetailPanel
+                trip={trip}
+                placeId={selectedPlaceId}
+                onClose={() => setSelectedPlaceId(null)}
+                onNavigatePlace={(pid) => setSelectedPlaceId(pid)}
+              />
+            </aside>
+          )}
         </div>
       </div>
 
