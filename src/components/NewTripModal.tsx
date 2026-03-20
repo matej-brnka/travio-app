@@ -67,6 +67,25 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Emoji picker */}
+          <div>
+            <Label className="text-foreground text-sm">Emoji</Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {EMOJI_OPTIONS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  className={`w-9 h-9 rounded-md text-lg flex items-center justify-center transition-colors ${
+                    emoji === e ? "bg-primary/15 ring-2 ring-primary" : "bg-muted hover:bg-muted/80"
+                  }`}
+                  onClick={() => setEmoji(e)}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="relative">
             <Label className="text-foreground text-sm">Destinace</Label>
             <Input
