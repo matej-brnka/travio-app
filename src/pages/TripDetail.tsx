@@ -55,6 +55,7 @@ const TripDetail = () => {
   const currentDayId = isUnassigned ? null : currentDay?.id || null;
 
   const toggleView = (view: "list" | "map") => {
+    localStorage.setItem("travio-view-mode", view);
     setSearchParams({ view });
   };
 
