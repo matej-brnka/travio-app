@@ -56,6 +56,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     setDateFrom("");
     setDateTo("");
     setAiHelp(false);
+    setEmoji("✈️");
   };
 
   return (
