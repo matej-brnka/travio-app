@@ -132,7 +132,7 @@ const TripMapView = ({
       </div>
 
       {/* Bottom card strip – mobile/tablet */}
-      {!hideBottomCards && places.length > 0 && (
+      {!hideBottomCards && (places.length > 0 || onAddPlace) && (
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {places.map((place, i) => {
