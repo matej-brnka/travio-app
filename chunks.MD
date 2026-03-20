@@ -1250,70 +1250,64 @@ Chunky 5, 6, 7, 8, 9, 10.
 
 ---
 
-## CHUNK 13 – Mapbox – mapové podklady
+## CHUNK 13 – Google Maps – mapové podklady
 
 ### Popis
-Nahraď mock `TripMapView` komponentu skutečnou interaktivní mapou postavenou na Mapbox GL JS. Mapa zobrazuje piny míst pro aktuální den, propojuje je čarou, reaguje na klik na pin a synchronizuje se s horizontálním stripem karet dole (mobil) / postranním panelem (desktop).
+Nahraď mock `TripMapView` komponentu skutečnou interaktivní mapou postavenou na Google Maps JavaScript API (`@vis.gl/react-google-maps`). Mapa zobrazuje piny míst pro aktuální den, propojuje je čarou, reaguje na klik na pin a synchronizuje se s horizontálním stripem karet dole (mobil) / postranním panelem (desktop).
 
 ### Co přesně udělej
 
 1. Nainstaluj závislosti:
    ```bash
    cd frontend
-   npm install mapbox-gl @types/mapbox-gl
+   npm install @vis.gl/react-google-maps
    ```
 
-2. Přidej Mapbox token do `frontend/.env.example`:
+2. Přidej Google Maps API klíč do `frontend/.env.example`:
    ```
-   VITE_MAPBOX_TOKEN=pk.your_mapbox_public_token
+   VITE_GOOGLE_MAPS_KEY=your_google_maps_api_key
    ```
-   Token je **veřejný** (public token) – bezpečné ho mít jako `VITE_` proměnnou.
+   Klíč je **veřejný** (omezený na HTTP referrery) – bezpečné ho mít jako `VITE_` proměnnou.
+   Stejný klíč jako `GOOGLE_PLACES_API_KEY` na backendu – ale ten frontendový musí mít povolenou **Maps JavaScript API**.
 
-3. **Přepiš `frontend/src/components/TripMapView.tsx`** – nahraď mock implementaci skutečnou Mapbox mapou:
+3. **Přepiš `frontend/src/components/TripMapView.tsx`** – nahraď mock implementaci skutečnou Google mapou:
 
-   - Inicializuj mapu přes `mapboxgl.Map` do `<div ref={mapContainerRef}>` s výchozím stylem `mapbox://styles/mapbox/streets-v12`
+   - Obal komponentu `<APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_KEY}>` z `@vis.gl/react-google-maps`
+   - Renderuj `<Map>` komponentu s `mapId` (nebo výchozím stylem), `defaultZoom={12}`
    - Přidej **piny** pro každé místo aktuálního dne (kde `lat` a `lng` jsou definovány):
-     - Použij `mapboxgl.Marker` s custom HTML elementem – zobrazí číslo pořadí a emoji místa
+     - Použij `<AdvancedMarker>` z `@vis.gl/react-google-maps` s custom HTML elementem – zobrazí číslo pořadí a emoji místa
      - Barva markeru odpovídá prioritě (stejné barvy jako v `priorityConfig` z `mockData.ts`)
      - Visited místo = snížená opacita markeru (50 %)
    - Přidej **čáru** mezi místy ve správném pořadí:
-     - Použij Mapbox `GeoJSON` source + `line` layer s `lineDasharray: [2, 2]` (přerušovaná čára)
-     - Barva čáry: `#00798c` (brand primary)
+     - Použij `<Polyline>` z `@vis.gl/react-google-maps` se `strokeColor: '#00798c'`, `strokeWeight: 2`, `strokeOpacity: 0.7`, `icons` pro přerušovanou čáru
    - Po kliknutí na marker:
      - Zvýrazni odpovídající kartu v horizontálním stripu (přidej CSS třídu `ring-2 ring-primary`)
      - Zavolej callback `onPlaceSelect(placeId)` (předávaný jako prop)
-   - **Auto-fit bounds**: při změně dne nebo seznamu míst zavolej `map.fitBounds()` tak, aby všechna místa aktuálního dne byla viditelná, s paddingem 60 px na všech stranách
-   - Přidej navigační ovládání (`mapboxgl.NavigationControl`, pozice `top-right`)
+   - **Auto-fit bounds**: při změně dne nebo seznamu míst uprav zoom/střed mapy tak, aby všechna místa aktuálního dne byla viditelná – použij `useMap()` hook a `map.fitBounds()`
    - Zpracuj případ, kdy místa nemají souřadnice: marker nepřidávej, zobraz placeholder text na kartě místo adresy
 
 4. **Zachovej stávající props rozhraní** `TripMapView` (přijímá `trip`, `selectedDayId`, `onPlaceSelect`) – ostatní komponenty nesmí potřebovat úpravy.
 
-5. **Uprav `frontend/src/pages/TripDetail.tsx`** – pokud Mapbox token není nastaven (`!import.meta.env.VITE_MAPBOX_TOKEN`), zobraz informativní placeholder místo mapy (ne crash):
+5. **Uprav `frontend/src/pages/TripDetail.tsx`** – pokud Google Maps klíč není nastaven (`!import.meta.env.VITE_GOOGLE_MAPS_KEY`), zobraz informativní placeholder místo mapy (ne crash):
    ```tsx
    <div className="flex items-center justify-center h-full text-muted-foreground">
-     Mapbox token není nastaven (VITE_MAPBOX_TOKEN)
+     Google Maps klíč není nastaven (VITE_GOOGLE_MAPS_KEY)
    </div>
-   ```
-
-6. **CSS cleanup**: Mapbox GL vyžaduje import stylu. Přidej do `frontend/src/index.css` nebo přímo do komponenty:
-   ```ts
-   import 'mapbox-gl/dist/mapbox-gl.css';
    ```
 
 ### Soubory k vytvoření / úpravě
 - `frontend/src/components/TripMapView.tsx` (přepsat)
 - `frontend/src/pages/TripDetail.tsx` (přidat fallback)
-- `frontend/src/index.css` (import mapbox-gl CSS)
-- `frontend/.env.example` (přidat `VITE_MAPBOX_TOKEN`)
-- `frontend/package.json` (nové závislosti)
+- `frontend/.env.example` (přidat `VITE_GOOGLE_MAPS_KEY`)
+- `frontend/package.json` (nová závislost)
 
 ### Testovací kritéria
-- V pohledu Mapa se zobrazuje skutečná Mapbox mapa (ne mock)
+- V pohledu Mapa se zobrazuje skutečná Google mapa (ne mock)
 - Piny jsou viditelné pro místa s `lat`/`lng`, správně obarvené dle priority
 - Kliknutí na pin zvýrazní odpovídající kartu ve stripu
 - Přepnutí dne (day pill) aktualizuje piny a přizpůsobí zoom
 - Místa bez souřadnic nejsou příčinou pádu – mapa se zobrazí bez jejich pinů
-- Bez `VITE_MAPBOX_TOKEN` se zobrazí placeholder, ne JS chyba
+- Bez `VITE_GOOGLE_MAPS_KEY` se zobrazí placeholder, ne JS chyba
 - `cd frontend && npm run build` proběhne bez chyb
 
 ### Závislosti
