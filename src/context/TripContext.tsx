@@ -193,6 +193,22 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
+  const addDayToTrip = useCallback((tripId: string) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const lastDay = trip.days[trip.days.length - 1];
+        const nextDate = lastDay
+          ? format(addDays(parseISO(lastDay.date), 1), "yyyy-MM-dd")
+          : trip.dateFrom;
+        return {
+          ...trip,
+          days: [...trip.days, { id: `day-${Date.now()}`, date: nextDate, places: [] }],
+        };
+      })
+    );
+  }, []);
+
   return (
     <TripContext.Provider
       value={{
