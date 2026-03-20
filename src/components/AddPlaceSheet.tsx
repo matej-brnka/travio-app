@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { mockPlaceSuggestions } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { X } from "lucide-react";
 
 interface AddPlaceSheetProps {
