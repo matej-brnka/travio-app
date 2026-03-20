@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { Trip, Place, mockTrips } from "@/data/mockData";
+import { differenceInDays, parseISO, addDays, format } from "date-fns";
 
 interface TripContextType {
   trips: Trip[];
