@@ -153,6 +153,15 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
                   onChange={(e) => updatePlace(trip.id, place.id, { timeTo: e.target.value || undefined })}
                   className="text-sm h-10 flex-1"
                 />
+                {(place.timeFrom || place.timeTo) && (
+                  <button
+                    onClick={() => updatePlace(trip.id, place.id, { timeFrom: undefined, timeTo: undefined })}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex-shrink-0"
+                    title="Smazat čas"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
