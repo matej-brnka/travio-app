@@ -142,7 +142,7 @@ const TripMapView = ({
               return (
                 <button
                   key={place.id}
-                  className={`flex-shrink-0 bg-card rounded-xl shadow-card min-w-[160px] text-left transition-all ${
+                  className={`flex-shrink-0 bg-card rounded-xl shadow-card w-[130px] text-left transition-all ${
                     isActive && !pCfg ? "ring-2 ring-primary" : isActive && pCfg ? "ring-2" : ""
                   }`}
                   style={isActive && pCfg ? { boxShadow: `0 0 0 2px ${pCfg.color}` } : undefined}
@@ -151,37 +151,23 @@ const TripMapView = ({
                     onPlaceClick(place.id);
                   }}
                 >
-                  {/* Colored top bar for priority */}
                   {pCfg && (
                     <div className="h-1 rounded-t-xl" style={{ backgroundColor: pCfg.color }} />
                   )}
-                  <div className="p-3.5">
-                    <div className="flex items-start gap-2.5">
-                      <span
-                        className={`w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 ${circleBg}`}
-                        style={circleStyle}
-                      >
-                        {i + 1}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        {place.emoji && <span className="text-lg block mb-0.5">{place.emoji}</span>}
-                        <span className="text-sm font-bold text-foreground block truncate">{place.name}</span>
-                        {place.timeFrom && place.timeTo && (
-                          <p className="text-xs text-primary mt-0.5">
-                            {place.timeFrom} – {place.timeTo}
-                          </p>
-                        )}
-                        {place.timeFrom && !place.timeTo && (
-                          <p className="text-xs text-primary mt-0.5">od {place.timeFrom}</p>
-                        )}
-                        {!place.timeFrom && place.timeTo && (
-                          <p className="text-xs text-primary mt-0.5">do {place.timeTo}</p>
-                        )}
-                        {place.address && (
-                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{place.address}</p>
-                        )}
-                      </div>
-                    </div>
+                  <div className="p-3">
+                    <span
+                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center mb-2 ${circleBg}`}
+                      style={circleStyle}
+                    >
+                      {i + 1}
+                    </span>
+                    {place.emoji && <span className="text-lg block mb-1">{place.emoji}</span>}
+                    <span className="text-sm font-bold text-foreground block truncate">{place.name}</span>
+                    {place.timeFrom && (
+                      <p className="text-xs text-primary mt-1">
+                        {place.timeFrom}{place.timeTo ? ` – ${place.timeTo}` : ""}
+                      </p>
+                    )}
                   </div>
                 </button>
               );
