@@ -5,10 +5,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { differenceInDays, parseISO, addDays, format } from "date-fns";
 import EmojiPicker from "@/components/EmojiPicker";
 
 const destinations = ["New York", "Praha", "Tokio", "Londýn", "Barcelona", "Řím"];
+
+const interestTags = [
+  { id: "culture", label: "🎭 Kultura", emoji: "🎭" },
+  { id: "museums", label: "🏛️ Muzea", emoji: "🏛️" },
+  { id: "sport", label: "⚽ Sport", emoji: "⚽" },
+  { id: "food", label: "🍽️ Jídlo", emoji: "🍽️" },
+  { id: "nature", label: "🌿 Příroda", emoji: "🌿" },
+  { id: "nightlife", label: "🌙 Noční život", emoji: "🌙" },
+  { id: "shopping", label: "🛍️ Nákupy", emoji: "🛍️" },
+  { id: "history", label: "📜 Historie", emoji: "📜" },
+  { id: "architecture", label: "🏗️ Architektura", emoji: "🏗️" },
+  { id: "adventure", label: "🧗 Dobrodružství", emoji: "🧗" },
+  { id: "relax", label: "🧘 Relax", emoji: "🧘" },
+  { id: "family", label: "👨‍👩‍👧 Rodina", emoji: "👨‍👩‍👧" },
+];
 
 interface NewTripModalProps {
   open: boolean;
@@ -22,16 +38,24 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [emoji, setEmoji] = useState("✈️");
   const [dateTo, setDateTo] = useState("");
   const [aiHelp, setAiHelp] = useState(false);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const filteredDestinations = destinations.filter((d) =>
     d.toLowerCase().includes(destination.toLowerCase())
   );
 
+  // +1 to include the last day
   const totalDays =
-    dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) : 0;
+    dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) + 1 : 0;
 
   const isValid = destination.trim() && dateFrom && dateTo && totalDays > 0;
+
+  const toggleInterest = (id: string) => {
+    setSelectedInterests((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
   const handleCreate = () => {
     if (!isValid) return;
@@ -49,6 +73,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       weather: { temp: 20, icon: "🌤️" },
       days,
       unassigned: [],
+      interests: aiHelp ? selectedInterests : undefined,
     };
     onCreate(trip);
     setDestination("");
@@ -56,6 +81,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     setDateTo("");
     setAiHelp(false);
     setEmoji("✈️");
+    setSelectedInterests([]);
   };
 
   return (
@@ -134,9 +160,31 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
           </div>
 
           {aiHelp && (
-            <p className="text-xs text-muted-foreground bg-muted rounded-md p-3">
-              AI navrhne základní itinerář, který pak upravíš dle libosti. ✨
-            </p>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground bg-muted rounded-md p-3">
+                AI navrhne základní itinerář, který pak upravíš dle libosti. ✨
+              </p>
+              <Label className="text-foreground text-sm">Co tě zajímá?</Label>
+              <div className="flex flex-wrap gap-2">
+                {interestTags.map((tag) => {
+                  const isSelected = selectedInterests.includes(tag.id);
+                  return (
+                    <Badge
+                      key={tag.id}
+                      variant={isSelected ? "default" : "outline"}
+                      className={`cursor-pointer select-none transition-all text-xs px-3 py-1.5 ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "hover:bg-muted"
+                      }`}
+                      onClick={() => toggleInterest(tag.id)}
+                    >
+                      {tag.label}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           <div className="flex gap-3 pt-2">
