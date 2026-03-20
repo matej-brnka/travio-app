@@ -192,14 +192,27 @@ const PlaceDetail = () => {
 
         {/* Visited */}
         <button
-          className={`w-full py-4 rounded-lg text-center font-bold text-sm transition-colors ${
+          className={`w-full py-4 rounded-lg text-center font-bold text-sm transition-all flex items-center justify-center gap-3 ${
             place.visited
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-foreground"
+              ? "bg-primary text-primary-foreground shadow-md"
+              : "bg-muted text-foreground hover:bg-muted/80"
           }`}
           onClick={handleVisitedToggle}
         >
-          {place.visited ? "✅ Navštíveno" : "☐ Označit jako navštíveno"}
+          <span
+            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+              place.visited
+                ? "border-primary-foreground bg-primary-foreground/20"
+                : "border-muted-foreground/40"
+            }`}
+          >
+            {place.visited && (
+              <svg className="w-3.5 h-3.5" viewBox="0 0 14 14" fill="none">
+                <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </span>
+          {place.visited ? "Navštíveno ✨" : "Označit jako navštíveno"}
         </button>
 
         <hr className="border-border my-5" />
