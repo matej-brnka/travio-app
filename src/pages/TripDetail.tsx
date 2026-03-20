@@ -9,6 +9,7 @@ import { ArrowLeft, MoreVertical, Share2, Trash2, Pencil, Plus } from "lucide-re
 import PlaceCard from "@/components/PlaceCard";
 import AddPlaceSheet from "@/components/AddPlaceSheet";
 import MovePlaceModal from "@/components/MovePlaceModal";
+import EditTripModal from "@/components/EditTripModal";
 import TripMapView from "@/components/TripMapView";
 import {
   DropdownMenu,
