@@ -13,6 +13,7 @@ interface TripContextType {
   deletePlace: (tripId: string, placeId: string) => void;
   addTrip: (trip: Trip) => void;
   updateTrip: (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => void;
+  addDayToTrip: (tripId: string) => void;
 }
 
 const TripContext = createContext<TripContextType | null>(null);
