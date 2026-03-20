@@ -178,7 +178,7 @@ const TripDetail = () => {
   );
 
   return (
-    <div className={`bg-background ${viewMode === "map" ? "h-screen flex flex-col lg:block lg:h-auto lg:min-h-screen" : "min-h-screen"}`}>
+    <div className={`bg-background ${viewMode === "map" ? "h-screen flex flex-col overflow-hidden lg:block lg:h-auto lg:overflow-auto lg:min-h-screen" : "min-h-screen"}`}>
 
       {/* ══════════════════════════════════════════
           MOBILE TOP BAR
