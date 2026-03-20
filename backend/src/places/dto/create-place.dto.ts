@@ -9,6 +9,8 @@ export class CreatePlaceDto {
   openingHours?: string[];
   ticket?: 'none' | 'need' | 'have';
   priority?: 'must-see' | 'chci-videt' | 'mozna';
+  note?: string;
+  visited?: boolean;
   timeFrom?: string;
   timeTo?: string;
   googlePlaceId?: string;

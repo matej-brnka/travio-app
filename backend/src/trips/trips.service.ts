@@ -1,11 +1,20 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
+import { randomBytes } from 'crypto';
+import { ConfigService } from '@nestjs/config';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
+import type { AiService } from '../external/ai/ai.service';
+import type { PlacesService } from '../places/places.service';
 
 @Injectable()
 export class TripsService {
-  constructor(private supabase: SupabaseService) {}
+  constructor(
+    private supabase: SupabaseService,
+    private config: ConfigService,
+    @Optional() private ai?: AiService,
+    @Optional() private places?: PlacesService,
+  ) {}
 
   async findAll(userId: string) {
     const rows = await this.supabase.query(
@@ -74,6 +83,29 @@ export class TripsService {
       );
     }
 
+    if (dto.useAi && this.ai && this.places) {
+      const days = await this.supabase.query(
+        `SELECT id, position FROM days WHERE trip_id = $1 ORDER BY position`,
+        [trip.id],
+      );
+      const aiPlaces = await this.ai.generateItinerary({
+        destination: dto.name,
+        dateFrom: dto.dateFrom,
+        dateTo: dto.dateTo,
+        interests: dto.interests ?? [],
+      });
+      for (const p of aiPlaces) {
+        const day = days[p.dayIndex] ?? days[days.length - 1];
+        await this.places.create(trip.id, userId, {
+          name: p.name,
+          dayId: day?.id,
+          emoji: p.emoji,
+          note: p.note,
+          priority: p.priority,
+        });
+      }
+    }
+
     return this.formatTrip(trip);
   }
 
@@ -111,6 +143,68 @@ export class TripsService {
     }
 
     return this.formatTrip(trips[0]);
+  }
+
+  async generateShareToken(tripId: string, userId: string) {
+    const trips = await this.supabase.query(
+      `SELECT id, share_token FROM trips WHERE id = $1 AND user_id = $2`,
+      [tripId, userId],
+    );
+    if (!trips.length) throw new NotFoundException('Trip not found');
+
+    // Return existing token if already generated
+    if (trips[0].share_token) {
+      const token = trips[0].share_token;
+      return { shareUrl: `${this.config.get('FRONTEND_URL') ?? 'http://localhost:5173'}/shared/${token}` };
+    }
+
+    const token = randomBytes(12).toString('base64url').slice(0, 16);
+    await this.supabase.query(
+      `UPDATE trips SET share_token = $1 WHERE id = $2`,
+      [token, tripId],
+    );
+    return { shareUrl: `${this.config.get('FRONTEND_URL') ?? 'http://localhost:5173'}/shared/${token}` };
+  }
+
+  async findByShareToken(token: string) {
+    const trips = await this.supabase.query(
+      `SELECT id, name, emoji, date_from, date_to, interests FROM trips WHERE share_token = $1`,
+      [token],
+    );
+    if (!trips.length) throw new NotFoundException('Shared trip not found');
+
+    const tripId = trips[0].id;
+    const days = await this.supabase.query(
+      `SELECT id, date, position FROM days WHERE trip_id = $1 ORDER BY position`,
+      [tripId],
+    );
+    const places = await this.supabase.query(
+      `SELECT * FROM places WHERE trip_id = $1 ORDER BY position`,
+      [tripId],
+    );
+
+    const placesMap = new Map<string | null, any[]>();
+    for (const p of places) {
+      const key = p.day_id ?? null;
+      if (!placesMap.has(key)) placesMap.set(key, []);
+      placesMap.get(key)!.push(this.formatPlace(p));
+    }
+
+    return {
+      id: trips[0].id,
+      name: trips[0].name,
+      emoji: trips[0].emoji,
+      dateFrom: trips[0].date_from,
+      dateTo: trips[0].date_to,
+      interests: trips[0].interests ?? [],
+      days: days.map((d) => ({
+        id: d.id,
+        date: d.date,
+        position: d.position,
+        places: placesMap.get(d.id) ?? [],
+      })),
+      unassigned: placesMap.get(null) ?? [],
+    };
   }
 
   async remove(tripId: string, userId: string) {

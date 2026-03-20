@@ -3,6 +3,7 @@ import { TripsService } from './trips.service';
 
 const mockQuery = jest.fn();
 const mockSupabase = { query: mockQuery } as any;
+const mockConfig = { get: () => 'http://localhost:5173', getOrThrow: () => '' } as any;
 
 const USER_ID = 'user-1';
 const TRIP_ID = 'trip-1';
@@ -19,7 +20,7 @@ describe('TripsService', () => {
 
   beforeEach(() => {
     mockQuery.mockReset();
-    service = new TripsService(mockSupabase);
+    service = new TripsService(mockSupabase, mockConfig);
   });
 
   describe('findAll', () => {

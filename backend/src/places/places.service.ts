@@ -22,13 +22,14 @@ export class PlacesService {
     const rows = await this.supabase.query(
       `INSERT INTO places
          (trip_id, day_id, name, emoji, address, website, lat, lng,
-          opening_hours, ticket, priority, time_from, time_to, google_place_id, position)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+          opening_hours, ticket, priority, note, visited, time_from, time_to, google_place_id, position)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
        RETURNING *`,
       [
         tripId, dto.dayId ?? null, dto.name, dto.emoji ?? null,
         dto.address ?? null, dto.website ?? null, dto.lat ?? null, dto.lng ?? null,
         dto.openingHours ?? null, dto.ticket ?? null, dto.priority ?? null,
+        dto.note ?? null, dto.visited ?? false,
         dto.timeFrom ?? null, dto.timeTo ?? null, dto.googlePlaceId ?? null, position,
       ],
     );

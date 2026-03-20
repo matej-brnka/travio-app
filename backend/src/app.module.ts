@@ -10,6 +10,7 @@ import { DaysModule } from './days/days.module';
 import { PlacesModule } from './places/places.module';
 import { GooglePlacesModule } from './external/google-places/google-places.module';
 import { WeatherModule } from './external/weather/weather.module';
+import { AiModule } from './external/ai/ai.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { WeatherModule } from './external/weather/weather.module';
     PlacesModule,
     GooglePlacesModule,
     WeatherModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
