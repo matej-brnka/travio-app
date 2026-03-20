@@ -161,7 +161,7 @@ const TripMapView = ({
                       >
                         {i + 1}
                       </span>
-                      {place.visited && <span className="text-sm">✅</span>}
+                      
                     </div>
                     {place.emoji && <span className="text-lg block mb-1">{place.emoji}</span>}
                     <span className={`text-sm font-bold text-foreground block truncate ${place.visited ? "line-through" : ""}`}>{place.name}</span>
