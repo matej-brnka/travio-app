@@ -14,38 +14,49 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-5 py-4">
+      <nav className="flex items-center justify-between px-5 md:px-12 lg:px-20 py-4">
         <span className="text-xl font-bold text-foreground">✈️ Travio</span>
         <Button variant="outline" size="sm" onClick={() => navigate("/login")}>
           Přihlásit se
         </Button>
       </nav>
 
-      {/* Hero */}
-      <motion.section
-        className="px-6 pt-12 pb-10 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1 className="text-4xl font-bold leading-tight text-foreground mb-3">
-          ✈️ Plánuj výlety<br />jako profík
-        </h1>
-        <p className="text-muted-foreground text-base mb-8 max-w-xs mx-auto">
-          Místa, mapy, itinerář – vše na jednom místě. Plánuj chytře, cestuj bez stresu.
-        </p>
-        <Button
-          size="lg"
-          className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-md px-8 py-6 text-lg font-bold shadow-card"
-          onClick={() => navigate("/login")}
+      {/* Hero + Features: stacked on mobile, side-by-side on desktop */}
+      <div className="px-6 md:px-12 lg:px-20 pt-12 pb-10 md:pt-20 md:pb-16 md:flex md:items-center md:gap-16 lg:gap-24 max-w-6xl mx-auto">
+        {/* Hero */}
+        <motion.section
+          className="text-center md:text-left md:flex-1"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          🚀 Začít zdarma
-        </Button>
-      </motion.section>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-foreground mb-3">
+            ✈️ Plánuj výlety<br />jako profík
+          </h1>
+          <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xs md:max-w-md mx-auto md:mx-0">
+            Místa, mapy, itinerář – vše na jednom místě. Plánuj chytře, cestuj bez stresu.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+            <Button
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-md px-8 py-6 text-lg font-bold shadow-card"
+              onClick={() => navigate("/login")}
+            >
+              🚀 Začít zdarma
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-md py-6 text-base border-primary text-primary hover:bg-primary/5"
+              onClick={() => navigate("/login")}
+            >
+              Přihlásit se přes Google
+            </Button>
+          </div>
+        </motion.section>
 
-      {/* Features */}
-      <section className="px-6 pb-12">
-        <div className="grid gap-4">
+        {/* Features */}
+        <div className="mt-10 md:mt-0 md:flex-1 grid gap-4">
           {features.map((f, i) => (
             <motion.div
               key={i}
@@ -60,19 +71,7 @@ const Landing = () => {
             </motion.div>
           ))}
         </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="px-6 pb-16 text-center">
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full rounded-md py-6 text-base border-primary text-primary hover:bg-primary/5"
-          onClick={() => navigate("/login")}
-        >
-          Přihlásit se přes Google
-        </Button>
-      </section>
+      </div>
     </div>
   );
 };
