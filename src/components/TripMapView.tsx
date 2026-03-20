@@ -142,7 +142,7 @@ const TripMapView = ({
               return (
                 <button
                   key={place.id}
-                  className="flex-shrink-0 bg-card rounded-xl shadow-card w-[130px] text-left transition-all"
+                  className={`flex-shrink-0 bg-card rounded-xl shadow-card w-[130px] text-left transition-all ${place.visited ? "opacity-60" : ""}`}
                   onClick={() => {
                     setActiveIndex(i);
                     onPlaceClick(place.id);
@@ -152,14 +152,17 @@ const TripMapView = ({
                     <div className="h-1 rounded-t-xl" style={{ backgroundColor: pCfg.color }} />
                   )}
                   <div className="p-3">
-                    <span
-                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center mb-2 ${circleBg}`}
-                      style={circleStyle}
-                    >
-                      {i + 1}
-                    </span>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span
+                        className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${circleBg}`}
+                        style={circleStyle}
+                      >
+                        {i + 1}
+                      </span>
+                      {place.visited && <span className="text-sm">✅</span>}
+                    </div>
                     {place.emoji && <span className="text-lg block mb-1">{place.emoji}</span>}
-                    <span className="text-sm font-bold text-foreground block truncate">{place.name}</span>
+                    <span className={`text-sm font-bold text-foreground block truncate ${place.visited ? "line-through" : ""}`}>{place.name}</span>
                     {place.timeFrom && (
                       <p className="text-xs text-primary mt-1">
                         {place.timeFrom}{place.timeTo ? ` – ${place.timeTo}` : ""}
