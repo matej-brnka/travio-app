@@ -258,7 +258,7 @@ const TripDetail = () => {
 
           {/* Desktop action buttons – all visible */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="rounded-md" onClick={() => {}}>
+            <Button variant="outline" size="sm" className="rounded-md" onClick={() => setShowEditTrip(true)}>
               <Pencil className="w-4 h-4 mr-1.5" />
               Upravit
             </Button>
