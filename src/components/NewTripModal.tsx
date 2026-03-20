@@ -15,9 +15,12 @@ interface NewTripModalProps {
   onCreate: (trip: Trip) => void;
 }
 
+const EMOJI_OPTIONS = ["✈️", "🗽", "🏔️", "🏖️", "🌍", "🏛️", "🎭", "🌸", "🏕️", "🚗", "🎿", "🌴", "🗼", "🏰", "🎢"];
+
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [destination, setDestination] = useState("");
   const [dateFrom, setDateFrom] = useState("");
+  const [emoji, setEmoji] = useState("✈️");
   const [dateTo, setDateTo] = useState("");
   const [aiHelp, setAiHelp] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -41,7 +44,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     const trip: Trip = {
       id: `trip-${Date.now()}`,
       name: destination,
-      emoji: "✈️",
+      emoji,
       dateFrom,
       dateTo,
       weather: { temp: 20, icon: "🌤️" },
@@ -53,6 +56,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     setDateFrom("");
     setDateTo("");
     setAiHelp(false);
+    setEmoji("✈️");
   };
 
   return (
@@ -63,6 +67,25 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Emoji picker */}
+          <div>
+            <Label className="text-foreground text-sm">Emoji</Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {EMOJI_OPTIONS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  className={`w-9 h-9 rounded-md text-lg flex items-center justify-center transition-colors ${
+                    emoji === e ? "bg-primary/15 ring-2 ring-primary" : "bg-muted hover:bg-muted/80"
+                  }`}
+                  onClick={() => setEmoji(e)}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="relative">
             <Label className="text-foreground text-sm">Destinace</Label>
             <Input
