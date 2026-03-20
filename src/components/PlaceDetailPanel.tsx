@@ -209,6 +209,15 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
             {place.visited ? "Navštíveno ✨" : "Označit jako navštíveno"}
           </button>
 
+          {/* Note */}
+          <div>
+            <p className="text-sm font-bold text-foreground mb-2">📝 Poznámka</p>
+            <NoteField
+              value={place.note || ""}
+              onChange={(note) => updatePlace(trip.id, place.id, { note })}
+            />
+          </div>
+
           <hr className="border-border" />
 
           {/* Pager */}
