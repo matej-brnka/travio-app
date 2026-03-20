@@ -50,8 +50,8 @@ const TripDetail = () => {
   const isUnassigned = selectedDayIndex === trip.days.length;
   const currentDay = isUnassigned ? null : trip.days[selectedDayIndex];
   const currentPlaces = isUnassigned ? trip.unassigned : currentDay?.places || [];
-  const totalDays = trip.days.length;
-  const totalNights = totalDays > 0 ? totalDays - 1 : 0;
+  const totalDays = differenceInDays(parseISO(trip.dateTo), parseISO(trip.dateFrom)) + 1;
+  const totalNights = totalDays > 1 ? totalDays - 1 : 0;
   const currentDayId = isUnassigned ? null : currentDay?.id || null;
 
   const toggleView = (view: "list" | "map") => {
