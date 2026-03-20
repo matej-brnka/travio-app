@@ -11,39 +11,55 @@ import EmojiPicker from "@/components/EmojiPicker";
 
 const destinations = ["New York", "Praha", "Tokio", "Londýn", "Barcelona", "Řím"];
 
-const interestTags = [
-  // Aktivity
-  { id: "culture", label: "🎭 Kultura" },
-  { id: "museums", label: "🏛️ Muzea" },
-  { id: "sport", label: "⚽ Sport" },
-  { id: "nature", label: "🌿 Příroda" },
-  { id: "adventure", label: "🧗 Dobrodružství" },
-  { id: "nightlife", label: "🌙 Noční život" },
-  { id: "shopping", label: "🛍️ Nákupy" },
-  { id: "history", label: "📜 Historie" },
-  { id: "architecture", label: "🏗️ Architektura" },
-  { id: "relax", label: "🧘 Relax & wellness" },
-  { id: "beaches", label: "🏖️ Pláže" },
-  { id: "hiking", label: "🥾 Turistika" },
-  // Jídlo & pití
-  { id: "food", label: "🍽️ Gastronomie" },
-  { id: "streetfood", label: "🌮 Street food" },
-  { id: "wine", label: "🍷 Víno & degustace" },
-  { id: "cafes", label: "☕ Kavárny" },
-  // Styl cestování
-  { id: "budget", label: "💰 Budget friendly" },
-  { id: "luxury", label: "💎 Luxus" },
-  { id: "offbeat", label: "🗺️ Off the beaten path" },
-  { id: "romantic", label: "💕 Romantika" },
-  { id: "family", label: "👨‍👩‍👧 S dětmi" },
-  { id: "solo", label: "🎒 Sólo cestování" },
-  // Zážitky
-  { id: "photography", label: "📸 Fotogenická místa" },
-  { id: "local", label: "🏘️ Lokální zážitky" },
-  { id: "markets", label: "🧺 Trhy & bleší trhy" },
-  { id: "art", label: "🎨 Umění & galerie" },
-  { id: "music", label: "🎵 Hudba & koncerty" },
-  { id: "viewpoints", label: "🌅 Vyhlídky" },
+const interestCategories = [
+  {
+    title: "🎯 Aktivity",
+    tags: [
+      { id: "culture", label: "🎭 Kultura" },
+      { id: "museums", label: "🏛️ Muzea" },
+      { id: "sport", label: "⚽ Sport" },
+      { id: "nature", label: "🌿 Příroda" },
+      { id: "adventure", label: "🧗 Dobrodružství" },
+      { id: "hiking", label: "🥾 Turistika" },
+      { id: "beaches", label: "🏖️ Pláže" },
+      { id: "nightlife", label: "🌙 Noční život" },
+    ],
+  },
+  {
+    title: "🍽️ Jídlo & pití",
+    tags: [
+      { id: "food", label: "🍽️ Gastronomie" },
+      { id: "streetfood", label: "🌮 Street food" },
+      { id: "wine", label: "🍷 Víno & degustace" },
+      { id: "cafes", label: "☕ Kavárny" },
+    ],
+  },
+  {
+    title: "✨ Zážitky",
+    tags: [
+      { id: "history", label: "📜 Historie" },
+      { id: "architecture", label: "🏗️ Architektura" },
+      { id: "photography", label: "📸 Fotogenická místa" },
+      { id: "art", label: "🎨 Umění & galerie" },
+      { id: "music", label: "🎵 Hudba & koncerty" },
+      { id: "viewpoints", label: "🌅 Vyhlídky" },
+      { id: "markets", label: "🧺 Trhy & bleší trhy" },
+      { id: "local", label: "🏘️ Lokální zážitky" },
+      { id: "shopping", label: "🛍️ Nákupy" },
+    ],
+  },
+  {
+    title: "🧳 Styl cesty",
+    tags: [
+      { id: "budget", label: "💰 Budget friendly" },
+      { id: "luxury", label: "💎 Luxus" },
+      { id: "romantic", label: "💕 Romantika" },
+      { id: "family", label: "👨‍👩‍👧 S dětmi" },
+      { id: "solo", label: "🎒 Sólo" },
+      { id: "offbeat", label: "🗺️ Off the beaten path" },
+      { id: "relax", label: "🧘 Relax & wellness" },
+    ],
+  },
 ];
 
 interface NewTripModalProps {
