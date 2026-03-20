@@ -210,6 +210,21 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     );
   }, []);
 
+  const removeDayFromTrip = useCallback((tripId: string, dayId: string) => {
+    setTrips((prev) =>
+      prev.map((trip) => {
+        if (trip.id !== tripId) return trip;
+        const dayToRemove = trip.days.find((d) => d.id === dayId);
+        if (!dayToRemove) return trip;
+        return {
+          ...trip,
+          days: trip.days.filter((d) => d.id !== dayId),
+          unassigned: [...trip.unassigned, ...dayToRemove.places],
+        };
+      })
+    );
+  }, []);
+
   return (
     <TripContext.Provider
       value={{
@@ -224,6 +239,7 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
         addTrip,
         updateTrip,
         addDayToTrip,
+        removeDayFromTrip,
       }}
     >
       {children}
