@@ -14,6 +14,7 @@ interface TripContextType {
   addTrip: (trip: Trip) => void;
   updateTrip: (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => void;
   addDayToTrip: (tripId: string) => void;
+  removeDayFromTrip: (tripId: string, dayId: string) => void;
 }
 
 const TripContext = createContext<TripContextType | null>(null);
