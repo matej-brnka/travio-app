@@ -73,6 +73,14 @@ const TripDetail = () => {
     toast.success("Místo přidáno! 📍");
   };
 
+  const handlePlaceClick = (placeId: string) => {
+    if (isMobile) {
+      navigate(`/app/trip/${id}/place/${placeId}`);
+    } else {
+      setSelectedPlaceId(placeId);
+    }
+  };
+
   const handleMoveUp = (index: number) => {
     if (index <= 0) return;
     reorderPlaces(trip.id, currentDayId, index, index - 1);
