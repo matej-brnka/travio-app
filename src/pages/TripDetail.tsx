@@ -54,8 +54,7 @@ const TripDetail = () => {
   const currentDayId = isUnassigned ? null : currentDay?.id || null;
 
   const toggleView = (view: "list" | "map") => {
-    if (view === "map") setSearchParams({ view: "map" });
-    else setSearchParams({});
+    setSearchParams({ view });
   };
 
   const handleShare = () => {
