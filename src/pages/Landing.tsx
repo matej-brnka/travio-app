@@ -22,7 +22,7 @@ const Landing = () => {
       </nav>
 
       {/* Hero + Features: stacked on mobile, side-by-side on desktop */}
-      <div className="px-6 md:px-12 lg:px-20 pt-12 pb-10 md:pt-20 md:pb-16 md:flex md:items-center md:gap-16 lg:gap-24 max-w-6xl mx-auto">
+      <div className="px-6 md:px-12 lg:px-20 pt-12 pb-10 md:pt-20 md:pb-16 max-w-5xl mx-auto">
         {/* Hero */}
         <motion.section
           className="text-center md:text-left md:flex-1"
