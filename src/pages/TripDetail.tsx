@@ -222,19 +222,19 @@ const TripDetail = () => {
         <div className="flex gap-2 px-4 pt-3">
           <button
             className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
-              viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-            }`}
-            onClick={() => toggleView("list")}
-          >
-            📋 Seznam
-          </button>
-          <button
-            className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
               viewMode === "map" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}
             onClick={() => toggleView("map")}
           >
             🗺️ Mapa
+          </button>
+          <button
+            className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
+              viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            }`}
+            onClick={() => toggleView("list")}
+          >
+            📋 Seznam
           </button>
         </div>
         <div className="px-4 py-2">{dayPills}</div>
