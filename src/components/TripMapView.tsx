@@ -136,46 +136,45 @@ const TripMapView = ({
             {places.map((place, i) => {
               const pCfg = place.priority ? priorityConfig[place.priority] : null;
               const isActive = activeIndex === i;
-              const circleBg = pCfg
-                ? undefined
-                : "bg-primary text-primary-foreground";
-              const circleStyle = pCfg
-                ? { backgroundColor: pCfg.color, color: "white" }
-                : undefined;
-              const borderClass = isActive
-                ? pCfg ? "ring-2" : "ring-2 ring-primary"
-                : "border border-transparent";
-              const borderStyle = isActive && pCfg
-                ? { boxShadow: `0 0 0 2px ${pCfg.color}` }
-                : undefined;
+              const circleBg = pCfg ? "" : "bg-primary text-primary-foreground";
+              const circleStyle = pCfg ? { backgroundColor: pCfg.color, color: "white" } : undefined;
 
               return (
                 <button
                   key={place.id}
-                  className={`flex-shrink-0 bg-card rounded-xl shadow-card p-3.5 min-w-[180px] text-left transition-all ${borderClass}`}
-                  style={borderStyle}
+                  className={`flex-shrink-0 bg-card rounded-xl shadow-card min-w-[160px] text-left transition-all ${
+                    isActive && !pCfg ? "ring-2 ring-primary" : isActive && pCfg ? "ring-2" : ""
+                  }`}
+                  style={isActive && pCfg ? { boxShadow: `0 0 0 2px ${pCfg.color}` } : undefined}
                   onClick={() => {
                     setActiveIndex(i);
                     onPlaceClick(place.id);
                   }}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 ${circleBg || ""}`}
-                      style={circleStyle}
-                    >
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1">
-                        {place.emoji && <span className="text-sm">{place.emoji}</span>}
-                        <span className="text-sm font-bold text-foreground truncate">{place.name}</span>
+                  {/* Colored top bar for priority */}
+                  {pCfg && (
+                    <div className="h-1 rounded-t-xl" style={{ backgroundColor: pCfg.color }} />
+                  )}
+                  <div className="p-3.5">
+                    <div className="flex items-start gap-2.5">
+                      <span
+                        className={`w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 ${circleBg}`}
+                        style={circleStyle}
+                      >
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        {place.emoji && <span className="text-lg block mb-0.5">{place.emoji}</span>}
+                        <span className="text-sm font-bold text-foreground block truncate">{place.name}</span>
+                        {(place.timeFrom || place.timeTo) && (
+                          <p className="text-xs text-primary mt-0.5">
+                            {place.timeFrom || "?"} – {place.timeTo || "?"}
+                          </p>
+                        )}
+                        {place.address && (
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{place.address}</p>
+                        )}
                       </div>
-                      {(place.timeFrom || place.timeTo) && (
-                        <p className="text-xs text-primary mt-0.5">
-                          {place.timeFrom || "?"} – {place.timeTo || "?"}
-                        </p>
-                      )}
                     </div>
                   </div>
                 </button>

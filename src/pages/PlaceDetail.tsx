@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Place } from "@/data/mockData";
+import { Place, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { format, parseISO } from "date-fns";
 import { cs } from "date-fns/locale";
+import EmojiPicker from "@/components/EmojiPicker";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import { toast } from "sonner";
 import {
@@ -121,6 +124,32 @@ const PlaceDetail = () => {
           </div>
         </div>
 
+        {/* Emoji + Time range */}
+        <div className="space-y-3 mb-5">
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Emoji</p>
+            <EmojiPicker value={place.emoji || ""} onChange={(emoji) => updatePlace(trip.id, place.id, { emoji: emoji || undefined })} />
+          </div>
+          <div>
+            <p className="text-xs font-medium text-foreground mb-1">🕘 Čas / rezervace</p>
+            <div className="flex gap-2 items-center">
+              <Input
+                type="time"
+                value={place.timeFrom || ""}
+                onChange={(e) => updatePlace(trip.id, place.id, { timeFrom: e.target.value || undefined })}
+                className="text-sm h-10 flex-1"
+              />
+              <span className="text-muted-foreground font-medium">–</span>
+              <Input
+                type="time"
+                value={place.timeTo || ""}
+                onChange={(e) => updatePlace(trip.id, place.id, { timeTo: e.target.value || undefined })}
+                className="text-sm h-10 flex-1"
+              />
+            </div>
+          </div>
+        </div>
+
         {place.address && (
           <p className="text-sm text-foreground mb-3">📍 {place.address}</p>
         )}
@@ -154,7 +183,46 @@ const PlaceDetail = () => {
 
         <hr className="border-border my-5" />
 
-        {/* Move to day - INLINE */}
+        {/* Priority */}
+        <div className="mb-5">
+          <p className="text-sm font-bold text-foreground mb-3">🎯 Jak moc to chci vidět?</p>
+          <div className="grid grid-cols-2 gap-2">
+            {(["must-see", "chci-videt", "mozna", null] as const).map((p) => {
+              const isActive = (place.priority || null) === p;
+              const cfg = p ? priorityConfig[p] : null;
+              return (
+                <button
+                  key={p || "none"}
+                  className={`py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    isActive
+                      ? p ? `${cfg!.bgClass} ring-2 ring-offset-1 ring-current` : "bg-muted text-foreground ring-2 ring-offset-1 ring-muted-foreground/30"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  }`}
+                  onClick={() => updatePlace(trip.id, place.id, { priority: p })}
+                >
+                  {cfg ? `${cfg.emoji} ${cfg.label}` : "🚫 Bez priority"}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <hr className="border-border my-5" />
+
+        {/* Note */}
+        <div className="mb-5">
+          <p className="text-sm font-bold text-foreground mb-3">📝 Poznámka</p>
+          <Textarea
+            value={place.note || ""}
+            onChange={(e) => updatePlace(trip.id, place.id, { note: e.target.value || undefined })}
+            placeholder="Přidej poznámku k tomuto místu…"
+            className="min-h-[80px] text-sm resize-none"
+          />
+        </div>
+
+        <hr className="border-border my-5" />
+
+        {/* Move to day */}
         <div className="mb-5">
           <p className="text-sm font-bold text-foreground mb-3">📅 Zařazení do dne</p>
           <div className="bg-card rounded-lg border border-border p-3">
