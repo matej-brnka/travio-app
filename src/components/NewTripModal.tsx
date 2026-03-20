@@ -178,21 +178,46 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
             <div className="grid grid-cols-2 gap-3 mt-1">
               <div>
                 <span className="text-xs text-muted-foreground">Datum odjezdu</span>
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="text-sm mt-0.5"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-0.5 text-sm", !dateFrom && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateFrom ? format(parseISO(dateFrom), "d. M. yyyy") : "Vyber datum"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateFrom ? parseISO(dateFrom) : undefined}
+                      onSelect={(d) => d && setDateFrom(format(d, "yyyy-MM-dd"))}
+                      locale={cs}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
                 <span className="text-xs text-muted-foreground">Datum příjezdu</span>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="text-sm mt-0.5"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-0.5 text-sm", !dateTo && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateTo ? format(parseISO(dateTo), "d. M. yyyy") : "Vyber datum"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateTo ? parseISO(dateTo) : undefined}
+                      onSelect={(d) => d && setDateTo(format(d, "yyyy-MM-dd"))}
+                      disabled={(d) => dateFrom ? d < parseISO(dateFrom) : false}
+                      locale={cs}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             {totalDays > 0 && (
