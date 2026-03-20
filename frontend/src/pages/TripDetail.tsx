@@ -7,7 +7,7 @@ import { cs } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MoreVertical, Share2, Trash2, Pencil, Plus } from "lucide-react";
 import PlaceCard from "@/components/PlaceCard";
-import AddPlaceSheet from "@/components/AddPlaceSheet";
+import AddPlaceSheet, { PlaceData } from "@/components/AddPlaceSheet";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import EditTripModal from "@/components/EditTripModal";
 import TripMapView from "@/components/TripMapView";
@@ -63,15 +63,8 @@ const TripDetail = () => {
     toast.success("Odkaz zkopírován! 🎉", { description: "https://travio.app/share/abc123" });
   };
 
-  const handleAddPlace = (name: string, address?: string) => {
-    const newPlace: Place = {
-      id: `place-${Date.now()}`,
-      name,
-      address,
-      visited: false,
-      ticket: null,
-    };
-    addPlaceToDay(trip.id, currentDayId, newPlace);
+  const handleAddPlace = async (place: PlaceData) => {
+    await addPlaceToDay(trip.id, currentDayId, place);
     setShowAddPlace(false);
     toast.success("Místo přidáno! 📍");
   };

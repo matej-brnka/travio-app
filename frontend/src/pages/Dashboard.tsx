@@ -10,13 +10,13 @@ import { Plus } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { trips, addTrip } = useTripContext();
+  const { trips, loading, addTrip } = useTripContext();
   const [showNewTrip, setShowNewTrip] = useState(false);
 
-  const handleCreateTrip = (trip: Trip) => {
-    addTrip(trip);
+  const handleCreateTrip = async (trip: Trip) => {
+    const created = await addTrip(trip);
     setShowNewTrip(false);
-    navigate(`/app/trip/${trip.id}`);
+    navigate(`/app/trip/${created.id}`);
   };
 
   return (
@@ -33,7 +33,22 @@ const Dashboard = () => {
       <div className="px-5 pb-24">
         <h1 className="text-2xl font-bold text-foreground mb-5">Moje cesty ✈️</h1>
 
-        {trips.length === 0 ? (
+        {loading ? (
+          <div className="grid gap-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-card rounded-lg shadow-card p-5 animate-pulse">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-5 bg-muted rounded w-2/3" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
+                    <div className="h-4 bg-muted rounded w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : trips.length === 0 ? (
           <motion.div
             className="bg-card rounded-lg shadow-card p-10 text-center"
             initial={{ opacity: 0 }}

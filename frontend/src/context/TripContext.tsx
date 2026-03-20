@@ -1,20 +1,28 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { Trip, Place, mockTrips } from "@/data/mockData";
-import { differenceInDays, parseISO, addDays, format } from "date-fns";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { Trip, Place } from "@/data/mockData";
+import * as TripsApi from "@/api/trips";
+import * as DaysApi from "@/api/days";
+import * as PlacesApi from "@/api/places";
+import { getWeather } from "@/api/weather";
+import { supabase } from "@/lib/supabase";
 
 interface TripContextType {
   trips: Trip[];
+  loading: boolean;
+  error: string | null;
   setTrips: React.Dispatch<React.SetStateAction<Trip[]>>;
+  loadTrip: (id: string) => Promise<Trip | undefined>;
   getTrip: (id: string) => Trip | undefined;
-  addPlaceToDay: (tripId: string, dayId: string | null, place: Place) => void;
-  movePlace: (tripId: string, placeId: string, toDayId: string | null) => void;
-  reorderPlaces: (tripId: string, dayId: string | null, fromIndex: number, toIndex: number) => void;
-  updatePlace: (tripId: string, placeId: string, updates: Partial<Place>) => void;
-  deletePlace: (tripId: string, placeId: string) => void;
-  addTrip: (trip: Trip) => void;
-  updateTrip: (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => void;
-  addDayToTrip: (tripId: string) => void;
-  removeDayFromTrip: (tripId: string, dayId: string) => void;
+  addPlaceToDay: (tripId: string, dayId: string | null, place: any) => Promise<void>;
+  movePlace: (tripId: string, placeId: string, toDayId: string | null) => Promise<void>;
+  reorderPlaces: (tripId: string, dayId: string | null, fromIndex: number, toIndex: number) => Promise<void>;
+  updatePlace: (tripId: string, placeId: string, updates: Partial<Place>) => Promise<void>;
+  deletePlace: (tripId: string, placeId: string) => Promise<void>;
+  addTrip: (data: any) => Promise<Trip>;
+  updateTrip: (tripId: string, updates: any) => Promise<void>;
+  deleteTrip: (tripId: string) => Promise<void>;
+  addDayToTrip: (tripId: string) => Promise<void>;
+  removeDayFromTrip: (tripId: string, dayId: string) => Promise<void>;
 }
 
 const TripContext = createContext<TripContextType | null>(null);
@@ -25,223 +33,223 @@ export const useTripContext = () => {
   return ctx;
 };
 
+function mapTrip(t: any): Trip {
+  return {
+    id: t.id,
+    name: t.name,
+    emoji: t.emoji,
+    dateFrom: t.dateFrom,
+    dateTo: t.dateTo,
+    interests: t.interests ?? [],
+    weather: t.weather,
+    days: (t.days ?? []).map((d: any) => ({
+      id: d.id,
+      date: d.date,
+      places: (d.places ?? []).map(mapPlace),
+    })),
+    unassigned: (t.unassigned ?? []).map(mapPlace),
+  };
+}
+
+function mapPlace(p: any): Place {
+  return {
+    id: p.id,
+    name: p.name,
+    emoji: p.emoji ?? undefined,
+    address: p.address ?? undefined,
+    website: p.website ?? undefined,
+    lat: p.lat ?? undefined,
+    lng: p.lng ?? undefined,
+    openingHours: p.openingHours ?? undefined,
+    ticket: p.ticket ?? null,
+    visited: p.visited ?? false,
+    note: p.note ?? undefined,
+    priority: p.priority ?? null,
+    timeFrom: p.timeFrom ?? undefined,
+    timeTo: p.timeTo ?? undefined,
+  };
+}
+
 export const TripProvider = ({ children }: { children: ReactNode }) => {
-  const [trips, setTrips] = useState<Trip[]>(mockTrips);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadTrips = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await TripsApi.getTrips();
+      setTrips(data.map(mapTrip));
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) loadTrips();
+      else setTrips([]);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) loadTrips();
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadTrip = useCallback(async (id: string): Promise<Trip | undefined> => {
+    try {
+      const data = await TripsApi.getTrip(id);
+      const trip = mapTrip(data);
+      const allPlaces = trip.days.flatMap(d => d.places).concat(trip.unassigned);
+      const withCoords = allPlaces.find(p => p.lat && p.lng);
+      if (withCoords?.lat && withCoords?.lng) {
+        try {
+          trip.weather = await getWeather(withCoords.lat, withCoords.lng, trip.dateFrom);
+        } catch {}
+      }
+      setTrips(prev => {
+        const idx = prev.findIndex(t => t.id === id);
+        if (idx >= 0) { const next = [...prev]; next[idx] = trip; return next; }
+        return [...prev, trip];
+      });
+      return trip;
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }, []);
 
   const getTrip = useCallback((id: string) => trips.find((t) => t.id === id), [trips]);
 
-  const addTrip = useCallback((trip: Trip) => {
-    setTrips((prev) => [...prev, trip]);
+  const addTrip = useCallback(async (data: any): Promise<Trip> => {
+    const created = await TripsApi.createTrip(data);
+    const trip = mapTrip(created);
+    setTrips(prev => [...prev, trip]);
+    return trip;
   }, []);
 
-  const addPlaceToDay = useCallback(
-    (tripId: string, dayId: string | null, place: Place) => {
-      setTrips((prev) =>
-        prev.map((trip) => {
-          if (trip.id !== tripId) return trip;
-          if (!dayId) {
-            return { ...trip, unassigned: [...trip.unassigned, place] };
-          }
-          return {
-            ...trip,
-            days: trip.days.map((d) =>
-              d.id === dayId ? { ...d, places: [...d.places, place] } : d
-            ),
-          };
-        })
-      );
-    },
-    []
-  );
-
-  const movePlace = useCallback(
-    (tripId: string, placeId: string, toDayId: string | null) => {
-      setTrips((prev) =>
-        prev.map((trip) => {
-          if (trip.id !== tripId) return trip;
-
-          // Find and remove place from current location
-          let foundPlace: Place | null = null;
-          let newDays = trip.days.map((d) => {
-            const idx = d.places.findIndex((p) => p.id === placeId);
-            if (idx !== -1) {
-              foundPlace = d.places[idx];
-              return { ...d, places: d.places.filter((p) => p.id !== placeId) };
-            }
-            return d;
-          });
-          let newUnassigned = [...trip.unassigned];
-          if (!foundPlace) {
-            const idx = newUnassigned.findIndex((p) => p.id === placeId);
-            if (idx !== -1) {
-              foundPlace = newUnassigned[idx];
-              newUnassigned = newUnassigned.filter((p) => p.id !== placeId);
-            }
-          }
-          if (!foundPlace) return trip;
-
-          // Add to new location
-          if (!toDayId) {
-            newUnassigned = [...newUnassigned, foundPlace];
-          } else {
-            newDays = newDays.map((d) =>
-              d.id === toDayId ? { ...d, places: [...d.places, foundPlace!] } : d
-            );
-          }
-
-          return { ...trip, days: newDays, unassigned: newUnassigned };
-        })
-      );
-    },
-    []
-  );
-
-  const reorderPlaces = useCallback(
-    (tripId: string, dayId: string | null, fromIndex: number, toIndex: number) => {
-      setTrips((prev) =>
-        prev.map((trip) => {
-          if (trip.id !== tripId) return trip;
-          if (!dayId) {
-            const items = [...trip.unassigned];
-            const [moved] = items.splice(fromIndex, 1);
-            items.splice(toIndex, 0, moved);
-            return { ...trip, unassigned: items };
-          }
-          return {
-            ...trip,
-            days: trip.days.map((d) => {
-              if (d.id !== dayId) return d;
-              const items = [...d.places];
-              const [moved] = items.splice(fromIndex, 1);
-              items.splice(toIndex, 0, moved);
-              return { ...d, places: items };
-            }),
-          };
-        })
-      );
-    },
-    []
-  );
-
-  const updatePlace = useCallback(
-    (tripId: string, placeId: string, updates: Partial<Place>) => {
-      setTrips((prev) =>
-        prev.map((trip) => {
-          if (trip.id !== tripId) return trip;
-          return {
-            ...trip,
-            days: trip.days.map((d) => ({
-              ...d,
-              places: d.places.map((p) =>
-                p.id === placeId ? { ...p, ...updates } : p
-              ),
-            })),
-            unassigned: trip.unassigned.map((p) =>
-              p.id === placeId ? { ...p, ...updates } : p
-            ),
-          };
-        })
-      );
-    },
-    []
-  );
-
-  const deletePlace = useCallback((tripId: string, placeId: string) => {
-    setTrips((prev) =>
-      prev.map((trip) => {
-        if (trip.id !== tripId) return trip;
-        return {
-          ...trip,
-          days: trip.days.map((d) => ({
-            ...d,
-            places: d.places.filter((p) => p.id !== placeId),
-          })),
-          unassigned: trip.unassigned.filter((p) => p.id !== placeId),
-        };
-      })
-    );
+  const updateTrip = useCallback(async (tripId: string, updates: any) => {
+    await TripsApi.updateTrip(tripId, updates);
+    const refreshed = await TripsApi.getTrip(tripId);
+    const trip = mapTrip(refreshed);
+    setTrips(prev => prev.map(t => t.id === tripId ? { ...trip, weather: t.weather } : t));
   }, []);
 
-  const updateTrip = useCallback(
-    (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => {
-      setTrips((prev) =>
-        prev.map((trip) => {
-          if (trip.id !== tripId) return trip;
-          const updated = { ...trip, ...updates };
-          // Recalculate days if dates changed
-          if (updates.dateFrom || updates.dateTo) {
-            const from = updated.dateFrom;
-            const to = updated.dateTo;
-            const newTotalDays = differenceInDays(parseISO(to), parseISO(from)) + 1;
-            if (newTotalDays > 0 && newTotalDays !== trip.days.length) {
-              const newDays = Array.from({ length: newTotalDays }, (_, i) => {
-                const date = format(addDays(parseISO(from), i), "yyyy-MM-dd");
-                // Preserve existing day data if available
-                const existing = trip.days[i];
-                if (existing) return { ...existing, date };
-                return { id: `day-${Date.now()}-${i}`, date, places: [] };
-              });
-              // Move places from removed days to unassigned
-              const removedPlaces = trip.days.slice(newTotalDays).flatMap((d) => d.places);
-              updated.days = newDays;
-              updated.unassigned = [...updated.unassigned, ...removedPlaces];
-            }
-          }
-          return updated;
-        })
-      );
-    },
-    []
-  );
-
-  const addDayToTrip = useCallback((tripId: string) => {
-    setTrips((prev) =>
-      prev.map((trip) => {
-        if (trip.id !== tripId) return trip;
-        const lastDay = trip.days[trip.days.length - 1];
-        const nextDate = lastDay
-          ? format(addDays(parseISO(lastDay.date), 1), "yyyy-MM-dd")
-          : trip.dateFrom;
-        return {
-          ...trip,
-          days: [...trip.days, { id: `day-${Date.now()}`, date: nextDate, places: [] }],
-        };
-      })
-    );
+  const deleteTrip = useCallback(async (tripId: string) => {
+    await TripsApi.deleteTrip(tripId);
+    setTrips(prev => prev.filter(t => t.id !== tripId));
   }, []);
 
-  const removeDayFromTrip = useCallback((tripId: string, dayId: string) => {
-    setTrips((prev) =>
-      prev.map((trip) => {
-        if (trip.id !== tripId) return trip;
-        const dayToRemove = trip.days.find((d) => d.id === dayId);
-        if (!dayToRemove) return trip;
-        return {
-          ...trip,
-          days: trip.days.filter((d) => d.id !== dayId),
-          unassigned: [...trip.unassigned, ...dayToRemove.places],
-        };
-      })
-    );
+  const addPlaceToDay = useCallback(async (tripId: string, dayId: string | null, placeData: any) => {
+    const created = await PlacesApi.createPlace(tripId, { ...placeData, dayId });
+    const place = mapPlace(created);
+    setTrips(prev => prev.map(trip => {
+      if (trip.id !== tripId) return trip;
+      if (!dayId) return { ...trip, unassigned: [...trip.unassigned, place] };
+      return { ...trip, days: trip.days.map(d => d.id === dayId ? { ...d, places: [...d.places, place] } : d) };
+    }));
+  }, []);
+
+  const movePlace = useCallback(async (tripId: string, placeId: string, toDayId: string | null) => {
+    await PlacesApi.movePlace(tripId, placeId, toDayId);
+    setTrips(prev => prev.map(trip => {
+      if (trip.id !== tripId) return trip;
+      let found: Place | null = null;
+      const newDays = trip.days.map(d => {
+        const idx = d.places.findIndex(p => p.id === placeId);
+        if (idx !== -1) { found = d.places[idx]; return { ...d, places: d.places.filter(p => p.id !== placeId) }; }
+        return d;
+      });
+      let newUnassigned = [...trip.unassigned];
+      if (!found) {
+        const idx = newUnassigned.findIndex(p => p.id === placeId);
+        if (idx !== -1) { found = newUnassigned[idx]; newUnassigned = newUnassigned.filter(p => p.id !== placeId); }
+      }
+      if (!found) return trip;
+      if (!toDayId) return { ...trip, days: newDays, unassigned: [...newUnassigned, found] };
+      return { ...trip, days: newDays.map(d => d.id === toDayId ? { ...d, places: [...d.places, found!] } : d), unassigned: newUnassigned };
+    }));
+  }, []);
+
+  const reorderPlaces = useCallback(async (tripId: string, dayId: string | null, fromIndex: number, toIndex: number) => {
+    setTrips(prev => prev.map(trip => {
+      if (trip.id !== tripId) return trip;
+      if (!dayId) {
+        const items = [...trip.unassigned];
+        const [moved] = items.splice(fromIndex, 1);
+        items.splice(toIndex, 0, moved);
+        PlacesApi.reorderPlaces(tripId, null, items.map(p => p.id));
+        return { ...trip, unassigned: items };
+      }
+      return {
+        ...trip,
+        days: trip.days.map(d => {
+          if (d.id !== dayId) return d;
+          const items = [...d.places];
+          const [moved] = items.splice(fromIndex, 1);
+          items.splice(toIndex, 0, moved);
+          PlacesApi.reorderPlaces(tripId, dayId, items.map(p => p.id));
+          return { ...d, places: items };
+        }),
+      };
+    }));
+  }, []);
+
+  const updatePlace = useCallback(async (tripId: string, placeId: string, updates: Partial<Place>) => {
+    await PlacesApi.updatePlace(tripId, placeId, updates);
+    setTrips(prev => prev.map(trip => {
+      if (trip.id !== tripId) return trip;
+      return {
+        ...trip,
+        days: trip.days.map(d => ({ ...d, places: d.places.map(p => p.id === placeId ? { ...p, ...updates } : p) })),
+        unassigned: trip.unassigned.map(p => p.id === placeId ? { ...p, ...updates } : p),
+      };
+    }));
+  }, []);
+
+  const deletePlace = useCallback(async (tripId: string, placeId: string) => {
+    await PlacesApi.deletePlace(tripId, placeId);
+    setTrips(prev => prev.map(trip => {
+      if (trip.id !== tripId) return trip;
+      return {
+        ...trip,
+        days: trip.days.map(d => ({ ...d, places: d.places.filter(p => p.id !== placeId) })),
+        unassigned: trip.unassigned.filter(p => p.id !== placeId),
+      };
+    }));
+  }, []);
+
+  const addDayToTrip = useCallback(async (tripId: string) => {
+    const newDay = await DaysApi.addDay(tripId);
+    setTrips(prev => prev.map(trip => {
+      if (trip.id !== tripId) return trip;
+      return { ...trip, days: [...trip.days, { id: newDay.id, date: newDay.date, places: [] }] };
+    }));
+  }, []);
+
+  const removeDayFromTrip = useCallback(async (tripId: string, dayId: string) => {
+    await DaysApi.removeDay(tripId, dayId);
+    setTrips(prev => prev.map(trip => {
+      if (trip.id !== tripId) return trip;
+      const day = trip.days.find(d => d.id === dayId);
+      return {
+        ...trip,
+        days: trip.days.filter(d => d.id !== dayId),
+        unassigned: [...trip.unassigned, ...(day?.places ?? [])],
+      };
+    }));
   }, []);
 
   return (
-    <TripContext.Provider
-      value={{
-        trips,
-        setTrips,
-        getTrip,
-        addPlaceToDay,
-        movePlace,
-        reorderPlaces,
-        updatePlace,
-        deletePlace,
-        addTrip,
-        updateTrip,
-        addDayToTrip,
-        removeDayFromTrip,
-      }}
-    >
+    <TripContext.Provider value={{
+      trips, loading, error, setTrips,
+      loadTrip, getTrip,
+      addPlaceToDay, movePlace, reorderPlaces, updatePlace, deletePlace,
+      addTrip, updateTrip, deleteTrip,
+      addDayToTrip, removeDayFromTrip,
+    }}>
       {children}
     </TripContext.Provider>
   );

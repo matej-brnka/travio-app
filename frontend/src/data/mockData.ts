@@ -36,7 +36,7 @@ export interface Trip {
   emoji: string;
   dateFrom: string;
   dateTo: string;
-  weather: { temp: number; icon: string };
+  weather?: { temp: number | null; icon: string | null };
   days: Day[];
   unassigned: Place[];
   interests?: string[];
