@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { differenceInDays, parseISO, addDays, format } from "date-fns";
 import { cs } from "date-fns/locale";
+import { DateRange } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "@/components/EmojiPicker";
@@ -82,6 +83,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const filteredDestinations = destinations.filter((d) =>
     d.toLowerCase().includes(destination.toLowerCase())
@@ -128,6 +130,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       setAiHelp(false);
       setEmoji("✈️");
       setSelectedInterests([]);
+      setCalendarOpen(false);
     } finally {
       setCreating(false);
     }
@@ -181,51 +184,39 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
 
           <div>
             <Label className="text-foreground text-sm">Datum cesty</Label>
-            <div className="grid grid-cols-2 gap-3 mt-1">
-              <div>
-                <span className="text-xs text-muted-foreground">Datum odjezdu</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-0.5 text-sm", !dateFrom && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(parseISO(dateFrom), "d. M. yyyy") : "Vyber datum"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateFrom ? parseISO(dateFrom) : undefined}
-                      onSelect={(d) => d && setDateFrom(format(d, "yyyy-MM-dd"))}
-                      locale={cs}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <span className="text-xs text-muted-foreground">Datum příjezdu</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-0.5 text-sm", !dateTo && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateTo ? format(parseISO(dateTo), "d. M. yyyy") : "Vyber datum"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateTo ? parseISO(dateTo) : undefined}
-                      onSelect={(d) => d && setDateTo(format(d, "yyyy-MM-dd"))}
-                      disabled={(d) => dateFrom ? d < parseISO(dateFrom) : false}
-                      locale={cs}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn("w-full justify-start text-left font-normal mt-1 text-sm", !dateFrom && "text-muted-foreground")}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateFrom && dateTo
+                    ? `${format(parseISO(dateFrom), "d. M. yyyy")} – ${format(parseISO(dateTo), "d. M. yyyy")}`
+                    : dateFrom
+                    ? `${format(parseISO(dateFrom), "d. M. yyyy")} – vyber konec`
+                    : "Vyber termín cesty"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  selected={{
+                    from: dateFrom ? parseISO(dateFrom) : undefined,
+                    to: dateTo ? parseISO(dateTo) : undefined,
+                  }}
+                  onSelect={(range: DateRange | undefined) => {
+                    setDateFrom(range?.from ? format(range.from, "yyyy-MM-dd") : "");
+                    setDateTo(range?.to ? format(range.to, "yyyy-MM-dd") : "");
+                    if (range?.from && range?.to) setCalendarOpen(false);
+                  }}
+                  disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                  locale={cs}
+                  initialFocus
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
             {totalDays > 0 && (
               <p className="text-sm text-muted-foreground mt-2">📅 {totalDays} dní · {totalNights} nocí k plánování</p>
             )}
