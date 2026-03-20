@@ -201,24 +201,31 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
                 AI navrhne základní itinerář, který pak upravíš dle libosti. ✨
               </p>
               <Label className="text-foreground text-sm">Co tě zajímá?</Label>
-              <div className="flex flex-wrap gap-2">
-                {interestTags.map((tag) => {
-                  const isSelected = selectedInterests.includes(tag.id);
-                  return (
-                    <Badge
-                      key={tag.id}
-                      variant={isSelected ? "default" : "outline"}
-                      className={`cursor-pointer select-none transition-all text-xs px-3 py-1.5 ${
-                        isSelected
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "hover:bg-muted"
-                      }`}
-                      onClick={() => toggleInterest(tag.id)}
-                    >
-                      {tag.label}
-                    </Badge>
-                  );
-                })}
+              <div className="max-h-52 overflow-y-auto space-y-3 pr-1">
+                {interestCategories.map((cat) => (
+                  <div key={cat.title}>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{cat.title}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cat.tags.map((tag) => {
+                        const isSelected = selectedInterests.includes(tag.id);
+                        return (
+                          <Badge
+                            key={tag.id}
+                            variant={isSelected ? "default" : "outline"}
+                            className={`cursor-pointer select-none transition-all text-xs px-2.5 py-1 ${
+                              isSelected
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "hover:bg-muted"
+                            }`}
+                            onClick={() => toggleInterest(tag.id)}
+                          >
+                            {tag.label}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
