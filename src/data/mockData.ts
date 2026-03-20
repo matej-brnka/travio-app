@@ -26,6 +26,7 @@ export interface Trip {
   weather: { temp: number; icon: string };
   days: Day[];
   unassigned: Place[];
+  interests?: string[];
 }
 
 export const mockTrips: Trip[] = [
