@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Place, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
-import { ArrowLeft, MoreVertical } from "lucide-react";
+import { ArrowLeft, MoreVertical, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
