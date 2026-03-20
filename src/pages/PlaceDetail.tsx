@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Place, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
-import { ArrowLeft, MoreVertical } from "lucide-react";
+import { ArrowLeft, MoreVertical, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -146,6 +146,15 @@ const PlaceDetail = () => {
                 onChange={(e) => updatePlace(trip.id, place.id, { timeTo: e.target.value || undefined })}
                 className="text-sm h-10 flex-1"
               />
+              {(place.timeFrom || place.timeTo) && (
+                <button
+                  onClick={() => updatePlace(trip.id, place.id, { timeFrom: undefined, timeTo: undefined })}
+                  className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex-shrink-0"
+                  title="Smazat čas"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
