@@ -195,7 +195,7 @@ const TripDetail = () => {
       {/* ══════════════════════════════════════════
           MOBILE CONTENT
          ══════════════════════════════════════════ */}
-      <div className="lg:hidden">
+      <div className={`lg:hidden ${viewMode === "map" ? "flex flex-col flex-1" : ""}`}>
         <div className="flex gap-2 px-4 pt-3">
           <button
             className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -214,9 +214,15 @@ const TripDetail = () => {
             🗺️ Mapa
           </button>
         </div>
-        <div className="px-4 py-3">{dayPills}</div>
+        <div className="px-4 py-2">{dayPills}</div>
         {viewMode === "map" ? (
-          <TripMapView places={currentPlaces} onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)} />
+          <div className="flex-1 relative">
+            <TripMapView
+              places={currentPlaces}
+              onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)}
+              className="absolute inset-0"
+            />
+          </div>
         ) : (
           <div className="px-4 pb-24">{placesListContent}</div>
         )}
