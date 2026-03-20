@@ -8,6 +8,7 @@ export interface Place {
   openingHours?: string[];
   ticket: "none" | "need" | "have" | null;
   visited: boolean;
+  note?: string;
   time?: string;
 }
 

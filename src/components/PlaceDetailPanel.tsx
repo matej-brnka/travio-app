@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Place, Trip } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
 import { cs } from "date-fns/locale";
-import { X } from "lucide-react";
+import { X, StickyNote } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import { toast } from "sonner";
 import {
@@ -26,6 +27,25 @@ interface PlaceDetailPanelProps {
   /** Navigate to another place in the panel */
   onNavigatePlace?: (placeId: string) => void;
 }
+
+/** Auto-saving note field with debounce */
+const NoteField = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const [local, setLocal] = useState(value);
+  useEffect(() => { setLocal(value); }, [value]);
+  useEffect(() => {
+    if (local === value) return;
+    const t = setTimeout(() => onChange(local), 500);
+    return () => clearTimeout(t);
+  }, [local]);
+  return (
+    <Textarea
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      placeholder="Přidej poznámku k tomuto místu…"
+      className="min-h-[80px] text-sm resize-none"
+    />
+  );
+};
 
 const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDetailPanelProps) => {
   const { updatePlace, deletePlace, movePlace } = useTripContext();
@@ -207,6 +227,15 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
             </span>
             {place.visited ? "Navštíveno ✨" : "Označit jako navštíveno"}
           </button>
+
+          {/* Note */}
+          <div>
+            <p className="text-sm font-bold text-foreground mb-2">📝 Poznámka</p>
+            <NoteField
+              value={place.note || ""}
+              onChange={(note) => updatePlace(trip.id, place.id, { note })}
+            />
+          </div>
 
           <hr className="border-border" />
 
