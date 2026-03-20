@@ -41,9 +41,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
       <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] p-0">
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <SheetHeader className="p-0">
-            <SheetTitle className="text-foreground text-lg">📍 Přidat místo</SheetTitle>
-          </SheetHeader>
+          <h2 className="text-foreground text-lg font-bold">📍 Přidat místo</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
             <X className="w-5 h-5" />
           </button>
