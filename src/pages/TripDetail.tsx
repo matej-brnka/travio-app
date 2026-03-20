@@ -162,7 +162,7 @@ const TripDetail = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`bg-background ${viewMode === "map" ? "h-screen flex flex-col lg:block lg:h-auto lg:min-h-screen" : "min-h-screen"}`}>
 
       {/* ══════════════════════════════════════════
           MOBILE TOP BAR
