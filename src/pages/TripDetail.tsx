@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Place } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInDays } from "date-fns";
 import { cs } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MoreVertical, Share2, Trash2, Pencil, Plus } from "lucide-react";
