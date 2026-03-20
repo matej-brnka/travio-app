@@ -28,7 +28,8 @@ const TripDetail = () => {
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("view");
-  const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : (isMobile ? "map" : "list");
+  const savedView = typeof window !== "undefined" ? localStorage.getItem("travio-view-mode") as "list" | "map" | null : null;
+  const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : savedView ? savedView : (isMobile ? "map" : "list");
   const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip } = useTripContext();
 
   const trip = getTrip(id || "");
