@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { Place, Trip } from "@/data/mockData";
+import { Place, Trip, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
@@ -227,6 +227,32 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
             </span>
             {place.visited ? "Navštíveno ✨" : "Označit jako navštíveno"}
           </button>
+
+          <hr className="border-border" />
+
+          {/* Priority */}
+          <div>
+            <p className="text-sm font-bold text-foreground mb-2">🎯 Jak moc to chci vidět?</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(["must-see", "chci-videt", "mozna", null] as const).map((p) => {
+                const isActive = (place.priority || null) === p;
+                const cfg = p ? priorityConfig[p] : null;
+                return (
+                  <button
+                    key={p || "none"}
+                    className={`py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                      isActive
+                        ? p ? `${cfg!.bgClass} ring-2 ring-offset-1 ring-current` : "bg-muted text-foreground ring-2 ring-offset-1 ring-muted-foreground/30"
+                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => updatePlace(trip.id, place.id, { priority: p })}
+                  >
+                    {cfg ? `${cfg.emoji} ${cfg.label}` : "🚫 Bez priority"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Note */}
           <div>

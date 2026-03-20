@@ -1,3 +1,11 @@
+export type PlacePriority = "must-see" | "chci-videt" | "mozna" | null;
+
+export const priorityConfig: Record<string, { label: string; emoji: string; color: string; bgClass: string }> = {
+  "must-see": { label: "Must see!", emoji: "🔥", color: "hsl(var(--destructive))", bgClass: "bg-destructive/10 text-destructive" },
+  "chci-videt": { label: "Chci vidět", emoji: "⭐", color: "hsl(var(--accent))", bgClass: "bg-accent/20 text-accent-foreground" },
+  "mozna": { label: "Když zbyde čas", emoji: "🤷", color: "hsl(var(--muted-foreground))", bgClass: "bg-muted text-muted-foreground" },
+};
+
 export interface Place {
   id: string;
   name: string;
@@ -9,6 +17,7 @@ export interface Place {
   ticket: "none" | "need" | "have" | null;
   visited: boolean;
   note?: string;
+  priority?: PlacePriority;
   time?: string;
 }
 

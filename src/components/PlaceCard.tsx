@@ -1,4 +1,4 @@
-import { Place } from "@/data/mockData";
+import { Place, priorityConfig } from "@/data/mockData";
 import { ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 
 interface PlaceCardProps {
@@ -18,11 +18,14 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
       ? "🎫 potřeba"
       : null;
 
+  const pCfg = place.priority ? priorityConfig[place.priority] : null;
+
   return (
     <div
       className={`w-full bg-card rounded-lg shadow-card p-4 flex items-center gap-2 ${
         place.visited ? "opacity-60" : ""
       }`}
+      style={pCfg ? { borderLeft: `3px solid ${pCfg.color}` } : undefined}
     >
       {/* Reorder buttons */}
       {!readOnly && (
@@ -72,6 +75,11 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
         {ticketBadge && (
           <span className="inline-block mt-1 text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
             {ticketBadge}
+          </span>
+        )}
+        {pCfg && (
+          <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${pCfg.bgClass}`}>
+            {pCfg.emoji} {pCfg.label}
           </span>
         )}
       </button>
