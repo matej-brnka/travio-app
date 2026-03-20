@@ -11,6 +11,8 @@ import AddPlaceSheet from "@/components/AddPlaceSheet";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import EditTripModal from "@/components/EditTripModal";
 import TripMapView from "@/components/TripMapView";
+import PlaceDetailPanel from "@/components/PlaceDetailPanel";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +25,7 @@ import { motion } from "framer-motion";
 const TripDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewMode = searchParams.get("view") === "map" ? "map" : "list";
   const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip } = useTripContext();
@@ -32,6 +35,7 @@ const TripDetail = () => {
   const [showAddPlace, setShowAddPlace] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   if (!trip) {
     return (
@@ -67,6 +71,14 @@ const TripDetail = () => {
     addPlaceToDay(trip.id, currentDayId, newPlace);
     setShowAddPlace(false);
     toast.success("Místo přidáno! 📍");
+  };
+
+  const handlePlaceClick = (placeId: string) => {
+    if (isMobile) {
+      navigate(`/app/trip/${id}/place/${placeId}`);
+    } else {
+      setSelectedPlaceId(placeId);
+    }
   };
 
   const handleMoveUp = (index: number) => {
@@ -144,7 +156,7 @@ const TripDetail = () => {
             <PlaceCard
               key={place.id}
               place={place}
-              onClick={() => navigate(`/app/trip/${id}/place/${place.id}`)}
+              onClick={() => handlePlaceClick(place.id)}
               onMove={() => setMovingPlace(place)}
               onMoveUp={index > 0 ? () => handleMoveUp(index) : undefined}
               onMoveDown={index < currentPlaces.length - 1 ? () => handleMoveDown(index) : undefined}
@@ -221,7 +233,7 @@ const TripDetail = () => {
           <div className="flex-1 relative">
             <TripMapView
               places={currentPlaces}
-              onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)}
+              onPlaceClick={handlePlaceClick}
               className="absolute inset-0"
             />
           </div>
@@ -333,15 +345,27 @@ const TripDetail = () => {
             </div>
           </aside>
 
-          {/* Right: full map */}
+          {/* Center: full map */}
           <main className="flex-1 relative">
             <TripMapView
               places={currentPlaces}
-              onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)}
+              onPlaceClick={handlePlaceClick}
               className="h-full"
               hideBottomCards
             />
           </main>
+
+          {/* Right: place detail panel */}
+          {selectedPlaceId && trip && (
+            <aside className="w-[380px] flex-shrink-0 border-l border-border bg-card/50">
+              <PlaceDetailPanel
+                trip={trip}
+                placeId={selectedPlaceId}
+                onClose={() => setSelectedPlaceId(null)}
+                onNavigatePlace={(pid) => setSelectedPlaceId(pid)}
+              />
+            </aside>
+          )}
         </div>
       </div>
 
