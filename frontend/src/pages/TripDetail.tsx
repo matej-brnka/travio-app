@@ -19,6 +19,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -30,7 +40,7 @@ const TripDetail = () => {
   const viewParam = searchParams.get("view");
   const savedView = typeof window !== "undefined" ? localStorage.getItem("travio-view-mode") as "list" | "map" | null : null;
   const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : savedView ? savedView : (isMobile ? "map" : "list");
-  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, addDayToTrip, removeDayFromTrip } = useTripContext();
+  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, deleteTrip, addDayToTrip, removeDayFromTrip } = useTripContext();
 
   const trip = getTrip(id || "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -38,6 +48,7 @@ const TripDetail = () => {
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [showDeleteTrip, setShowDeleteTrip] = useState(false);
 
   if (!trip) {
     return (
@@ -63,7 +74,7 @@ const TripDetail = () => {
     toast.success("Odkaz zkopírován! 🎉", { description: "https://travio.app/share/abc123" });
   };
 
-  const handleAddPlace = async (place: PlaceData) => {
+  const handleAddPlace = async (place: PlaceData): Promise<void> => {
     await addPlaceToDay(trip.id, currentDayId, place);
     setShowAddPlace(false);
     toast.success("Místo přidáno! 📍");
@@ -233,7 +244,7 @@ const TripDetail = () => {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setShowEditTrip(true)}>Upravit cestu</DropdownMenuItem>
             <DropdownMenuItem onClick={handleShare}>🔗 Sdílet odkaz</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">🗑️ Smazat cestu</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={() => setShowDeleteTrip(true)}>🗑️ Smazat cestu</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -311,7 +322,7 @@ const TripDetail = () => {
               <Share2 className="w-4 h-4 mr-1.5" />
               Sdílet
             </Button>
-            <Button variant="outline" size="sm" className="rounded-md text-destructive border-destructive/30 hover:bg-destructive/5">
+            <Button variant="outline" size="sm" className="rounded-md text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => setShowDeleteTrip(true)}>
               <Trash2 className="w-4 h-4 mr-1.5" />
               Smazat
             </Button>
@@ -427,6 +438,30 @@ const TripDetail = () => {
           }}
         />
       )}
+
+      <AlertDialog open={showDeleteTrip} onOpenChange={setShowDeleteTrip}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Smazat cestu {trip.emoji} {trip.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tato akce je nevratná. Smažou se všechny dny a místa v této cestě.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                await deleteTrip(trip.id);
+                navigate("/app");
+                toast.success("Cesta smazána 🗑️");
+              }}
+            >
+              Smazat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {movingPlace && trip && (
         <MovePlaceModal

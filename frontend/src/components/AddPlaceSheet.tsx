@@ -18,7 +18,7 @@ export interface PlaceData {
 interface AddPlaceSheetProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (place: PlaceData) => void;
+  onAdd: (place: PlaceData) => Promise<void>;
 }
 
 const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
@@ -28,6 +28,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
   const [showManual, setShowManual] = useState(false);
   const [manualName, setManualName] = useState("");
   const [manualAddress, setManualAddress] = useState("");
+  const [adding, setAdding] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -94,8 +95,9 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
                   results.map((place) => (
                     <button
                       key={place.googlePlaceId ?? place.name}
-                      className="w-full bg-card border border-border rounded-lg p-3 text-left hover:border-primary/50 transition-colors"
-                      onClick={() => { onAdd(place); onClose(); }}
+                      className="w-full bg-card border border-border rounded-lg p-3 text-left hover:border-primary/50 transition-colors disabled:opacity-50"
+                      disabled={adding}
+                      onClick={async () => { setAdding(true); try { await onAdd(place); onClose(); } finally { setAdding(false); } }}
                     >
                       <p className="text-sm font-medium text-foreground">📍 {place.name}</p>
                       {place.address && <p className="text-xs text-muted-foreground mt-0.5">{place.address}</p>}
@@ -141,10 +143,14 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
                 </Button>
                 <Button
                   className="flex-1 rounded-md bg-accent text-accent-foreground hover:bg-accent/90"
-                  disabled={!manualName.trim()}
-                  onClick={() => { onAdd({ name: manualName, address: manualAddress || undefined }); onClose(); }}
+                  disabled={!manualName.trim() || adding}
+                  onClick={async () => {
+                    setAdding(true);
+                    try { await onAdd({ name: manualName, address: manualAddress || undefined }); onClose(); }
+                    finally { setAdding(false); }
+                  }}
                 >
-                  ✅ Přidat
+                  {adding ? "Přidávám..." : "✅ Přidat"}
                 </Button>
               </div>
             </>

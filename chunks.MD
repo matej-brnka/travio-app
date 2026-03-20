@@ -1382,4 +1382,41 @@ Projdi celou aplikaci, oprav případné chyby, doplň chybějící testy a ově
 ### Závislosti
 Chunky 1–13 (všechny předchozí).
 
+---
+
+## CHUNK 15 – Uživatelský profil a odhlášení
+
+### Popis
+Přidej uživatelský profil a možnost odhlášení. V současné době se uživatel nemůže odhlásit, což znemožňuje přepnutí účtu nebo řešení session problémů.
+
+### Co přesně udělej
+
+1. **Dashboard – avatar a odhlášení**:
+   - Nahraď placeholder `"U"` avatar v pravém horním rohu skutečným avatarem z Google účtu (Supabase `session.user.user_metadata.avatar_url`)
+   - Kliknutí na avatar otevře dropdown menu s:
+     - Jménem a emailem uživatele
+     - Tlačítkem „Odhlásit se"
+   - Odhlášení zavolá `supabase.auth.signOut()` a přesměruje na `/`
+
+2. **TripDetail – stejný avatar**:
+   - Přidej stejný avatar/dropdown do hlavičky TripDetail (desktop i mobile)
+
+3. **Auth redirect**:
+   - Po odhlášení přesměruj na Login stránku
+   - Pokud uživatel přijde na `/app` bez session, přesměruj na `/`
+
+### Soubory k vytvoření / úpravě
+- `frontend/src/pages/Dashboard.tsx`
+- `frontend/src/pages/TripDetail.tsx`
+- `frontend/src/components/UserAvatar.tsx` (nová komponenta – avatar + dropdown)
+- `frontend/src/App.tsx` nebo router (auth guard pro `/app` routy)
+
+### Testovací kritéria
+- Kliknutím na avatar se zobrazí dropdown s jménem, emailem a tlačítkem odhlášení
+- Po odhlášení je uživatel přesměrován na Login stránku
+- Přímý přístup na `/app` bez přihlášení přesměruje na `/`
+
+### Závislosti
+CHUNK 12 (auth + TripContext).
+
 **Commitni a pushni změny.**

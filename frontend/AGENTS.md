@@ -2,7 +2,7 @@
 
 ## Tech stack
 - React 18 + TypeScript
-- Vite (dev server na portu 5173)
+- Vite (dev server, výchozí port 5173, může běžet i na 8080)
 - Tailwind CSS + shadcn/ui komponenty
 - react-day-picker (výběr dat)
 - Routování: react-router-dom
@@ -10,9 +10,18 @@
 ## Jak spustit
 ```bash
 npm install
-npm run dev     # http://localhost:5173
-npm run build   # produkční build
-npm run test    # Vitest testy
+cp .env.example .env   # Vyplň hodnoty (viz níže)
+npm run dev            # http://localhost:5173
+npm run build          # produkční build
+npm run test           # Vitest testy
+```
+
+## Environment proměnné (.env)
+```
+VITE_API_URL=http://localhost:3123/api
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key          # sb_publishable_... nebo eyJ...
+VITE_GOOGLE_MAPS_KEY=your-google-maps-api-key
 ```
 
 ## Struktura komponent
@@ -29,10 +38,19 @@ src/
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
 │   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa
 │   └── TripMapView.tsx       # Pohled mapy s piny a kartami
+├── api/
+│   ├── client.ts        # apiFetch – přidává Bearer token ze Supabase session
+│   ├── trips.ts         # CRUD cest
+│   ├── days.ts          # CRUD dnů
+│   ├── places.ts        # CRUD míst
+│   ├── search.ts        # Vyhledávání míst (Google Places)
+│   └── weather.ts       # Počasí
 ├── context/
-│   └── TripContext.tsx  # Hlavní state management (zatím mock data)
+│   └── TripContext.tsx  # State management – načítá data z backendu přes API
+├── lib/
+│   └── supabase.ts      # Supabase klient (auth)
 ├── data/
-│   └── mockData.ts      # Mock data – ZDE jsou typy Place, Day, Trip
+│   └── mockData.ts      # Typy Place, Day, Trip + mock data pro dev
 ├── pages/
 │   ├── Dashboard.tsx    # Přehled cest (hlavní stránka po přihlášení)
 │   ├── TripDetail.tsx   # Detail cesty (seznam/mapa pohled)
@@ -61,7 +79,7 @@ interface Day { id: string; date: string; places: Place[]; }
 interface Trip {
   id: string; name: string; emoji: string;
   dateFrom: string; dateTo: string;
-  weather: { temp: number; icon: string };
+  weather?: { temp: number | null; icon: string | null };  // volitelné, lazy load
   days: Day[]; unassigned: Place[];
   interests?: string[];
 }
@@ -73,18 +91,14 @@ interface Trip {
 - Styly: Tailwind třídy, žádné CSS moduly
 - Barvy definované v Tailwind configu: `primary` (#00798c), `accent` (#edae49), `destructive` (#d1495b)
 
-## Mock data
-Viz `src/data/mockData.ts` – obsahuje `mockTrips` a `mockPlaceSuggestions`.
-State management je v `src/context/TripContext.tsx` – momentálně pracuje s mock daty v paměti.
-Po implementaci backendu bude nahrazen skutečnými API voláními.
+## Auth
+- Přihlášení přes Google OAuth (Supabase)
+- `supabase.auth.signInWithOAuth({ provider: 'google' })` v `Login.tsx`
+- Token se automaticky přikládá v `api/client.ts` ke každému API volání
+- Supabase vydává tokeny s algoritmem **ES256** – backend validuje přes JWKS
 
-## Kde napsat API volání
-Při propojení s backendem vytvoř `src/api/` složku se soubory:
-- `trips.ts` – CRUD cest
-- `places.ts` – CRUD míst
-- `days.ts` – CRUD dnů
-- `auth.ts` – přihlášení
-
-API base URL bere z `import.meta.env.VITE_API_URL` (výchozí `http://localhost:3123/api`).
+## API volání
+Všechna volání přes `apiFetch()` z `src/api/client.ts`.
+Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
 
 ## Pokud přidáš novou funkci, endpoint nebo změníš strukturu projektu, aktualizuj příslušný AGENTS.md.

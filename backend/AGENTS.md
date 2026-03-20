@@ -1,7 +1,7 @@
 # Travio – AGENTS.md (backend)
 
 ## Tech stack
-- NestJS 10 (Node.js + TypeScript)
+- NestJS 11 (Node.js + TypeScript)
 - Supabase (PostgreSQL databáze + Auth)
 - REST API, prefix `/api`
 - JWT autentizace (Supabase tokeny)
@@ -18,14 +18,32 @@ npm run test            # Jest testy
 ## Environment proměnné (.env)
 ```
 PORT=3123
-FRONTEND_URL=http://localhost:5173
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=...       # jen na backendu!
+FRONTEND_URL=http://localhost:8080
+
+# Supabase connection pooler (Project Settings → Database → Transaction pooler)
+SUPABASE_URL=aws-1-eu-west-1.pooler.supabase.com
+SUPABASE_PORT=6543
+SUPABASE_DATABASE=postgres
+SUPABASE_USER=postgres.your-project-ref
+SUPABASE_SERVICE_ROLE_KEY=...       # DB heslo, jen na backendu!
+
+# Supabase project URL (pro JWKS JWT validaci)
+SUPABASE_PROJECT_URL=https://your-project-ref.supabase.co
+
+# JWT_SECRET zachován pro zpětnou kompatibilitu, ale validace probíhá přes JWKS (ES256)
 JWT_SECRET=...
+
 GOOGLE_PLACES_API_KEY=...
 YR_NO_USER_AGENT=travio/1.0 your@email.com
 OPENAI_API_KEY=...                  # pro AI generování itineráře
+OPENAI_MODEL=gpt-4o-mini
 ```
+
+## Poznámky k autentizaci
+- Supabase nově vydává tokeny s algoritmem **ES256** (asymetrické klíče)
+- Backend validuje tokeny přes **JWKS endpoint**: `${SUPABASE_PROJECT_URL}/auth/v1/.well-known/jwks.json`
+- Používá balíček `jwks-rsa` s `passportJwtSecret`
+- `JWT_SECRET` v `.env` již není potřeba pro validaci, ale může být zachován
 
 ## Databázové schéma (Supabase / PostgreSQL)
 

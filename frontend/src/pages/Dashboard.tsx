@@ -13,7 +13,7 @@ const Dashboard = () => {
   const { trips, loading, addTrip } = useTripContext();
   const [showNewTrip, setShowNewTrip] = useState(false);
 
-  const handleCreateTrip = async (trip: Trip) => {
+  const handleCreateTrip = async (trip: Trip): Promise<void> => {
     const created = await addTrip(trip);
     setShowNewTrip(false);
     navigate(`/app/trip/${created.id}`);

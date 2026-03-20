@@ -70,7 +70,7 @@ const interestCategories = [
 interface NewTripModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (trip: Trip) => void;
+  onCreate: (trip: Trip) => Promise<void>;
 }
 
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
@@ -81,6 +81,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [aiHelp, setAiHelp] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const filteredDestinations = destinations.filter((d) =>
     d.toLowerCase().includes(destination.toLowerCase())
@@ -100,8 +101,8 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     );
   };
 
-  const handleCreate = () => {
-    if (!isValid) return;
+  const handleCreate = async () => {
+    if (!isValid || creating) return;
     const days = Array.from({ length: totalDays }, (_, i) => ({
       id: `new-day-${i}`,
       date: format(addDays(parseISO(dateFrom), i), "yyyy-MM-dd"),
@@ -118,13 +119,18 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       unassigned: [],
       interests: aiHelp ? selectedInterests : undefined,
     };
-    onCreate(trip);
-    setDestination("");
-    setDateFrom("");
-    setDateTo("");
-    setAiHelp(false);
-    setEmoji("✈️");
-    setSelectedInterests([]);
+    setCreating(true);
+    try {
+      await onCreate(trip);
+      setDestination("");
+      setDateFrom("");
+      setDateTo("");
+      setAiHelp(false);
+      setEmoji("✈️");
+      setSelectedInterests([]);
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
@@ -275,9 +281,9 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
             <Button
               className="flex-1 rounded-md bg-accent text-accent-foreground hover:bg-accent/90"
               onClick={handleCreate}
-              disabled={!isValid}
+              disabled={!isValid || creating}
             >
-              ✅ Vytvořit
+              {creating ? "Vytvářím..." : "✅ Vytvořit"}
             </Button>
           </div>
         </div>
