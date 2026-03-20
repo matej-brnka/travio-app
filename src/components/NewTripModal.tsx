@@ -171,21 +171,27 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
           <div>
             <Label className="text-foreground text-sm">Datum cesty</Label>
             <div className="grid grid-cols-2 gap-3 mt-1">
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="text-sm"
-              />
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="text-sm"
-              />
+              <div>
+                <span className="text-xs text-muted-foreground">Datum odjezdu</span>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="text-sm mt-0.5"
+                />
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground">Datum příjezdu</span>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="text-sm mt-0.5"
+                />
+              </div>
             </div>
             {totalDays > 0 && (
-              <p className="text-sm text-muted-foreground mt-2">📅 {totalDays} dní k plánování</p>
+              <p className="text-sm text-muted-foreground mt-2">📅 {totalDays} dní · {totalNights} nocí k plánování</p>
             )}
           </div>
 

@@ -271,7 +271,7 @@ const TripDetail = () => {
                 <h1 className="text-xl font-bold text-foreground">{trip.name}</h1>
                 <p className="text-sm text-muted-foreground">
                   {format(parseISO(trip.dateFrom), "d. MMMM", { locale: cs })} –{" "}
-                  {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní
+                  {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní · {totalNights} nocí
                 </p>
               </div>
             </div>
