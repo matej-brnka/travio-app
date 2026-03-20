@@ -106,7 +106,7 @@ export class TripsService {
       }
     }
 
-    return this.formatTrip(trip);
+    return this.findOne(trip.id, userId);
   }
 
   async update(tripId: string, userId: string, dto: UpdateTripDto) {
