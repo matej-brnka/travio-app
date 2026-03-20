@@ -25,11 +25,12 @@ const TripDetail = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewMode = searchParams.get("view") === "map" ? "map" : "list";
-  const { getTrip, addPlaceToDay, movePlace, reorderPlaces } = useTripContext();
+  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip } = useTripContext();
 
   const trip = getTrip(id || "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [showAddPlace, setShowAddPlace] = useState(false);
+  const [showEditTrip, setShowEditTrip] = useState(false);
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
 
   if (!trip) {
