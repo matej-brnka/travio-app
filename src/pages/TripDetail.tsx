@@ -73,11 +73,13 @@ const TripDetail = () => {
     toast.success("Místo přidáno! 📍");
   };
 
+  const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
+
   const handlePlaceClick = (placeId: string) => {
-    if (isMobile) {
-      navigate(`/app/trip/${id}/place/${placeId}`);
-    } else {
+    if (isDesktop) {
       setSelectedPlaceId(placeId);
+    } else {
+      navigate(`/app/trip/${id}/place/${placeId}`);
     }
   };
 
