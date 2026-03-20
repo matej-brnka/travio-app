@@ -174,7 +174,14 @@ const TripMapView = ({
                 </button>
               );
             })}
-          </div>
+            {onAddPlace && (
+              <button
+                className="flex-shrink-0 bg-card rounded-xl shadow-card w-[130px] flex items-center justify-center border-2 border-dashed border-primary/30 hover:border-primary/60 transition-colors"
+                onClick={onAddPlace}
+              >
+                <span className="text-3xl text-primary/50 hover:text-primary transition-colors">+</span>
+              </button>
+            )}
         </div>
       )}
     </div>
