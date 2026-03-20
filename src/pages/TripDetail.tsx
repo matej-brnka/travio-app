@@ -5,7 +5,7 @@ import { useTripContext } from "@/context/TripContext";
 import { format, parseISO } from "date-fns";
 import { cs } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MoreVertical } from "lucide-react";
+import { ArrowLeft, MoreVertical, Share2, Trash2, Pencil, Plus } from "lucide-react";
 import PlaceCard from "@/components/PlaceCard";
 import AddPlaceSheet from "@/components/AddPlaceSheet";
 import MovePlaceModal from "@/components/MovePlaceModal";
@@ -77,7 +77,7 @@ const TripDetail = () => {
     reorderPlaces(trip.id, currentDayId, index, index + 1);
   };
 
-  /* Shared sub-components */
+  /* ─── Day pills (shared) ─── */
   const dayPills = (
     <div className="flex gap-2 overflow-x-auto scrollbar-hide">
       {trip.days.map((day, i) => (
@@ -86,7 +86,7 @@ const TripDetail = () => {
           className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
             selectedDayIndex === i
               ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
           }`}
           onClick={() => setSelectedDayIndex(i)}
         >
@@ -95,7 +95,7 @@ const TripDetail = () => {
       ))}
       <button
         className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-          isUnassigned ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+          isUnassigned ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
         }`}
         onClick={() => setSelectedDayIndex(trip.days.length)}
       >
@@ -104,8 +104,9 @@ const TripDetail = () => {
     </div>
   );
 
-  const placesList = (
-    <div className="pb-24 lg:pb-4">
+  /* ─── Places list content (shared) ─── */
+  const placesListContent = (
+    <>
       {currentDay && (
         <p className="text-sm text-muted-foreground mb-3">
           📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
@@ -150,22 +151,23 @@ const TripDetail = () => {
         </div>
       )}
 
-      {currentPlaces.length > 0 && (
-        <Button
-          variant="outline"
-          className="w-full mt-4 border-primary text-primary rounded-md py-5"
-          onClick={() => setShowAddPlace(true)}
-        >
-          + Přidat místo do dne
-        </Button>
-      )}
-    </div>
+      <Button
+        variant="outline"
+        className="w-full mt-4 border-primary text-primary rounded-md py-5 lg:py-3"
+        onClick={() => setShowAddPlace(true)}
+      >
+        <Plus className="w-4 h-4 mr-1" /> Přidat místo
+      </Button>
+    </>
   );
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-card shadow-sm">
+
+      {/* ══════════════════════════════════════════
+          MOBILE TOP BAR
+         ══════════════════════════════════════════ */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-card shadow-sm">
         <button onClick={() => navigate("/app")} className="p-1 text-foreground">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -180,9 +182,7 @@ const TripDetail = () => {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1 text-foreground">
-              <MoreVertical className="w-5 h-5" />
-            </button>
+            <button className="p-1 text-foreground"><MoreVertical className="w-5 h-5" /></button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>Upravit cestu</DropdownMenuItem>
@@ -192,9 +192,10 @@ const TripDetail = () => {
         </DropdownMenu>
       </div>
 
-      {/* MOBILE: toggle + pills + content */}
+      {/* ══════════════════════════════════════════
+          MOBILE CONTENT
+         ══════════════════════════════════════════ */}
       <div className="lg:hidden">
-        {/* View toggle */}
         <div className="flex gap-2 px-4 pt-3">
           <button
             className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -213,36 +214,130 @@ const TripDetail = () => {
             🗺️ Mapa
           </button>
         </div>
-
         <div className="px-4 py-3">{dayPills}</div>
-
         {viewMode === "map" ? (
-          <TripMapView
-            places={currentPlaces}
-            onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)}
-          />
+          <TripMapView places={currentPlaces} onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)} />
         ) : (
-          <div className="px-4">{placesList}</div>
+          <div className="px-4 pb-24">{placesListContent}</div>
         )}
       </div>
 
-      {/* DESKTOP: side-by-side list + map */}
-      <div className="hidden lg:flex gap-0" style={{ height: "calc(100vh - 70px)" }}>
-        {/* Left panel: list */}
-        <div className="w-[380px] flex-shrink-0 border-r border-border flex flex-col overflow-hidden">
-          <div className="px-4 py-3">{dayPills}</div>
-          <div className="flex-1 overflow-y-auto px-4">{placesList}</div>
-        </div>
-        {/* Right panel: map */}
-        <div className="flex-1 relative">
-          <TripMapView
-            places={currentPlaces}
-            onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)}
-            className="h-full"
-          />
+      {/* ══════════════════════════════════════════
+          DESKTOP LAYOUT
+         ══════════════════════════════════════════ */}
+      <div className="hidden lg:flex flex-col h-screen">
+        {/* Desktop top bar */}
+        <header className="flex items-center justify-between px-6 py-3 bg-card border-b border-border flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/app")}
+              className="text-sm text-primary hover:underline font-medium"
+            >
+              ✈️ Travio
+            </button>
+            <span className="text-muted-foreground">/</span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{trip.emoji}</span>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">{trip.name}</h1>
+                <p className="text-sm text-muted-foreground">
+                  {format(parseISO(trip.dateFrom), "d. MMMM", { locale: cs })} –{" "}
+                  {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop action buttons – all visible */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="rounded-md" onClick={() => {}}>
+              <Pencil className="w-4 h-4 mr-1.5" />
+              Upravit
+            </Button>
+            <Button variant="outline" size="sm" className="rounded-md" onClick={handleShare}>
+              <Share2 className="w-4 h-4 mr-1.5" />
+              Sdílet
+            </Button>
+            <Button variant="outline" size="sm" className="rounded-md text-destructive border-destructive/30 hover:bg-destructive/5">
+              <Trash2 className="w-4 h-4 mr-1.5" />
+              Smazat
+            </Button>
+          </div>
+        </header>
+
+        {/* Desktop body: sidebar + map */}
+        <div className="flex flex-1 overflow-hidden">
+
+          {/* Left sidebar: day navigation + place list */}
+          <aside className="w-[360px] flex-shrink-0 border-r border-border flex flex-col bg-card/50">
+            {/* Day tabs – vertical list */}
+            <div className="px-4 py-4 border-b border-border">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">
+                Dny cesty
+              </h2>
+              <div className="flex flex-col gap-1">
+                {trip.days.map((day, i) => (
+                  <button
+                    key={day.id}
+                    className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                      selectedDayIndex === i
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => setSelectedDayIndex(i)}
+                  >
+                    <span className="font-medium">Den {i + 1}</span>
+                    <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                      {format(parseISO(day.date), "EE d. M.", { locale: cs })}
+                    </span>
+                    {day.places.length > 0 && (
+                      <span className={`ml-auto float-right text-xs px-1.5 py-0.5 rounded-full ${
+                        selectedDayIndex === i ? "bg-primary-foreground/20" : "bg-muted"
+                      }`}>
+                        {day.places.length}
+                      </span>
+                    )}
+                  </button>
+                ))}
+                <button
+                  className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                    isUnassigned
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                  onClick={() => setSelectedDayIndex(trip.days.length)}
+                >
+                  ⚡ Nezařazená místa
+                  {trip.unassigned.length > 0 && (
+                    <span className={`ml-auto float-right text-xs px-1.5 py-0.5 rounded-full ${
+                      isUnassigned ? "bg-primary-foreground/20" : "bg-muted"
+                    }`}>
+                      {trip.unassigned.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Place list for selected day */}
+            <div className="flex-1 overflow-y-auto px-4 py-4">
+              {placesListContent}
+            </div>
+          </aside>
+
+          {/* Right: full map */}
+          <main className="flex-1 relative">
+            <TripMapView
+              places={currentPlaces}
+              onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)}
+              className="h-full"
+              hideBottomCards
+            />
+          </main>
         </div>
       </div>
 
+      {/* Modals (shared) */}
       <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} />
 
       {movingPlace && trip && (
