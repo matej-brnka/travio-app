@@ -5,4 +5,6 @@ export class CreateTripDto {
   dateTo: string;
   interests?: string[];
   useAi?: boolean;
+  centerLat?: number;
+  centerLng?: number;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Trip } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,8 +14,7 @@ import { DateRange } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "@/components/EmojiPicker";
-
-const destinations = ["New York", "Praha", "Tokio", "Londýn", "Barcelona", "Řím"];
+import { searchDestinations, DestinationResult } from "@/api/search";
 
 const interestCategories = [
   {
@@ -76,18 +75,27 @@ interface NewTripModalProps {
 
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [destination, setDestination] = useState("");
+  const [destinationLat, setDestinationLat] = useState<number | null>(null);
+  const [destinationLng, setDestinationLng] = useState<number | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [emoji, setEmoji] = useState("✈️");
   const [dateTo, setDateTo] = useState("");
   const [aiHelp, setAiHelp] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<DestinationResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [creating, setCreating] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const filteredDestinations = destinations.filter((d) =>
-    d.toLowerCase().includes(destination.toLowerCase())
-  );
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    if (!destination.trim() || destinationLat != null) { setSuggestions([]); return; }
+    debounceRef.current = setTimeout(async () => {
+      try { setSuggestions(await searchDestinations(destination)); } catch { setSuggestions([]); }
+    }, 350);
+    return () => clearTimeout(debounceRef.current);
+  }, [destination, destinationLat]);
 
   // +1 to include the last day
   const totalDays =
@@ -120,16 +128,21 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       days,
       unassigned: [],
       interests: aiHelp ? selectedInterests : undefined,
+      centerLat: destinationLat,
+      centerLng: destinationLng,
     };
     setCreating(true);
     try {
       await onCreate(trip);
       setDestination("");
+      setDestinationLat(null);
+      setDestinationLng(null);
       setDateFrom("");
       setDateTo("");
       setAiHelp(false);
       setEmoji("✈️");
       setSelectedInterests([]);
+      setSuggestions([]);
       setCalendarOpen(false);
     } finally {
       setCreating(false);
@@ -159,23 +172,28 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
               value={destination}
               onChange={(e) => {
                 setDestination(e.target.value);
+                setDestinationLat(null);
+                setDestinationLng(null);
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
               className="mt-1"
             />
-            {showSuggestions && destination && filteredDestinations.length > 0 && (
-              <div className="absolute z-10 w-full bg-card border border-border rounded-md mt-1 shadow-card">
-                {filteredDestinations.map((d) => (
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-10 w-full bg-card border border-border rounded-md mt-1 shadow-card max-h-48 overflow-y-auto">
+                {suggestions.map((s) => (
                   <button
-                    key={d}
+                    key={s.placeId}
                     className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                     onClick={() => {
-                      setDestination(d);
+                      setDestination(s.name);
+                      setDestinationLat(s.lat);
+                      setDestinationLng(s.lng);
                       setShowSuggestions(false);
                     }}
                   >
-                    📍 {d}
+                    <span className="font-medium">📍 {s.name}</span>
+                    {s.description && <span className="text-muted-foreground ml-1 text-xs">{s.description}</span>}
                   </button>
                 ))}
               </div>

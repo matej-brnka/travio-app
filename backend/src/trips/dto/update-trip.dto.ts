@@ -4,4 +4,6 @@ export class UpdateTripDto {
   dateFrom?: string;
   dateTo?: string;
   interests?: string[];
+  centerLat?: number;
+  centerLng?: number;
 }

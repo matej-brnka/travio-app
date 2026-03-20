@@ -7,8 +7,21 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 export class GooglePlacesController {
   constructor(private googlePlaces: GooglePlacesService) {}
 
+  @Get('search-destinations')
+  searchDestinations(@Query('q') q: string) {
+    return this.googlePlaces.searchDestinations(q);
+  }
+
   @Get('search')
-  search(@Query('q') q: string) {
-    return this.googlePlaces.search(q);
+  search(
+    @Query('q') q: string,
+    @Query('centerLat') centerLat?: string,
+    @Query('centerLng') centerLng?: string,
+  ) {
+    return this.googlePlaces.search(
+      q,
+      centerLat ? parseFloat(centerLat) : undefined,
+      centerLng ? parseFloat(centerLng) : undefined,
+    );
   }
 }

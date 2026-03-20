@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 
 const BASE = 'https://maps.googleapis.com/maps/api/place';
 
+const DESTINATION_TYPES = ['locality', 'administrative_area_level_1', 'administrative_area_level_2', 'country', 'sublocality', 'natural_feature', 'neighborhood', 'colloquial_area'];
+
 @Injectable()
 export class GooglePlacesService {
   private readonly logger = new Logger(GooglePlacesService.name);
@@ -12,14 +14,41 @@ export class GooglePlacesService {
     this.apiKey = config.get<string>('GOOGLE_PLACES_API_KEY');
   }
 
-  async search(query: string): Promise<any[]> {
+  async searchDestinations(query: string): Promise<any[]> {
+    if (!this.apiKey) throw new ServiceUnavailableException('Google Places API key is not configured');
+    if (!query?.trim()) return [];
+    try {
+      const url = `${BASE}/textsearch/json?query=${encodeURIComponent(query)}&key=${this.apiKey}&language=cs`;
+      const res = await fetch(url);
+      const data: any = await res.json();
+      if (data.status === 'ZERO_RESULTS' || !data.results?.length) return [];
+      return data.results
+        .filter((r: any) => r.types?.some((t: string) => DESTINATION_TYPES.includes(t)))
+        .slice(0, 6)
+        .map((r: any) => ({
+          name: r.name,
+          description: r.formatted_address,
+          placeId: r.place_id,
+          lat: r.geometry?.location?.lat ?? null,
+          lng: r.geometry?.location?.lng ?? null,
+        }));
+    } catch (err: any) {
+      this.logger.error('Destination search failed', err.message);
+      return [];
+    }
+  }
+
+  async search(query: string, centerLat?: number, centerLng?: number): Promise<any[]> {
     if (!this.apiKey) {
       throw new ServiceUnavailableException('Google Places API key is not configured');
     }
     if (!query?.trim()) return [];
 
     try {
-      const searchUrl = `${BASE}/textsearch/json?query=${encodeURIComponent(query)}&key=${this.apiKey}&language=cs`;
+      let searchUrl = `${BASE}/textsearch/json?query=${encodeURIComponent(query)}&key=${this.apiKey}&language=cs`;
+      if (centerLat != null && centerLng != null) {
+        searchUrl += `&location=${centerLat},${centerLng}&radius=50000`;
+      }
       const searchRes = await fetch(searchUrl);
       const searchData: any = await searchRes.json();
 

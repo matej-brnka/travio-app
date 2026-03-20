@@ -40,6 +40,8 @@ export interface Trip {
   days: Day[];
   unassigned: Place[];
   interests?: string[];
+  centerLat?: number | null;
+  centerLng?: number | null;
 }
 
 export const mockTrips: Trip[] = [

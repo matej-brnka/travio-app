@@ -18,7 +18,7 @@ export class TripsService {
 
   async findAll(userId: string) {
     const rows = await this.supabase.query(
-      `SELECT id, name, emoji, date_from, date_to, interests, share_token, created_at, updated_at
+      `SELECT id, name, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, created_at, updated_at
        FROM trips WHERE user_id = $1 ORDER BY created_at DESC`,
       [userId],
     );
@@ -27,7 +27,7 @@ export class TripsService {
 
   async findOne(tripId: string, userId: string) {
     const trips = await this.supabase.query(
-      `SELECT id, name, emoji, date_from, date_to, interests, share_token
+      `SELECT id, name, emoji, date_from, date_to, interests, share_token, center_lat, center_lng
        FROM trips WHERE id = $1 AND user_id = $2`,
       [tripId, userId],
     );
@@ -68,10 +68,10 @@ export class TripsService {
     }
 
     const trips = await this.supabase.query(
-      `INSERT INTO trips (user_id, name, emoji, date_from, date_to, interests)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, name, emoji, date_from, date_to, interests, share_token, created_at, updated_at`,
-      [userId, dto.name, dto.emoji, dto.dateFrom, dto.dateTo, dto.interests ?? null],
+      `INSERT INTO trips (user_id, name, emoji, date_from, date_to, interests, center_lat, center_lng)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id, name, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, created_at, updated_at`,
+      [userId, dto.name, dto.emoji, dto.dateFrom, dto.dateTo, dto.interests ?? null, dto.centerLat ?? null, dto.centerLng ?? null],
     );
     const trip = trips[0];
 
@@ -123,10 +123,12 @@ export class TripsService {
          date_from = COALESCE($5, date_from),
          date_to = COALESCE($6, date_to),
          interests = COALESCE($7, interests),
+         center_lat = COALESCE($8, center_lat),
+         center_lng = COALESCE($9, center_lng),
          updated_at = now()
        WHERE id = $1 AND user_id = $2
-       RETURNING id, name, emoji, date_from, date_to, interests, share_token, created_at, updated_at`,
-      [tripId, userId, dto.name ?? null, dto.emoji ?? null, dto.dateFrom ?? null, dto.dateTo ?? null, dto.interests ?? null],
+       RETURNING id, name, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, created_at, updated_at`,
+      [tripId, userId, dto.name ?? null, dto.emoji ?? null, dto.dateFrom ?? null, dto.dateTo ?? null, dto.interests ?? null, dto.centerLat ?? null, dto.centerLng ?? null],
     );
 
     const dateChanged = dto.dateFrom || dto.dateTo;
@@ -236,6 +238,8 @@ export class TripsService {
       dateTo: row.date_to,
       interests: row.interests ?? [],
       shareToken: row.share_token,
+      centerLat: row.center_lat ?? null,
+      centerLng: row.center_lng ?? null,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

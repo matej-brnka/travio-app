@@ -42,6 +42,8 @@ function mapTrip(t: any): Trip {
     dateTo: t.dateTo,
     interests: t.interests ?? [],
     weather: t.weather,
+    centerLat: t.centerLat ?? null,
+    centerLng: t.centerLng ?? null,
     days: (t.days ?? []).map((d: any) => ({
       id: d.id,
       date: d.date,

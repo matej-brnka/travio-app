@@ -424,7 +424,7 @@ const TripDetail = () => {
       </div>
 
       {/* Modals (shared) */}
-      <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} />
+      <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} centerLat={trip.centerLat} centerLng={trip.centerLng} />
 
       {trip && (
         <EditTripModal

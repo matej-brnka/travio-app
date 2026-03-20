@@ -18,9 +18,11 @@ interface AddPlaceSheetProps {
   open: boolean;
   onClose: () => void;
   onAdd: (place: PlaceData) => Promise<void>;
+  centerLat?: number | null;
+  centerLng?: number | null;
 }
 
-const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
+const AddPlaceSheet = ({ open, onClose, onAdd, centerLat, centerLng }: AddPlaceSheetProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceData[]>([]);
   const [searching, setSearching] = useState(false);
@@ -48,7 +50,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const data = await searchPlaces(query);
+        const data = await searchPlaces(query, centerLat, centerLng);
         setResults(data);
       } catch {
         setResults([]);
