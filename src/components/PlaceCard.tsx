@@ -77,6 +77,11 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
             {ticketBadge}
           </span>
         )}
+        {pCfg && (
+          <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${pCfg.bgClass}`}>
+            {pCfg.emoji} {pCfg.label}
+          </span>
+        )}
       </button>
     </div>
   );

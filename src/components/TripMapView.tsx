@@ -56,23 +56,33 @@ const TripMapView = ({
                       }}
                     >
                       {/* Pin shape */}
-                      <div
-                        className={`flex flex-col items-center ${
-                          activeIndex === i ? "text-accent" : "text-primary"
-                        }`}
-                      >
                         <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md ${
-                            activeIndex === i
-                              ? "bg-accent text-accent-foreground ring-2 ring-accent/30 ring-offset-1"
-                              : "bg-primary text-primary-foreground"
+                          className={`flex flex-col items-center ${
+                            activeIndex === i ? "text-accent" : "text-primary"
                           }`}
                         >
-                          {i + 1}
+                          {(() => {
+                            const pCfg = place.priority ? priorityConfig[place.priority] : null;
+                            const pinBg = activeIndex === i
+                              ? "bg-accent text-accent-foreground ring-2 ring-accent/30 ring-offset-1"
+                              : pCfg
+                              ? ""
+                              : "bg-primary text-primary-foreground";
+                            const pinStyle = (!activeIndex || activeIndex !== i) && pCfg
+                              ? { backgroundColor: pCfg.color, color: "white" }
+                              : undefined;
+                            return (
+                              <div
+                                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md ${pinBg}`}
+                                style={pinStyle}
+                              >
+                                {i + 1}
+                              </div>
+                            );
+                          })()}
+                          <div className="w-0.5 h-2 bg-current" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />
                         </div>
-                        <div className="w-0.5 h-2 bg-current" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />
-                      </div>
                       {/* Label on hover / active */}
                       {activeIndex === i && (
                         <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-card shadow-card rounded px-2 py-1 whitespace-nowrap z-30">
