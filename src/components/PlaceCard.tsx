@@ -78,9 +78,6 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
         {!place.timeFrom && place.timeTo && (
           <p className="text-xs text-primary mt-0.5">🕘 do {place.timeTo}</p>
         )}
-        {!place.timeFrom && !place.timeTo && place.time && (
-          <p className="text-xs text-muted-foreground mt-0.5">🕘 {place.time}</p>
-        )}
         {place.address && (
           <p className="text-xs text-muted-foreground truncate mt-0.5">{place.address}</p>
         )}
