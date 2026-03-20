@@ -14,6 +14,16 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Pages that use mobile-centric layout (centered, narrow)
+const MobileFrame = ({ children }: { children: React.ReactNode }) => (
+  <div className="max-w-[480px] mx-auto min-h-screen">{children}</div>
+);
+
+// Pages that go full-width on desktop
+const FullFrame = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen">{children}</div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -21,17 +31,15 @@ const App = () => (
       <Sonner />
       <TripProvider>
         <BrowserRouter>
-          <div className="max-w-[480px] mx-auto min-h-screen">
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/app" element={<Dashboard />} />
-              <Route path="/app/trip/:id" element={<TripDetail />} />
-              <Route path="/app/trip/:id/place/:placeId" element={<PlaceDetail />} />
-              <Route path="/share/:token" element={<SharedTrip />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path="/" element={<MobileFrame><Landing /></MobileFrame>} />
+            <Route path="/login" element={<MobileFrame><Login /></MobileFrame>} />
+            <Route path="/app" element={<MobileFrame><Dashboard /></MobileFrame>} />
+            <Route path="/app/trip/:id" element={<FullFrame><TripDetail /></FullFrame>} />
+            <Route path="/app/trip/:id/place/:placeId" element={<MobileFrame><PlaceDetail /></MobileFrame>} />
+            <Route path="/share/:token" element={<MobileFrame><SharedTrip /></MobileFrame>} />
+            <Route path="*" element={<MobileFrame><NotFound /></MobileFrame>} />
+          </Routes>
         </BrowserRouter>
       </TripProvider>
     </TooltipProvider>
