@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 interface TripMapViewProps {
   places: Place[];
   onPlaceClick: (placeId: string) => void;
+  onAddPlace?: () => void;
   className?: string;
   hideBottomCards?: boolean;
 }
@@ -11,6 +12,7 @@ interface TripMapViewProps {
 const TripMapView = ({
   places,
   onPlaceClick,
+  onAddPlace,
   className = "",
   hideBottomCards = false,
 }: TripMapViewProps) => {
@@ -130,7 +132,7 @@ const TripMapView = ({
       </div>
 
       {/* Bottom card strip – mobile/tablet */}
-      {!hideBottomCards && places.length > 0 && (
+      {!hideBottomCards && (places.length > 0 || onAddPlace) && (
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {places.map((place, i) => {
@@ -172,6 +174,14 @@ const TripMapView = ({
                 </button>
               );
             })}
+            {onAddPlace && (
+              <button
+                className="flex-shrink-0 bg-card rounded-xl shadow-card w-[130px] flex items-center justify-center border-2 border-dashed border-primary/30 hover:border-primary/60 transition-colors"
+                onClick={onAddPlace}
+              >
+                <span className="text-3xl text-primary/50 hover:text-primary transition-colors">+</span>
+              </button>
+            )}
           </div>
         </div>
       )}
