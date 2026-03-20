@@ -22,7 +22,7 @@ const TripMapView = ({
   }, [places.length]);
 
   return (
-    <div className={`relative flex-1 ${className}`} style={{ minHeight: "50vh" }}>
+    <div className={`relative ${className}`} style={{ minHeight: 0 }}>
       {/* Mock map – will be replaced by Mapbox GL JS */}
       <div className="absolute inset-0 bg-[hsl(var(--muted))] flex items-center justify-center rounded-lg overflow-hidden">
         {places.length > 0 ? (
