@@ -27,13 +27,6 @@ const Dashboard = () => {
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
             U
           </div>
-          <Button
-            size="sm"
-            className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-md"
-            onClick={() => setShowNewTrip(true)}
-          >
-            <Plus className="w-4 h-4 mr-1" /> Nová
-          </Button>
         </div>
       </div>
 
@@ -78,12 +71,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      <button
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center text-2xl hover:bg-accent/90 transition-colors z-50"
-        onClick={() => setShowNewTrip(true)}
-      >
-        +
-      </button>
 
       <NewTripModal
         open={showNewTrip}
