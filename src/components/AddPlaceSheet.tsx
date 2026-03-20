@@ -3,6 +3,7 @@ import { mockPlaceSuggestions } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { X } from "lucide-react";
 
 interface AddPlaceSheetProps {
   open: boolean;
@@ -19,29 +20,36 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
 
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    } else {
       setQuery("");
       setShowManual(false);
       setManualName("");
       setManualAddress("");
+      setTimeout(() => inputRef.current?.focus(), 200);
     }
   }, [open]);
 
-  const filtered = mockPlaceSuggestions.filter(
-    (p) =>
-      p.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.address.toLowerCase().includes(query.toLowerCase())
-  );
+  const filtered = query.trim()
+    ? mockPlaceSuggestions.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.address.toLowerCase().includes(query.toLowerCase())
+      )
+    : mockPlaceSuggestions;
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
-        <SheetHeader>
-          <SheetTitle className="text-foreground">📍 Přidat místo</SheetTitle>
-        </SheetHeader>
+      <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] p-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <SheetHeader className="p-0">
+            <SheetTitle className="text-foreground text-lg">📍 Přidat místo</SheetTitle>
+          </SheetHeader>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="px-5 pb-6 space-y-4">
           {!showManual ? (
             <>
               <Input
@@ -49,26 +57,34 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
                 placeholder="🔍 Hledat místo..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                className="text-base"
               />
 
-              <div className="space-y-2 max-h-[40vh] overflow-y-auto">
-                {query && (
-                  <p className="text-xs text-muted-foreground">Návrhy:</p>
+              <div className="space-y-2 max-h-[45vh] overflow-y-auto">
+                <p className="text-xs text-muted-foreground font-medium">
+                  {query.trim() ? "Výsledky:" : "Návrhy:"}
+                </p>
+                {filtered.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <span className="text-2xl block mb-2">🔍</span>
+                    <p className="text-sm">Nic nenalezeno</p>
+                    <p className="text-xs mt-1">Zkus jiný výraz nebo přidej ručně</p>
+                  </div>
+                ) : (
+                  filtered.map((place) => (
+                    <button
+                      key={place.name}
+                      className="w-full bg-card border border-border rounded-lg p-3 text-left hover:border-primary/50 transition-colors"
+                      onClick={() => onAdd(place.name, place.address)}
+                    >
+                      <p className="text-sm font-medium text-foreground">📍 {place.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{place.address}</p>
+                    </button>
+                  ))
                 )}
-                {filtered.map((place) => (
-                  <button
-                    key={place.name}
-                    className="w-full bg-muted rounded-md p-3 text-left hover:bg-muted/80 transition-colors"
-                    onClick={() => onAdd(place.name, place.address)}
-                  >
-                    <p className="text-sm font-medium text-foreground">📍 {place.name}</p>
-                    <p className="text-xs text-muted-foreground">{place.address}</p>
-                  </button>
-                ))}
               </div>
 
-              <div className="pt-2 border-t border-border">
-                <p className="text-xs text-muted-foreground mb-2">Nebo přidat ručně:</p>
+              <div className="pt-3 border-t border-border">
                 <Button
                   variant="outline"
                   className="w-full rounded-md border-primary text-primary"
@@ -86,7 +102,8 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
                   value={manualName}
                   onChange={(e) => setManualName(e.target.value)}
                   placeholder="Např. Eiffelova věž"
-                  className="mt-1"
+                  className="mt-1 text-base"
+                  autoFocus
                 />
               </div>
               <div>
@@ -95,7 +112,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
                   value={manualAddress}
                   onChange={(e) => setManualAddress(e.target.value)}
                   placeholder="Champ de Mars, Paříž"
-                  className="mt-1"
+                  className="mt-1 text-base"
                 />
               </div>
               <div className="flex gap-3 pt-2">
@@ -104,14 +121,14 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
                   className="flex-1 rounded-md"
                   onClick={() => setShowManual(false)}
                 >
-                  Zpět
+                  ← Zpět
                 </Button>
                 <Button
                   className="flex-1 rounded-md bg-accent text-accent-foreground hover:bg-accent/90"
                   disabled={!manualName.trim()}
                   onClick={() => onAdd(manualName, manualAddress || undefined)}
                 >
-                  Přidat
+                  ✅ Přidat
                 </Button>
               </div>
             </>
