@@ -348,6 +348,19 @@ const TripDetail = () => {
       {/* Modals (shared) */}
       <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} />
 
+      {trip && (
+        <EditTripModal
+          open={showEditTrip}
+          trip={trip}
+          onClose={() => setShowEditTrip(false)}
+          onSave={(updates) => {
+            updateTrip(trip.id, updates);
+            setShowEditTrip(false);
+            toast.success("Cesta upravena ✅");
+          }}
+        />
+      )}
+
       {movingPlace && trip && (
         <MovePlaceModal
           place={movingPlace}
