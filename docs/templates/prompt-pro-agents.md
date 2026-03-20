@@ -1,0 +1,1 @@
+Na základě toho, co víš o tomto projektu vytvoř vhodný AGENTS.md. Využij strukturu z přiloženého souboru.
