@@ -129,29 +129,58 @@ const TripMapView = ({
         )}
       </div>
 
-      {/* Bottom card strip – mobile only */}
+      {/* Bottom card strip – mobile/tablet */}
       {!hideBottomCards && places.length > 0 && (
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-            {places.map((place, i) => (
-              <button
-                key={place.id}
-                className={`flex-shrink-0 bg-card rounded-lg shadow-card p-3 min-w-[160px] text-left transition-all ${
-                  activeIndex === i ? "border-2 border-primary" : "border border-transparent"
-                }`}
-                onClick={() => {
-                  setActiveIndex(i);
-                  onPlaceClick(place.id);
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center flex-shrink-0">
-                    {i + 1}
-                  </span>
-                  <span className="text-sm font-bold text-foreground truncate">{place.name}</span>
-                </div>
-              </button>
-            ))}
+            {places.map((place, i) => {
+              const pCfg = place.priority ? priorityConfig[place.priority] : null;
+              const isActive = activeIndex === i;
+              const circleBg = pCfg
+                ? undefined
+                : "bg-primary text-primary-foreground";
+              const circleStyle = pCfg
+                ? { backgroundColor: pCfg.color, color: "white" }
+                : undefined;
+              const borderClass = isActive
+                ? pCfg ? "ring-2" : "ring-2 ring-primary"
+                : "border border-transparent";
+              const borderStyle = isActive && pCfg
+                ? { boxShadow: `0 0 0 2px ${pCfg.color}` }
+                : undefined;
+
+              return (
+                <button
+                  key={place.id}
+                  className={`flex-shrink-0 bg-card rounded-xl shadow-card p-3.5 min-w-[180px] text-left transition-all ${borderClass}`}
+                  style={borderStyle}
+                  onClick={() => {
+                    setActiveIndex(i);
+                    onPlaceClick(place.id);
+                  }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 ${circleBg || ""}`}
+                      style={circleStyle}
+                    >
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1">
+                        {place.emoji && <span className="text-sm">{place.emoji}</span>}
+                        <span className="text-sm font-bold text-foreground truncate">{place.name}</span>
+                      </div>
+                      {(place.timeFrom || place.timeTo) && (
+                        <p className="text-xs text-primary mt-0.5">
+                          {place.timeFrom || "?"} – {place.timeTo || "?"}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

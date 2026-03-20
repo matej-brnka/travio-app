@@ -58,6 +58,7 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
       <button onClick={onClick} className="flex-1 min-w-0 text-left">
         <div className="flex items-center gap-2">
           {place.visited && <span className="text-primary">✅</span>}
+          {place.emoji && <span>{place.emoji}</span>}
           <h3
             className={`font-bold text-foreground text-sm truncate ${
               place.visited ? "line-through" : ""
@@ -66,7 +67,12 @@ const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCard
             📍 {place.name}
           </h3>
         </div>
-        {place.time && (
+        {(place.timeFrom || place.timeTo) && (
+          <p className="text-xs text-primary mt-0.5">
+            🕘 {place.timeFrom || "?"} – {place.timeTo || "?"}
+          </p>
+        )}
+        {!place.timeFrom && !place.timeTo && place.time && (
           <p className="text-xs text-muted-foreground mt-0.5">🕘 {place.time}</p>
         )}
         {place.address && (
