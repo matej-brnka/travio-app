@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Place } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInDays } from "date-fns";
 import { cs } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MoreVertical, Share2, Trash2, Pencil, Plus } from "lucide-react";
@@ -50,8 +50,8 @@ const TripDetail = () => {
   const isUnassigned = selectedDayIndex === trip.days.length;
   const currentDay = isUnassigned ? null : trip.days[selectedDayIndex];
   const currentPlaces = isUnassigned ? trip.unassigned : currentDay?.places || [];
-  const totalDays = trip.days.length;
-  const totalNights = totalDays > 0 ? totalDays - 1 : 0;
+  const totalDays = differenceInDays(parseISO(trip.dateTo), parseISO(trip.dateFrom)) + 1;
+  const totalNights = totalDays > 1 ? totalDays - 1 : 0;
   const currentDayId = isUnassigned ? null : currentDay?.id || null;
 
   const toggleView = (view: "list" | "map") => {
