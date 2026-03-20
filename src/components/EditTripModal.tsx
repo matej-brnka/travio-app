@@ -5,11 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { differenceInDays, parseISO } from "date-fns";
-
-const EMOJI_OPTIONS = [
-  "✈️", "🗽", "🏔️", "🏖️", "🌍", "🏛️", "🎭", "🌸", "🏕️", "🚗", "🎿", "🌴", "🗼", "🏰", "🎢",
-  "🇨🇿", "🇸🇰", "🇩🇪", "🇦🇹", "🇮🇹", "🇫🇷", "🇪🇸", "🇬🇧", "🇺🇸", "🇬🇷", "🇭🇷", "🇵🇹", "🇯🇵", "🇹🇭", "🇦🇺", "🇧🇷", "🇲🇽", "🇹🇷", "🇪🇬", "🇮🇸",
-];
+import EmojiPicker from "@/components/EmojiPicker";
 
 interface EditTripModalProps {
   open: boolean;
@@ -54,19 +50,8 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
           {/* Emoji */}
           <div>
             <Label className="text-foreground text-sm">Emoji</Label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {EMOJI_OPTIONS.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  className={`w-9 h-9 rounded-md text-lg flex items-center justify-center transition-colors ${
-                    emoji === e ? "bg-primary/15 ring-2 ring-primary" : "bg-muted hover:bg-muted/80"
-                  }`}
-                  onClick={() => setEmoji(e)}
-                >
-                  {e}
-                </button>
-              ))}
+            <div className="mt-1">
+              <EmojiPicker value={emoji} onChange={setEmoji} />
             </div>
           </div>
 
