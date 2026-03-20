@@ -187,7 +187,7 @@ const TripDetail = () => {
             <button className="p-1 text-foreground"><MoreVertical className="w-5 h-5" /></button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Upravit cestu</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowEditTrip(true)}>Upravit cestu</DropdownMenuItem>
             <DropdownMenuItem onClick={handleShare}>🔗 Sdílet odkaz</DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">🗑️ Smazat cestu</DropdownMenuItem>
           </DropdownMenuContent>
