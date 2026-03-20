@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { mockTrips, Place } from "@/data/mockData";
+import { Place } from "@/data/mockData";
+import { useTripContext } from "@/context/TripContext";
 import { format, parseISO } from "date-fns";
 import { cs } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -23,8 +24,9 @@ const TripDetail = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewMode = searchParams.get("view") === "map" ? "map" : "list";
+  const { getTrip, addPlaceToDay, movePlace, reorderPlaces } = useTripContext();
 
-  const trip = useMemo(() => mockTrips.find((t) => t.id === id), [id]);
+  const trip = getTrip(id || "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [showAddPlace, setShowAddPlace] = useState(false);
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
@@ -39,11 +41,9 @@ const TripDetail = () => {
 
   const isUnassigned = selectedDayIndex === trip.days.length;
   const currentDay = isUnassigned ? null : trip.days[selectedDayIndex];
-  const currentPlaces = isUnassigned
-    ? trip.unassigned
-    : currentDay?.places || [];
-
+  const currentPlaces = isUnassigned ? trip.unassigned : currentDay?.places || [];
   const totalDays = trip.days.length;
+  const currentDayId = isUnassigned ? null : currentDay?.id || null;
 
   const toggleView = (view: "list" | "map") => {
     if (view === "map") {
@@ -57,6 +57,29 @@ const TripDetail = () => {
     toast.success("Odkaz zkopírován! 🎉", {
       description: "https://travio.app/share/abc123",
     });
+  };
+
+  const handleAddPlace = (name: string, address?: string) => {
+    const newPlace: Place = {
+      id: `place-${Date.now()}`,
+      name,
+      address,
+      visited: false,
+      ticket: null,
+    };
+    addPlaceToDay(trip.id, currentDayId, newPlace);
+    setShowAddPlace(false);
+    toast.success("Místo přidáno! 📍");
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (index <= 0) return;
+    reorderPlaces(trip.id, currentDayId, index, index - 1);
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index >= currentPlaces.length - 1) return;
+    reorderPlaces(trip.id, currentDayId, index, index + 1);
   };
 
   return (
@@ -147,7 +170,6 @@ const TripDetail = () => {
         />
       ) : (
         <div className="px-4 pb-24">
-          {/* Day date */}
           {currentDay && (
             <p className="text-sm text-muted-foreground mb-3">
               📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
@@ -159,7 +181,6 @@ const TripDetail = () => {
             </p>
           )}
 
-          {/* Places */}
           {currentPlaces.length === 0 ? (
             <motion.div
               className="bg-card rounded-lg shadow-card p-8 text-center"
@@ -180,18 +201,19 @@ const TripDetail = () => {
             </motion.div>
           ) : (
             <div className="space-y-3">
-              {currentPlaces.map((place) => (
+              {currentPlaces.map((place, index) => (
                 <PlaceCard
                   key={place.id}
                   place={place}
                   onClick={() => navigate(`/app/trip/${id}/place/${place.id}`)}
                   onMove={() => setMovingPlace(place)}
+                  onMoveUp={index > 0 ? () => handleMoveUp(index) : undefined}
+                  onMoveDown={index < currentPlaces.length - 1 ? () => handleMoveDown(index) : undefined}
                 />
               ))}
             </div>
           )}
 
-          {/* Add place button */}
           {currentPlaces.length > 0 && (
             <Button
               variant="outline"
@@ -207,10 +229,7 @@ const TripDetail = () => {
       <AddPlaceSheet
         open={showAddPlace}
         onClose={() => setShowAddPlace(false)}
-        onAdd={() => {
-          setShowAddPlace(false);
-          toast.success("Místo přidáno! 📍");
-        }}
+        onAdd={handleAddPlace}
       />
 
       {movingPlace && trip && (
@@ -219,7 +238,8 @@ const TripDetail = () => {
           days={trip.days}
           onClose={() => setMovingPlace(null)}
           onMove={(dayId) => {
-            toast.success(`Přesunuto do ${dayId === "unassigned" ? "Volných" : "dne"} ✅`);
+            movePlace(trip.id, movingPlace.id, dayId === "unassigned" ? null : dayId);
+            toast.success(`Přesunuto ✅`);
             setMovingPlace(null);
           }}
         />

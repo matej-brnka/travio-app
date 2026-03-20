@@ -1,33 +1,58 @@
 import { Place } from "@/data/mockData";
-import { GripVertical } from "lucide-react";
+import { ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 
 interface PlaceCardProps {
   place: Place;
   onClick: () => void;
   onMove?: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
   readOnly?: boolean;
 }
 
-const PlaceCard = ({ place, onClick, readOnly }: PlaceCardProps) => {
-  const ticketBadge = place.ticket === "have"
-    ? "🎫 mám"
-    : place.ticket === "need"
-    ? "🎫 potřeba"
-    : null;
+const PlaceCard = ({ place, onClick, onMoveUp, onMoveDown, readOnly }: PlaceCardProps) => {
+  const ticketBadge =
+    place.ticket === "have"
+      ? "🎫 mám"
+      : place.ticket === "need"
+      ? "🎫 potřeba"
+      : null;
 
   return (
-    <button
-      onClick={onClick}
-      className={`w-full bg-card rounded-lg shadow-card p-4 text-left flex items-center gap-3 hover:shadow-md transition-shadow ${
+    <div
+      className={`w-full bg-card rounded-lg shadow-card p-4 flex items-center gap-2 ${
         place.visited ? "opacity-60" : ""
       }`}
     >
+      {/* Reorder buttons */}
       {!readOnly && (
-        <span className="text-muted-foreground cursor-grab flex-shrink-0">
-          <GripVertical className="w-4 h-4" />
-        </span>
+        <div className="flex flex-col gap-0.5 flex-shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveUp?.();
+            }}
+            disabled={!onMoveUp}
+            className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-colors"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </button>
+          <GripVertical className="w-4 h-4 text-muted-foreground/40 mx-auto" />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveDown?.();
+            }}
+            disabled={!onMoveDown}
+            className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-colors"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
       )}
-      <div className="flex-1 min-w-0">
+
+      {/* Content - clickable */}
+      <button onClick={onClick} className="flex-1 min-w-0 text-left">
         <div className="flex items-center gap-2">
           {place.visited && <span className="text-primary">✅</span>}
           <h3
@@ -49,8 +74,8 @@ const PlaceCard = ({ place, onClick, readOnly }: PlaceCardProps) => {
             {ticketBadge}
           </span>
         )}
-      </div>
-    </button>
+      </button>
+    </div>
   );
 };
 

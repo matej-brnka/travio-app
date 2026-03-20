@@ -1,32 +1,58 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { mockTrips, Place } from "@/data/mockData";
+import { Place } from "@/data/mockData";
+import { useTripContext } from "@/context/TripContext";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { format, parseISO } from "date-fns";
+import { cs } from "date-fns/locale";
+import MovePlaceModal from "@/components/MovePlaceModal";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const PlaceDetail = () => {
   const { id, placeId } = useParams();
   const navigate = useNavigate();
+  const { getTrip, updatePlace, deletePlace, movePlace } = useTripContext();
 
-  const trip = useMemo(() => mockTrips.find((t) => t.id === id), [id]);
+  const trip = getTrip(id || "");
 
   const allPlaces = useMemo(() => {
     if (!trip) return [];
-    const dayPlaces = trip.days.flatMap((d) => d.places);
-    return [...dayPlaces, ...trip.unassigned];
+    return [...trip.days.flatMap((d) => d.places), ...trip.unassigned];
   }, [trip]);
 
   const placeIndex = allPlaces.findIndex((p) => p.id === placeId);
   const place = allPlaces[placeIndex];
 
-  const [ticket, setTicket] = useState<Place["ticket"]>(place?.ticket ?? null);
-  const [visited, setVisited] = useState(place?.visited ?? false);
+  // Find which day this place belongs to
+  const currentDayInfo = useMemo(() => {
+    if (!trip || !place) return null;
+    for (let i = 0; i < trip.days.length; i++) {
+      if (trip.days[i].places.some((p) => p.id === place.id)) {
+        return { dayId: trip.days[i].id, dayIndex: i, date: trip.days[i].date };
+      }
+    }
+    return null; // unassigned
+  }, [trip, place]);
+
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   if (!trip || !place) {
     return (
@@ -45,6 +71,20 @@ const PlaceDetail = () => {
     ? `https://maps.google.com/?q=${place.lat},${place.lng}`
     : null;
 
+  const handleTicketChange = (ticket: Place["ticket"]) => {
+    updatePlace(trip.id, place.id, { ticket });
+  };
+
+  const handleVisitedToggle = () => {
+    updatePlace(trip.id, place.id, { visited: !place.visited });
+  };
+
+  const handleDelete = () => {
+    deletePlace(trip.id, place.id);
+    toast.success("Místo smazáno 🗑️");
+    navigate(`/app/trip/${id}`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top bar */}
@@ -62,8 +102,12 @@ const PlaceDetail = () => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Přesunout do dne</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">🗑️ Smazat místo</DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              🗑️ Smazat místo
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -77,12 +121,10 @@ const PlaceDetail = () => {
           </div>
         </div>
 
-        {/* Address */}
         {place.address && (
           <p className="text-sm text-foreground mb-3">📍 {place.address}</p>
         )}
 
-        {/* Website */}
         {place.website && (
           <a
             href={place.website}
@@ -94,7 +136,6 @@ const PlaceDetail = () => {
           </a>
         )}
 
-        {/* Opening hours */}
         {place.openingHours && place.openingHours.length > 0 && (
           <div className="mb-5">
             {place.openingHours.map((h, i) => (
@@ -102,6 +143,28 @@ const PlaceDetail = () => {
             ))}
           </div>
         )}
+
+        <hr className="border-border my-5" />
+
+        {/* Move to day - INLINE */}
+        <div className="mb-5">
+          <p className="text-sm font-bold text-foreground mb-3">📅 Zařazení do dne</p>
+          <div className="bg-card rounded-lg border border-border p-3">
+            <p className="text-sm text-muted-foreground mb-2">
+              {currentDayInfo
+                ? `Den ${currentDayInfo.dayIndex + 1} – ${format(parseISO(currentDayInfo.date), "EE d. MMMM", { locale: cs })}`
+                : "⚡ Nezařazené"}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-md border-primary text-primary"
+              onClick={() => setShowMoveModal(true)}
+            >
+              Přesunout do jiného dne
+            </Button>
+          </div>
+        </div>
 
         <hr className="border-border my-5" />
 
@@ -113,11 +176,11 @@ const PlaceDetail = () => {
               <button
                 key={t}
                 className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
-                  ticket === t || (t === "none" && ticket === null)
+                  place.ticket === t || (t === "none" && place.ticket === null)
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground"
                 }`}
-                onClick={() => setTicket(t)}
+                onClick={() => handleTicketChange(t)}
               >
                 {t === "none" ? "Není třeba" : t === "need" ? "Potřeba" : "Mám"}
               </button>
@@ -130,13 +193,13 @@ const PlaceDetail = () => {
         {/* Visited */}
         <button
           className={`w-full py-4 rounded-lg text-center font-bold text-sm transition-colors ${
-            visited
+            place.visited
               ? "bg-primary text-primary-foreground"
               : "bg-muted text-foreground"
           }`}
-          onClick={() => setVisited(!visited)}
+          onClick={handleVisitedToggle}
         >
-          {visited ? "✅ Navštíveno" : "☐ Označit jako navštíveno"}
+          {place.visited ? "✅ Navštíveno" : "☐ Označit jako navštíveno"}
         </button>
 
         <hr className="border-border my-5" />
@@ -147,9 +210,7 @@ const PlaceDetail = () => {
             variant="outline"
             className="flex-1 rounded-md"
             disabled={!prevPlace}
-            onClick={() =>
-              prevPlace && navigate(`/app/trip/${id}/place/${prevPlace.id}`)
-            }
+            onClick={() => prevPlace && navigate(`/app/trip/${id}/place/${prevPlace.id}`)}
           >
             ← Předchozí
           </Button>
@@ -157,31 +218,53 @@ const PlaceDetail = () => {
             variant="outline"
             className="flex-1 rounded-md"
             disabled={!nextPlace}
-            onClick={() =>
-              nextPlace && navigate(`/app/trip/${id}/place/${nextPlace.id}`)
-            }
+            onClick={() => nextPlace && navigate(`/app/trip/${id}/place/${nextPlace.id}`)}
           >
             Další →
           </Button>
         </div>
 
-        {/* Google Maps */}
         {googleMapsUrl && (
-          <a
-            href={googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block mt-4"
-          >
-            <Button
-              variant="outline"
-              className="w-full rounded-md border-primary text-primary py-5"
-            >
+          <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="block mt-4">
+            <Button variant="outline" className="w-full rounded-md border-primary text-primary py-5">
               🗺️ Navigovat (Google Maps)
             </Button>
           </a>
         )}
       </div>
+
+      {showMoveModal && (
+        <MovePlaceModal
+          place={place}
+          days={trip.days}
+          onClose={() => setShowMoveModal(false)}
+          onMove={(dayId) => {
+            movePlace(trip.id, place.id, dayId === "unassigned" ? null : dayId);
+            toast.success("Přesunuto ✅");
+            setShowMoveModal(false);
+          }}
+        />
+      )}
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Opravdu chceš smazat {place.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tuto akci nelze vrátit zpět.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground"
+              onClick={handleDelete}
+            >
+              🗑️ Smazat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
