@@ -32,7 +32,7 @@ const App = () => (
       <TripProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<MobileFrame><Landing /></MobileFrame>} />
+            <Route path="/" element={<FullFrame><Landing /></FullFrame>} />
             <Route path="/login" element={<MobileFrame><Login /></MobileFrame>} />
             <Route path="/app" element={<MobileFrame><Dashboard /></MobileFrame>} />
             <Route path="/app/trip/:id" element={<FullFrame><TripDetail /></FullFrame>} />
