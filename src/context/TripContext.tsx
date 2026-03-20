@@ -11,6 +11,7 @@ interface TripContextType {
   updatePlace: (tripId: string, placeId: string, updates: Partial<Place>) => void;
   deletePlace: (tripId: string, placeId: string) => void;
   addTrip: (trip: Trip) => void;
+  updateTrip: (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => void;
 }
 
 const TripContext = createContext<TripContextType | null>(null);
@@ -158,6 +159,15 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     );
   }, []);
 
+  const updateTrip = useCallback(
+    (tripId: string, updates: Partial<Pick<Trip, "name" | "emoji" | "dateFrom" | "dateTo">>) => {
+      setTrips((prev) =>
+        prev.map((trip) => (trip.id === tripId ? { ...trip, ...updates } : trip))
+      );
+    },
+    []
+  );
+
   return (
     <TripContext.Provider
       value={{
@@ -170,6 +180,7 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
         updatePlace,
         deletePlace,
         addTrip,
+        updateTrip,
       }}
     >
       {children}

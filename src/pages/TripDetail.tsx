@@ -9,6 +9,7 @@ import { ArrowLeft, MoreVertical, Share2, Trash2, Pencil, Plus } from "lucide-re
 import PlaceCard from "@/components/PlaceCard";
 import AddPlaceSheet from "@/components/AddPlaceSheet";
 import MovePlaceModal from "@/components/MovePlaceModal";
+import EditTripModal from "@/components/EditTripModal";
 import TripMapView from "@/components/TripMapView";
 import {
   DropdownMenu,
@@ -24,11 +25,12 @@ const TripDetail = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewMode = searchParams.get("view") === "map" ? "map" : "list";
-  const { getTrip, addPlaceToDay, movePlace, reorderPlaces } = useTripContext();
+  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip } = useTripContext();
 
   const trip = getTrip(id || "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [showAddPlace, setShowAddPlace] = useState(false);
+  const [showEditTrip, setShowEditTrip] = useState(false);
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
 
   if (!trip) {
@@ -185,7 +187,7 @@ const TripDetail = () => {
             <button className="p-1 text-foreground"><MoreVertical className="w-5 h-5" /></button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Upravit cestu</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowEditTrip(true)}>Upravit cestu</DropdownMenuItem>
             <DropdownMenuItem onClick={handleShare}>🔗 Sdílet odkaz</DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">🗑️ Smazat cestu</DropdownMenuItem>
           </DropdownMenuContent>
@@ -256,7 +258,7 @@ const TripDetail = () => {
 
           {/* Desktop action buttons – all visible */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="rounded-md" onClick={() => {}}>
+            <Button variant="outline" size="sm" className="rounded-md" onClick={() => setShowEditTrip(true)}>
               <Pencil className="w-4 h-4 mr-1.5" />
               Upravit
             </Button>
@@ -345,6 +347,19 @@ const TripDetail = () => {
 
       {/* Modals (shared) */}
       <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} />
+
+      {trip && (
+        <EditTripModal
+          open={showEditTrip}
+          trip={trip}
+          onClose={() => setShowEditTrip(false)}
+          onSave={(updates) => {
+            updateTrip(trip.id, updates);
+            setShowEditTrip(false);
+            toast.success("Cesta upravena ✅");
+          }}
+        />
+      )}
 
       {movingPlace && trip && (
         <MovePlaceModal
