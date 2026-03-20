@@ -358,6 +358,16 @@ const TripDetail = () => {
                     </span>
                   )}
                 </button>
+                <button
+                  className="text-left px-3 py-2 rounded-md text-sm transition-colors text-muted-foreground hover:bg-muted hover:text-primary flex items-center gap-2"
+                  onClick={() => {
+                    addDayToTrip(trip.id);
+                    toast.success("Den přidán! 📅");
+                  }}
+                >
+                  <span className="text-lg font-medium">+</span>
+                  <span>Přidat den</span>
+                </button>
               </div>
             </div>
 
