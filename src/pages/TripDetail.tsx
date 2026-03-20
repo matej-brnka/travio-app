@@ -25,6 +25,7 @@ import { motion } from "framer-motion";
 const TripDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewMode = searchParams.get("view") === "map" ? "map" : "list";
   const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip } = useTripContext();
@@ -34,6 +35,7 @@ const TripDetail = () => {
   const [showAddPlace, setShowAddPlace] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   if (!trip) {
     return (
