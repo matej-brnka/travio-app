@@ -31,6 +31,8 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
   }, [open, trip]);
 
   const totalDays =
+    dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) + 1 : 0;
+  const totalNights =
     dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) : 0;
   const isValid = name.trim() && dateFrom && dateTo && totalDays > 0;
 
