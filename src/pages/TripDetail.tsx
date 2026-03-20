@@ -232,11 +232,11 @@ const TripDetail = () => {
         </div>
         <div className="px-4 py-2">{dayPills}</div>
         {viewMode === "map" ? (
-          <div className="flex-1 relative">
+          <div className="flex-1 min-h-0 relative">
             <TripMapView
               places={currentPlaces}
               onPlaceClick={handlePlaceClick}
-              className="absolute inset-0"
+              className="w-full h-full"
             />
           </div>
         ) : (
