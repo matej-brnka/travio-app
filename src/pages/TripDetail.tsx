@@ -126,6 +126,16 @@ const TripDetail = () => {
           <span className="ml-1 opacity-50 font-normal">({trip.unassigned.length})</span>
         )}
       </button>
+      <button
+        className="flex-shrink-0 w-8 h-8 rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-center text-lg font-medium"
+        onClick={() => {
+          addDayToTrip(trip.id);
+          toast.success("Den přidán! 📅");
+        }}
+        title="Přidat den"
+      >
+        +
+      </button>
     </div>
   );
 
