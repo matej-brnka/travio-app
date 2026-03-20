@@ -245,13 +245,6 @@ const PlaceDetail = () => {
           </Button>
         </div>
 
-        {googleMapsUrl && (
-          <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="block mt-4">
-            <Button variant="outline" className="w-full rounded-md border-primary text-primary py-5">
-              🗺️ Navigovat (Google Maps)
-            </Button>
-          </a>
-        )}
       </div>
 
       {showMoveModal && (
