@@ -15,9 +15,12 @@ interface NewTripModalProps {
   onCreate: (trip: Trip) => void;
 }
 
+const EMOJI_OPTIONS = ["✈️", "🗽", "🏔️", "🏖️", "🌍", "🏛️", "🎭", "🌸", "🏕️", "🚗", "🎿", "🌴", "🗼", "🏰", "🎢"];
+
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [destination, setDestination] = useState("");
   const [dateFrom, setDateFrom] = useState("");
+  const [emoji, setEmoji] = useState("✈️");
   const [dateTo, setDateTo] = useState("");
   const [aiHelp, setAiHelp] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
