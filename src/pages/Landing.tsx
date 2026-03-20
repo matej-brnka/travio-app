@@ -36,7 +36,7 @@ const Landing = () => {
           <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xs md:max-w-md mx-auto">
             Místa, mapy, itinerář – vše na jednom místě. Plánuj chytře, cestuj bez stresu.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               size="lg"
               className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-md px-8 py-6 text-lg font-bold shadow-card"
