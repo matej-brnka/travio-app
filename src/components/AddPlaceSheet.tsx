@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { mockPlaceSuggestions } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { X } from "lucide-react";
 
 interface AddPlaceSheetProps {
@@ -41,9 +41,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd }: AddPlaceSheetProps) => {
       <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] p-0">
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <SheetHeader className="p-0">
-            <SheetTitle className="text-foreground text-lg">📍 Přidat místo</SheetTitle>
-          </SheetHeader>
+          <h2 className="text-foreground text-lg font-bold">📍 Přidat místo</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
             <X className="w-5 h-5" />
           </button>
