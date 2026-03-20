@@ -22,10 +22,10 @@ const Landing = () => {
       </nav>
 
       {/* Hero + Features: stacked on mobile, side-by-side on desktop */}
-      <div className="px-6 md:px-12 lg:px-20 pt-12 pb-10 md:pt-20 md:pb-16 md:flex md:items-center md:gap-16 lg:gap-24 max-w-6xl mx-auto">
+      <div className="px-6 md:px-12 lg:px-20 pt-12 pb-10 md:pt-20 md:pb-16 max-w-5xl mx-auto">
         {/* Hero */}
         <motion.section
-          className="text-center md:text-left md:flex-1"
+          className="text-center md:max-w-2xl md:mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -33,10 +33,10 @@ const Landing = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-foreground mb-3">
             ✈️ Plánuj výlety<br />jako profík
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xs md:max-w-md mx-auto md:mx-0">
+          <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xs md:max-w-md mx-auto">
             Místa, mapy, itinerář – vše na jednom místě. Plánuj chytře, cestuj bez stresu.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               size="lg"
               className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-md px-8 py-6 text-lg font-bold shadow-card"
@@ -56,7 +56,7 @@ const Landing = () => {
         </motion.section>
 
         {/* Features */}
-        <div className="mt-10 md:mt-0 md:flex-1 grid gap-4">
+        <div className="mt-10 md:mt-14 grid gap-4 md:grid-cols-3">
           {features.map((f, i) => (
             <motion.div
               key={i}
