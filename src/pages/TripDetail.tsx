@@ -349,7 +349,7 @@ const TripDetail = () => {
           <main className="flex-1 relative">
             <TripMapView
               places={currentPlaces}
-              onPlaceClick={(placeId) => navigate(`/app/trip/${id}/place/${placeId}`)}
+              onPlaceClick={handlePlaceClick}
               className="h-full"
               hideBottomCards
             />
