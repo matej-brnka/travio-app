@@ -166,10 +166,16 @@ const TripMapView = ({
                       <div className="min-w-0 flex-1">
                         {place.emoji && <span className="text-lg block mb-0.5">{place.emoji}</span>}
                         <span className="text-sm font-bold text-foreground block truncate">{place.name}</span>
-                        {(place.timeFrom || place.timeTo) && (
+                        {place.timeFrom && place.timeTo && (
                           <p className="text-xs text-primary mt-0.5">
-                            {place.timeFrom || "?"} – {place.timeTo || "?"}
+                            {place.timeFrom} – {place.timeTo}
                           </p>
+                        )}
+                        {place.timeFrom && !place.timeTo && (
+                          <p className="text-xs text-primary mt-0.5">od {place.timeFrom}</p>
+                        )}
+                        {!place.timeFrom && place.timeTo && (
+                          <p className="text-xs text-primary mt-0.5">do {place.timeTo}</p>
                         )}
                         {place.address && (
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">{place.address}</p>
