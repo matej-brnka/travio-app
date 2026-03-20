@@ -44,7 +44,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     const trip: Trip = {
       id: `trip-${Date.now()}`,
       name: destination,
-      emoji: "✈️",
+      emoji,
       dateFrom,
       dateTo,
       weather: { temp: 20, icon: "🌤️" },
