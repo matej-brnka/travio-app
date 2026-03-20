@@ -12,6 +12,7 @@ interface TripMapViewProps {
 const TripMapView = ({
   places,
   onPlaceClick,
+  onAddPlace,
   className = "",
   hideBottomCards = false,
 }: TripMapViewProps) => {
