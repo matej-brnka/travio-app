@@ -4,8 +4,10 @@ import { useTripContext } from "@/context/TripContext";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
 import { cs } from "date-fns/locale";
-import { X, StickyNote } from "lucide-react";
+import { X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import EmojiPicker from "@/components/EmojiPicker";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import { toast } from "sonner";
 import {
@@ -109,7 +111,10 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
-        <h2 className="text-base font-bold text-foreground truncate flex-1 pr-2">{place.name}</h2>
+        <div className="flex items-center gap-2 truncate flex-1 pr-2">
+          {place.emoji && <span className="text-xl">{place.emoji}</span>}
+          <h2 className="text-base font-bold text-foreground truncate">{place.name}</h2>
+        </div>
         <button onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
           <X className="w-5 h-5" />
         </button>
@@ -123,6 +128,34 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
             <div className="text-center text-muted-foreground">
               <span className="text-2xl block">🗺️</span>
               <p className="text-xs mt-1">Mapbox (TODO)</p>
+            </div>
+          </div>
+
+          {/* Emoji + Time range */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Emoji</p>
+              <EmojiPicker value={place.emoji || ""} onChange={(emoji) => updatePlace(trip.id, place.id, { emoji: emoji || undefined })} />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">🕘 Čas (rezervace)</p>
+              <div className="flex gap-1.5 items-center">
+                <Input
+                  type="time"
+                  value={place.timeFrom || ""}
+                  onChange={(e) => updatePlace(trip.id, place.id, { timeFrom: e.target.value || undefined })}
+                  className="text-sm h-9 px-2"
+                  placeholder="Od"
+                />
+                <span className="text-muted-foreground text-xs">–</span>
+                <Input
+                  type="time"
+                  value={place.timeTo || ""}
+                  onChange={(e) => updatePlace(trip.id, place.id, { timeTo: e.target.value || undefined })}
+                  className="text-sm h-9 px-2"
+                  placeholder="Do"
+                />
+              </div>
             </div>
           </div>
 
