@@ -5,11 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { differenceInDays, parseISO } from "date-fns";
-
-const EMOJI_OPTIONS = [
-  "✈️", "🗽", "🏔️", "🏖️", "🌍", "🏛️", "🎭", "🌸", "🏕️", "🚗", "🎿", "🌴", "🗼", "🏰", "🎢",
-  "🇨🇿", "🇸🇰", "🇩🇪", "🇦🇹", "🇮🇹", "🇫🇷", "🇪🇸", "🇬🇧", "🇺🇸", "🇬🇷", "🇭🇷", "🇵🇹", "🇯🇵", "🇹🇭", "🇦🇺", "🇧🇷", "🇲🇽", "🇹🇷", "🇪🇬", "🇮🇸",
-];
+import EmojiPicker from "@/components/EmojiPicker";
 
 interface EditTripModalProps {
   open: boolean;
