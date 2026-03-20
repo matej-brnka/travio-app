@@ -56,7 +56,7 @@ const Landing = () => {
         </motion.section>
 
         {/* Features */}
-        <div className="mt-10 md:mt-0 md:flex-1 grid gap-4">
+        <div className="mt-10 md:mt-14 grid gap-4 md:grid-cols-3">
           {features.map((f, i) => (
             <motion.div
               key={i}
