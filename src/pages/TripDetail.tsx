@@ -30,7 +30,7 @@ const TripDetail = () => {
   const viewParam = searchParams.get("view");
   const savedView = typeof window !== "undefined" ? localStorage.getItem("travio-view-mode") as "list" | "map" | null : null;
   const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : savedView ? savedView : (isMobile ? "map" : "list");
-  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, addDayToTrip } = useTripContext();
+  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, addDayToTrip, removeDayFromTrip } = useTripContext();
 
   const trip = getTrip(id || "");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -193,6 +193,24 @@ const TripDetail = () => {
       >
         <Plus className="w-4 h-4 mr-1" /> Přidat místo
       </Button>
+
+      {!isUnassigned && currentDay && (
+        <Button
+          variant="ghost"
+          className="w-full mt-2 text-destructive hover:bg-destructive/10 rounded-md py-5 lg:py-3 text-sm"
+          onClick={() => {
+            if (trip.days.length <= 1) {
+              toast.error("Nelze smazat poslední den cesty");
+              return;
+            }
+            removeDayFromTrip(trip.id, currentDay.id);
+            setSelectedDayIndex(Math.max(0, selectedDayIndex - 1));
+            toast.success("Den smazán 🗑️", { description: "Místa byla přesunuta do Volných" });
+          }}
+        >
+          <Trash2 className="w-4 h-4 mr-1" /> Smazat den {selectedDayIndex + 1}
+        </Button>
+      )}
     </>
   );
 
