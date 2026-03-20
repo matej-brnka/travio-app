@@ -1,4 +1,4 @@
-import { Place } from "@/data/mockData";
+import { Place, priorityConfig } from "@/data/mockData";
 import { ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 
 interface PlaceCardProps {
