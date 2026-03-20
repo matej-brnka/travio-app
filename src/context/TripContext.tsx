@@ -222,6 +222,7 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
         deletePlace,
         addTrip,
         updateTrip,
+        addDayToTrip,
       }}
     >
       {children}
