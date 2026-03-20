@@ -156,7 +156,7 @@ const TripDetail = () => {
             <PlaceCard
               key={place.id}
               place={place}
-              onClick={() => navigate(`/app/trip/${id}/place/${place.id}`)}
+              onClick={() => handlePlaceClick(place.id)}
               onMove={() => setMovingPlace(place)}
               onMoveUp={index > 0 ? () => handleMoveUp(index) : undefined}
               onMoveDown={index < currentPlaces.length - 1 ? () => handleMoveDown(index) : undefined}
