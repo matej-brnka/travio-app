@@ -135,10 +135,12 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
       if (lat && lng) {
         try {
           const w = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo);
+          console.log('[weather] raw days:', JSON.stringify(w.days.slice(0, 2)));
           trip.weather = { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type };
           trip.days = trip.days.map(day => {
             const dw = w.days.find(d => d.date === day.date);
-            return dw ? { ...day, weather: { temp: dw.temp, icon: dw.icon } } : day;
+            console.log('[weather] day', day.date, '→ dw:', dw);
+            return dw ? { ...day, weather: { temp: dw.temp, tempMin: dw.tempMin, icon: dw.icon } } : day;
           });
         } catch (e) {
           console.error('Weather fetch failed', e);

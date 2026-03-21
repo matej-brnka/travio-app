@@ -37,7 +37,7 @@ function wmoIcon(code: number): string {
   return '🌡️';
 }
 
-interface DayWeather { date: string; temp: number | null; icon: string | null; }
+interface DayWeather { date: string; temp: number | null; tempMin: number | null; icon: string | null; }
 export interface TripWeatherResult {
   summary: { temp: number | null; icon: string | null; type: 'forecast' | 'historical' };
   days: DayWeather[];
@@ -120,7 +120,7 @@ export class WeatherService {
       const url = `https://archive-api.open-meteo.com/v1/archive`
         + `?latitude=${lat}&longitude=${lng}`
         + `&start_date=${histFrom}&end_date=${histTo}`
-        + `&daily=temperature_2m_max,weathercode&timezone=auto`;
+        + `&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
 
       const res = await fetch(url);
       if (!res.ok) throw new Error(`open-meteo ${res.status}`);
@@ -135,6 +135,7 @@ export class WeatherService {
       const days: DayWeather[] = tripDates.map((tripDate, i) => ({
         date: tripDate,
         temp: temps[i] != null ? Math.round(temps[i]) : null,
+        tempMin: null,
         icon: codes[i] != null ? wmoIcon(codes[i]) : null,
       }));
 
@@ -145,7 +146,7 @@ export class WeatherService {
       const tripDates = this.eachDay(dateFrom, dateTo);
       return {
         summary: { temp: null, icon: null, type: 'historical' },
-        days: tripDates.map(date => ({ date, temp: null, icon: null })),
+        days: tripDates.map(date => ({ date, temp: null, tempMin: null, icon: null })),
       };
     }
   }
@@ -188,13 +189,14 @@ export class WeatherService {
       ? daytime
       : timeseries.filter((t: any) => t.time?.startsWith(date)); // fallback: all entries
 
-    if (!entries.length) return { date: returnDate ?? date, temp: null, icon: null };
+    if (!entries.length) return { date: returnDate ?? date, temp: null, tempMin: null, icon: null };
 
-    // Maximum temperature across daytime entries
+    // Max and min temperature across daytime entries
     const temps = entries
       .map((e: any) => e.data?.instant?.details?.air_temperature)
       .filter((v: any) => v != null) as number[];
-    const temp = temps.length ? Math.round(Math.max(...temps)) : null;
+    const temp    = temps.length ? Math.round(Math.max(...temps)) : null;
+    const tempMin = temps.length ? Math.round(Math.min(...temps)) : null;
 
     // Most common symbol code
     const symbolCounts: Record<string, number> = {};
@@ -209,6 +211,6 @@ export class WeatherService {
     const symbolCode = Object.entries(symbolCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
     const mapped = SYMBOL_MAP[symbolCode] ?? { icon: '🌡️' };
 
-    return { date: returnDate ?? date, temp, icon: mapped.icon };
+    return { date: returnDate ?? date, temp, tempMin, icon: mapped.icon };
   }
 }

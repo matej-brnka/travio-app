@@ -5,7 +5,7 @@ export const getWeather = (lat: number, lng: number, date: string) =>
 
 export interface TripWeatherResult {
   summary: { temp: number | null; icon: string | null; type: 'forecast' | 'historical' };
-  days: { date: string; temp: number | null; icon: string | null }[];
+  days: { date: string; temp: number | null; tempMin?: number | null; icon: string | null }[];
 }
 
 export const getTripWeather = (lat: number, lng: number, dateFrom: string, dateTo: string): Promise<TripWeatherResult> =>

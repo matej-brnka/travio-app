@@ -148,7 +148,7 @@ const TripDetail = () => {
           Den {i + 1}
           {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
             <span className="ml-1.5 opacity-80 font-normal text-xs">
-              {day.weather.icon} {day.weather.temp}°
+              {day.weather.icon} {day.weather.tempMin != null && day.weather.tempMin !== undefined ? `${day.weather.temp}°/${day.weather.tempMin}°` : `${day.weather.temp}°`}
             </span>
           )}
           {day.places.length > 0 && (
@@ -407,7 +407,7 @@ const TripDetail = () => {
                     </span>
                     {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
                       <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                        {day.weather.icon} {day.weather.temp}°
+                        {day.weather.icon} {day.weather.tempMin != null && day.weather.tempMin !== undefined ? `${day.weather.temp}°/${day.weather.tempMin}°` : `${day.weather.temp}°`}
                       </span>
                     )}
                     {day.places.length > 0 && (

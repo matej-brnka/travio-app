@@ -77,11 +77,12 @@ interface Place {
   priority?: "must-see" | "chci-videt" | "mozna" | null;
   timeFrom?: string; timeTo?: string;
 }
-interface Day { id: string; date: string; places: Place[]; }
+interface DayWeather { temp: number | null; tempMin?: number | null; icon: string | null; }
+interface Day { id: string; date: string; places: Place[]; weather?: DayWeather | null; }
 interface Trip {
   id: string; name: string; emoji: string;
   dateFrom: string; dateTo: string;
-  weather?: { temp: number | null; icon: string | null };  // volitelné, lazy load
+  weather?: { temp: number | null; icon: string | null; type?: 'forecast' | 'historical' };
   days: Day[]; unassigned: Place[];
   interests?: string[];
   centerLat?: number | null;   // střed destinace (z Google Places)
@@ -128,11 +129,20 @@ Většina volání přes `apiFetch()` z `src/api/client.ts` – automaticky při
 Výjimka: `getSharedTrip(token)` v `api/trips.ts` používá plain `fetch` (bez auth, veřejný endpoint).
 Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
 
+## Počasí
+- `TripContext.loadTrips()` – po načtení cest fire-and-forget `getTripWeather` pro každou cestu s coords → nastaví `trip.weather` (summary)
+- `TripContext.loadTrip()` – načte weather + nastaví `trip.weather` (summary) i `day.weather` (per-day forecast)
+- `TripCard` – zobrazuje `trip.weather.temp` + label „předpověď" / „hist. průměr"
+- `TripDetail` + `SharedTrip` – jednotlivé dny zobrazují `max°/min°` pouze pokud `trip.weather.type === 'forecast'`
+- Logika forecast vs historical je na backendu: ≤9 dní → yr.no, >9 dní → Open-Meteo archiv (stejné období -1 rok)
+- `getTripWeather` v `src/api/weather.ts` – vrací `TripWeatherResult { summary, days }`
+
 ## Sdílení cest
 - `TripDetail` – tlačítko „Sdílet odkaz" zavolá `GET /api/trips/:id/share`, otevře Dialog modal
 - Modal zobrazí URL a tlačítko „Kopírovat odkaz" (`navigator.clipboard` + toast)
 - `SharedTrip.tsx` – veřejná stránka na `/share/:token`, čte token z `useParams()`,
-  fetchuje `GET /api/shared/:token` (bez autentizace), layout totožný s TripDetail (read-only)
+  fetchuje `GET /api/shared/:token` (bez autentizace), layout totožný s TripDetail (read-only),
+  po načtení cesty fetchuje weather a zobrazuje per-day forecast (max°/min°) stejně jako TripDetail
 - Router: `/share/:token` obaleno v `FullFrame` (ne MobileFrame) – plná šířka na desktopu
 
 ## Routování (`App.tsx`)

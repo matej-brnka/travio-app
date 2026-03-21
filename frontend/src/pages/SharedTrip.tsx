@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Trip } from "@/data/mockData";
 import { getSharedTrip } from "@/api/trips";
+import { getTripWeather } from "@/api/weather";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { cs } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,34 @@ const SharedTrip = () => {
   useEffect(() => {
     if (!token) { setError(true); setLoading(false); return; }
     getSharedTrip(token)
-      .then((data) => setTrip(data))
+      .then(async (data) => {
+        // Normalize pg DATE columns
+        const toDate = (v: any) => { const s = String(v ?? ''); return s.length > 10 ? s.slice(0, 10) : s; };
+        data.dateFrom = toDate(data.dateFrom);
+        data.dateTo = toDate(data.dateTo);
+        data.days = (data.days ?? []).map((d: any) => ({ ...d, date: toDate(d.date) }));
+
+        setTrip(data);
+
+        const lat = data.centerLat ?? data.days.flatMap((d: any) => d.places).find((p: any) => p.lat)?.lat ?? null;
+        const lng = data.centerLng ?? data.days.flatMap((d: any) => d.places).find((p: any) => p.lng)?.lng ?? null;
+        if (lat && lng && data.dateFrom && data.dateTo) {
+          try {
+            const w = await getTripWeather(lat, lng, data.dateFrom, data.dateTo);
+            setTrip(prev => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                weather: { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type },
+                days: prev.days.map(day => {
+                  const dw = w.days.find(d => d.date === day.date);
+                  return dw ? { ...day, weather: { temp: dw.temp, tempMin: dw.tempMin, icon: dw.icon } } : day;
+                }),
+              };
+            });
+          } catch { /* weather is non-critical */ }
+        }
+      })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [token]);
@@ -88,6 +116,11 @@ const SharedTrip = () => {
           onClick={() => setSelectedDayIndex(i)}
         >
           Den {i + 1}
+          {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
+            <span className="ml-1.5 opacity-80 font-normal text-xs">
+              {day.weather.icon} {day.weather.tempMin != null && day.weather.tempMin !== undefined ? `${day.weather.temp}°/${day.weather.tempMin}°` : `${day.weather.temp}°`}
+            </span>
+          )}
           {day.places.length > 0 && (
             <span className="ml-1 opacity-50 font-normal">({day.places.length})</span>
           )}
@@ -275,6 +308,11 @@ const SharedTrip = () => {
                     <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                       {format(parseISO(day.date), "EE d. M.", { locale: cs })}
                     </span>
+                    {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
+                      <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                        {day.weather.icon} {day.weather.tempMin != null && day.weather.tempMin !== undefined ? `${day.weather.temp}°/${day.weather.tempMin}°` : `${day.weather.temp}°`}
+                      </span>
+                    )}
                     {day.places.length > 0 && (
                       <span className={`ml-auto float-right text-xs px-1.5 py-0.5 rounded-full ${selectedDayIndex === i ? "bg-primary-foreground/20" : "bg-muted"}`}>
                         {day.places.length}

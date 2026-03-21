@@ -26,6 +26,7 @@ export interface Place {
 
 export interface DayWeather {
   temp: number | null;
+  tempMin?: number | null;
   icon: string | null;
 }
 
