@@ -146,7 +146,7 @@ const TripDetail = () => {
           onClick={() => setSelectedDayIndex(i)}
         >
           Den {i + 1}
-          {day.weather?.temp != null && (
+          {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
             <span className="ml-1.5 opacity-80 font-normal text-xs">
               {day.weather.icon} {day.weather.temp}°
             </span>
@@ -405,7 +405,7 @@ const TripDetail = () => {
                     <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                       {format(parseISO(day.date), "EE d. M.", { locale: cs })}
                     </span>
-                    {day.weather?.temp != null && (
+                    {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
                       <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                         {day.weather.icon} {day.weather.temp}°
                       </span>
