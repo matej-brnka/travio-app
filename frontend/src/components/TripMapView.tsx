@@ -16,6 +16,10 @@ interface TripMapViewProps {
   hideBottomCards?: boolean;
   centerLat?: number | null;
   centerLng?: number | null;
+  viewportNorth?: number | null;
+  viewportSouth?: number | null;
+  viewportEast?: number | null;
+  viewportWest?: number | null;
 }
 
 /* ─── Route polyline using Maps library ─── */
@@ -63,24 +67,37 @@ const RoutePolyline = ({ places }: { places: Place[] }) => {
 };
 
 /* ─── Bounds fitter ─── */
-const BoundsFitter = ({ places }: { places: Place[] }) => {
+interface BoundsFitterProps {
+  places: Place[];
+  viewportNorth?: number | null;
+  viewportSouth?: number | null;
+  viewportEast?: number | null;
+  viewportWest?: number | null;
+}
+
+const BoundsFitter = ({ places, viewportNorth, viewportSouth, viewportEast, viewportWest }: BoundsFitterProps) => {
   const map = useMap();
 
   useEffect(() => {
     if (!map) return;
     const withCoords = places.filter((p) => p.lat != null && p.lng != null);
-    if (withCoords.length === 0) return;
 
-    if (withCoords.length === 1) {
+    if (withCoords.length >= 2) {
+      // Fit to all places in the current day
+      const bounds = new google.maps.LatLngBounds();
+      withCoords.forEach((p) => bounds.extend({ lat: p.lat!, lng: p.lng! }));
+      map.fitBounds(bounds, 60);
+    } else if (withCoords.length === 1) {
       map.setCenter({ lat: withCoords[0].lat!, lng: withCoords[0].lng! });
       map.setZoom(14);
-      return;
+    } else if (viewportNorth != null && viewportSouth != null && viewportEast != null && viewportWest != null) {
+      // No places yet – zoom to the destination area (country/city viewport)
+      map.fitBounds(
+        { north: viewportNorth, south: viewportSouth, east: viewportEast, west: viewportWest },
+        0,
+      );
     }
-
-    const bounds = new google.maps.LatLngBounds();
-    withCoords.forEach((p) => bounds.extend({ lat: p.lat!, lng: p.lng! }));
-    map.fitBounds(bounds, 60);
-  }, [map, places]);
+  }, [map, places, viewportNorth, viewportSouth, viewportEast, viewportWest]);
 
   return null;
 };
@@ -93,6 +110,10 @@ const MapContent = ({
   hideBottomCards,
   centerLat,
   centerLng,
+  viewportNorth,
+  viewportSouth,
+  viewportEast,
+  viewportWest,
 }: Omit<TripMapViewProps, "className">) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -126,7 +147,13 @@ const MapContent = ({
         gestureHandling="greedy"
         style={{ width: "100%", height: "100%" }}
       >
-        <BoundsFitter places={places} />
+        <BoundsFitter
+          places={places}
+          viewportNorth={viewportNorth}
+          viewportSouth={viewportSouth}
+          viewportEast={viewportEast}
+          viewportWest={viewportWest}
+        />
         <RoutePolyline places={places} />
 
         {places.map((place, i) => {
@@ -251,6 +278,10 @@ const TripMapView = ({
   hideBottomCards = false,
   centerLat,
   centerLng,
+  viewportNorth,
+  viewportSouth,
+  viewportEast,
+  viewportWest,
 }: TripMapViewProps) => {
   return (
     <div className={`relative w-full h-full min-h-0 ${className}`}>
@@ -262,6 +293,10 @@ const TripMapView = ({
           hideBottomCards={hideBottomCards}
           centerLat={centerLat}
           centerLng={centerLng}
+          viewportNorth={viewportNorth}
+          viewportSouth={viewportSouth}
+          viewportEast={viewportEast}
+          viewportWest={viewportWest}
         />
       </APIProvider>
     </div>

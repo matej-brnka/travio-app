@@ -14,7 +14,7 @@ import { DateRange } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "@/components/EmojiPicker";
-import { searchDestinations, DestinationResult } from "@/api/search";
+import { searchDestinations, DestinationResult, DestinationViewport } from "@/api/search";
 
 const interestCategories = [
   {
@@ -77,6 +77,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [destination, setDestination] = useState("");
   const [destinationLat, setDestinationLat] = useState<number | null>(null);
   const [destinationLng, setDestinationLng] = useState<number | null>(null);
+  const [destinationViewport, setDestinationViewport] = useState<DestinationViewport | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [emoji, setEmoji] = useState("✈️");
   const [dateTo, setDateTo] = useState("");
@@ -130,6 +131,10 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       interests: aiHelp ? selectedInterests : undefined,
       centerLat: destinationLat,
       centerLng: destinationLng,
+      viewportNorth: destinationViewport?.north ?? null,
+      viewportSouth: destinationViewport?.south ?? null,
+      viewportEast: destinationViewport?.east ?? null,
+      viewportWest: destinationViewport?.west ?? null,
     };
     setCreating(true);
     try {
@@ -137,6 +142,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       setDestination("");
       setDestinationLat(null);
       setDestinationLng(null);
+      setDestinationViewport(null);
       setDateFrom("");
       setDateTo("");
       setAiHelp(false);
@@ -174,6 +180,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
                 setDestination(e.target.value);
                 setDestinationLat(null);
                 setDestinationLng(null);
+                setDestinationViewport(null);
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
@@ -189,6 +196,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
                       setDestination(s.name);
                       setDestinationLat(s.lat);
                       setDestinationLng(s.lng);
+                      setDestinationViewport(s.viewport);
                       setShowSuggestions(false);
                     }}
                   >

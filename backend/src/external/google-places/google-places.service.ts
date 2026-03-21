@@ -31,6 +31,14 @@ export class GooglePlacesService {
           placeId: r.place_id,
           lat: r.geometry?.location?.lat ?? null,
           lng: r.geometry?.location?.lng ?? null,
+          viewport: r.geometry?.viewport
+            ? {
+                north: r.geometry.viewport.northeast.lat,
+                south: r.geometry.viewport.southwest.lat,
+                east: r.geometry.viewport.northeast.lng,
+                west: r.geometry.viewport.southwest.lng,
+              }
+            : null,
         }));
     } catch (err: any) {
       this.logger.error('Destination search failed', err.message);

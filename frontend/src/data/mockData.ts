@@ -42,6 +42,10 @@ export interface Trip {
   interests?: string[];
   centerLat?: number | null;
   centerLng?: number | null;
+  viewportNorth?: number | null;
+  viewportSouth?: number | null;
+  viewportEast?: number | null;
+  viewportWest?: number | null;
 }
 
 export const mockTrips: Trip[] = [

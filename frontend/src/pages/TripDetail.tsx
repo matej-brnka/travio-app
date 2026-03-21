@@ -286,6 +286,10 @@ const TripDetail = () => {
                 className="w-full h-full"
                 centerLat={trip.centerLat}
                 centerLng={trip.centerLng}
+                viewportNorth={trip.viewportNorth}
+                viewportSouth={trip.viewportSouth}
+                viewportEast={trip.viewportEast}
+                viewportWest={trip.viewportWest}
               />
             )}
           </div>
@@ -421,6 +425,10 @@ const TripDetail = () => {
                 hideBottomCards
                 centerLat={trip.centerLat}
                 centerLng={trip.centerLng}
+                viewportNorth={trip.viewportNorth}
+                viewportSouth={trip.viewportSouth}
+                viewportEast={trip.viewportEast}
+                viewportWest={trip.viewportWest}
               />
             )}
           </main>

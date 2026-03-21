@@ -1,11 +1,19 @@
 import { apiFetch } from './client';
 
+export interface DestinationViewport {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
 export interface DestinationResult {
   name: string;
   description: string;
   placeId: string;
   lat: number | null;
   lng: number | null;
+  viewport: DestinationViewport | null;
 }
 
 export const searchPlaces = (q: string, centerLat?: number | null, centerLng?: number | null) => {
