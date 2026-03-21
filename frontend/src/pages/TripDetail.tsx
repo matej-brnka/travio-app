@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Place } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
@@ -48,9 +48,13 @@ const TripDetail = () => {
   const viewParam = searchParams.get("view");
   const savedView = typeof window !== "undefined" ? localStorage.getItem("travio-view-mode") as "list" | "map" | null : null;
   const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : savedView ? savedView : (isMobile ? "map" : "list");
-  const { getTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, deleteTrip, addDayToTrip, removeDayFromTrip } = useTripContext();
+  const { getTrip, loadTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, deleteTrip, addDayToTrip, removeDayFromTrip } = useTripContext();
 
   const trip = getTrip(id || "");
+
+  useEffect(() => {
+    if (id) loadTrip(id);
+  }, [id]);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [showAddPlace, setShowAddPlace] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
