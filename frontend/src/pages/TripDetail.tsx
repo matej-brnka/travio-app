@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Place } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
+import { shareTrip } from "@/api/trips";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { cs } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -49,6 +57,9 @@ const TripDetail = () => {
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [showDeleteTrip, setShowDeleteTrip] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!trip) {
     return (
@@ -70,8 +81,25 @@ const TripDetail = () => {
     setSearchParams({ view });
   };
 
-  const handleShare = () => {
-    toast.success("Odkaz zkopírován! 🎉", { description: "https://travio.app/share/abc123" });
+  const handleShare = async () => {
+    setShareLoading(true);
+    try {
+      const { shareUrl: url } = await shareTrip(trip.id);
+      setShareUrl(url);
+      setCopied(false);
+    } catch {
+      toast.error("Nepodařilo se získat odkaz");
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    toast.success("Odkaz zkopírován do schránky!");
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleAddPlace = async (place: PlaceData): Promise<void> => {
@@ -243,7 +271,9 @@ const TripDetail = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setShowEditTrip(true)}>Upravit cestu</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleShare}>🔗 Sdílet odkaz</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleShare} disabled={shareLoading}>
+              {shareLoading ? "Načítám…" : "🔗 Sdílet odkaz"}
+            </DropdownMenuItem>
             <DropdownMenuItem className="text-destructive" onClick={() => setShowDeleteTrip(true)}>🗑️ Smazat cestu</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -499,6 +529,30 @@ const TripDetail = () => {
           }}
         />
       )}
+
+      {/* Share modal */}
+      <Dialog open={shareUrl !== null} onOpenChange={(v) => !v && setShareUrl(null)}>
+        <DialogContent className="max-w-sm mx-auto rounded-lg">
+          <DialogHeader>
+            <DialogTitle>Sdílet cestu 🔗</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Kdokoli s tímto odkazem si může prohlédnout cestu bez přihlášení.
+          </p>
+          <div className="flex items-center gap-2 bg-muted rounded-md px-3 py-2">
+            <span className="flex-1 text-sm text-foreground break-all select-all">
+              {shareUrl}
+            </span>
+          </div>
+          <Button className="w-full rounded-md" onClick={handleCopyLink}>
+            {copied ? (
+              <><Check className="w-4 h-4 mr-2" /> Zkopírováno!</>
+            ) : (
+              <><Copy className="w-4 h-4 mr-2" /> Kopírovat odkaz</>
+            )}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
