@@ -82,7 +82,22 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const data = await TripsApi.getTrips();
-      setTrips(data.map(mapTrip));
+      const trips = data.map(mapTrip);
+      setTrips(trips);
+
+      // Fire-and-forget: fetch weather for each trip that has center coords
+      trips.forEach(trip => {
+        if (!trip.centerLat || !trip.centerLng) return;
+        getTripWeather(trip.centerLat, trip.centerLng, trip.dateFrom, trip.dateTo)
+          .then(w => {
+            setTrips(prev => prev.map(t =>
+              t.id === trip.id
+                ? { ...t, weather: { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type } }
+                : t
+            ));
+          })
+          .catch(() => {});
+      });
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -114,12 +129,15 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
         try {
           const w = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo);
           trip.weather = { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type };
-          // Attach per-day weather
           trip.days = trip.days.map(day => {
             const dw = w.days.find(d => d.date === day.date);
             return dw ? { ...day, weather: { temp: dw.temp, icon: dw.icon } } : day;
           });
-        } catch {}
+        } catch (e) {
+          console.error('Weather fetch failed for trip', trip.id, e);
+        }
+      } else {
+        console.warn('No coords for weather on trip', trip.id, { lat, lng });
       }
 
       setTrips(prev => {
