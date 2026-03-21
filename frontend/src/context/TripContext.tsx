@@ -3,7 +3,7 @@ import { Trip, Place } from "@/data/mockData";
 import * as TripsApi from "@/api/trips";
 import * as DaysApi from "@/api/days";
 import * as PlacesApi from "@/api/places";
-import { getWeather } from "@/api/weather";
+import { getTripWeather } from "@/api/weather";
 import { supabase } from "@/lib/supabase";
 
 interface TripContextType {
@@ -105,13 +105,23 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await TripsApi.getTrip(id);
       const trip = mapTrip(data);
-      const allPlaces = trip.days.flatMap(d => d.places).concat(trip.unassigned);
-      const withCoords = allPlaces.find(p => p.lat && p.lng);
-      if (withCoords?.lat && withCoords?.lng) {
+
+      // Prefer trip center coords, fall back to first place with coords
+      const lat = trip.centerLat ?? trip.days.flatMap(d => d.places).concat(trip.unassigned).find(p => p.lat)?.lat ?? null;
+      const lng = trip.centerLng ?? trip.days.flatMap(d => d.places).concat(trip.unassigned).find(p => p.lng)?.lng ?? null;
+
+      if (lat && lng) {
         try {
-          trip.weather = await getWeather(withCoords.lat, withCoords.lng, trip.dateFrom);
+          const w = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo);
+          trip.weather = { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type };
+          // Attach per-day weather
+          trip.days = trip.days.map(day => {
+            const dw = w.days.find(d => d.date === day.date);
+            return dw ? { ...day, weather: { temp: dw.temp, icon: dw.icon } } : day;
+          });
         } catch {}
       }
+
       setTrips(prev => {
         const idx = prev.findIndex(t => t.id === id);
         if (idx >= 0) { const next = [...prev]; next[idx] = trip; return next; }

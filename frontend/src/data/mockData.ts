@@ -24,10 +24,16 @@ export interface Place {
   timeTo?: string;
 }
 
+export interface DayWeather {
+  temp: number | null;
+  icon: string | null;
+}
+
 export interface Day {
   id: string;
   date: string;
   places: Place[];
+  weather?: DayWeather | null;
 }
 
 export interface Trip {
@@ -36,7 +42,7 @@ export interface Trip {
   emoji: string;
   dateFrom: string;
   dateTo: string;
-  weather?: { temp: number | null; icon: string | null };
+  weather?: { temp: number | null; icon: string | null; type?: 'forecast' | 'historical' };
   days: Day[];
   unassigned: Place[];
   interests?: string[];

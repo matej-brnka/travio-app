@@ -142,6 +142,11 @@ const TripDetail = () => {
           onClick={() => setSelectedDayIndex(i)}
         >
           Den {i + 1}
+          {day.weather?.temp != null && (
+            <span className="ml-1.5 opacity-80 font-normal text-xs">
+              {day.weather.icon} {day.weather.temp}°
+            </span>
+          )}
           {day.places.length > 0 && (
             <span className="ml-1 opacity-50 font-normal">({day.places.length})</span>
           )}
@@ -396,6 +401,11 @@ const TripDetail = () => {
                     <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                       {format(parseISO(day.date), "EE d. M.", { locale: cs })}
                     </span>
+                    {day.weather?.temp != null && (
+                      <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                        {day.weather.icon} {day.weather.temp}°
+                      </span>
+                    )}
                     {day.places.length > 0 && (
                       <span className={`ml-auto float-right text-xs px-1.5 py-0.5 rounded-full ${
                         selectedDayIndex === i ? "bg-primary-foreground/20" : "bg-muted"

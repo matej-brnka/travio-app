@@ -41,9 +41,16 @@ const TripCard = ({ trip, onClick }: TripCardProps) => {
             <span>{totalDays} dní</span>
           </div>
           <div className="mt-2 text-sm text-muted-foreground">
-            {trip.weather?.temp != null
-              ? <span>{trip.weather.icon} {trip.weather.temp}°C průměrně</span>
-              : <span className="inline-block w-24 h-4 bg-muted animate-pulse rounded" />}
+            {trip.weather?.temp != null ? (
+              <span>
+                {trip.weather.icon} {trip.weather.temp}°C{' '}
+                <span className="text-xs opacity-60">
+                  {trip.weather.type === 'forecast' ? 'předpověď' : 'hist. průměr'}
+                </span>
+              </span>
+            ) : (
+              <span className="inline-block w-24 h-4 bg-muted animate-pulse rounded" />
+            )}
           </div>
         </div>
       </div>

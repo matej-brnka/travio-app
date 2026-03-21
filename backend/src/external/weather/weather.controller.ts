@@ -13,4 +13,14 @@ export class WeatherController {
   ) {
     return this.weather.getWeather(parseFloat(lat), parseFloat(lng), date);
   }
+
+  @Get('trip')
+  getTripWeather(
+    @Query('lat') lat: string,
+    @Query('lng') lng: string,
+    @Query('dateFrom') dateFrom: string,
+    @Query('dateTo') dateTo: string,
+  ) {
+    return this.weather.getTripWeather(parseFloat(lat), parseFloat(lng), dateFrom, dateTo);
+  }
 }
