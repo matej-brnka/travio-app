@@ -120,14 +120,14 @@ export class WeatherService {
       const url = `https://archive-api.open-meteo.com/v1/archive`
         + `?latitude=${lat}&longitude=${lng}`
         + `&start_date=${histFrom}&end_date=${histTo}`
-        + `&daily=temperature_2m_mean,weathercode&timezone=auto`;
+        + `&daily=temperature_2m_max,weathercode&timezone=auto`;
 
       const res = await fetch(url);
       if (!res.ok) throw new Error(`open-meteo ${res.status}`);
       const data: any = await res.json();
 
       const dates: string[] = data?.daily?.time ?? [];
-      const temps: number[] = data?.daily?.temperature_2m_mean ?? [];
+      const temps: number[] = data?.daily?.temperature_2m_max ?? [];
       const codes: number[] = data?.daily?.weathercode ?? [];
 
       // Map historical dates back to trip dates
@@ -176,19 +176,39 @@ export class WeatherService {
 
   private extractForDate(data: any, date: string, returnDate?: string): DayWeather {
     const timeseries: any[] = data?.properties?.timeseries ?? [];
-    const candidates = timeseries.filter((t: any) => t.time?.startsWith(date));
-    const entry = candidates.find((t: any) => t.time?.includes('T12:')) ?? candidates[0];
 
-    if (!entry) return { date: returnDate ?? date, temp: null, icon: null };
+    // Daytime entries: 06:00 – 20:00
+    const daytime = timeseries.filter((t: any) => {
+      if (!t.time?.startsWith(date)) return false;
+      const hour = parseInt(t.time.slice(11, 13), 10);
+      return hour >= 6 && hour <= 20;
+    });
 
-    const temp = Math.round(entry.data?.instant?.details?.air_temperature ?? null);
-    const symbolCode: string = (
-      entry.data?.next_6_hours?.summary?.symbol_code ??
-      entry.data?.next_1_hours?.summary?.symbol_code ??
-      ''
-    ).replace(/_day|_night|_polartwilight/, '');
+    const entries = daytime.length > 0
+      ? daytime
+      : timeseries.filter((t: any) => t.time?.startsWith(date)); // fallback: all entries
 
+    if (!entries.length) return { date: returnDate ?? date, temp: null, icon: null };
+
+    // Average temperature across entries
+    const temps = entries
+      .map((e: any) => e.data?.instant?.details?.air_temperature)
+      .filter((v: any) => v != null) as number[];
+    const temp = temps.length ? Math.round(temps.reduce((a, b) => a + b, 0) / temps.length) : null;
+
+    // Most common symbol code
+    const symbolCounts: Record<string, number> = {};
+    for (const e of entries) {
+      const code = (
+        e.data?.next_1_hours?.summary?.symbol_code ??
+        e.data?.next_6_hours?.summary?.symbol_code ??
+        ''
+      ).replace(/_day|_night|_polartwilight/, '');
+      if (code) symbolCounts[code] = (symbolCounts[code] ?? 0) + 1;
+    }
+    const symbolCode = Object.entries(symbolCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
     const mapped = SYMBOL_MAP[symbolCode] ?? { icon: '🌡️' };
-    return { date: returnDate ?? date, temp: isNaN(temp) ? null : temp, icon: mapped.icon };
+
+    return { date: returnDate ?? date, temp, icon: mapped.icon };
   }
 }

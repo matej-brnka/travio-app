@@ -33,20 +33,27 @@ export const useTripContext = () => {
   return ctx;
 };
 
+// pg DATE columns can come back as full ISO timestamps – normalize to YYYY-MM-DD
+function toDate(v: any): string {
+  if (!v) return '';
+  const s = String(v);
+  return s.length > 10 ? s.slice(0, 10) : s;
+}
+
 function mapTrip(t: any): Trip {
   return {
     id: t.id,
     name: t.name,
     emoji: t.emoji,
-    dateFrom: t.dateFrom,
-    dateTo: t.dateTo,
+    dateFrom: toDate(t.dateFrom),
+    dateTo: toDate(t.dateTo),
     interests: t.interests ?? [],
     weather: t.weather,
     centerLat: t.centerLat ?? null,
     centerLng: t.centerLng ?? null,
     days: (t.days ?? []).map((d: any) => ({
       id: d.id,
-      date: d.date,
+      date: toDate(d.date),
       places: (d.places ?? []).map(mapPlace),
     })),
     unassigned: (t.unassigned ?? []).map(mapPlace),
@@ -117,7 +124,6 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadTrip = useCallback(async (id: string): Promise<Trip | undefined> => {
-    console.log('[loadTrip] called for', id);
     try {
       const data = await TripsApi.getTrip(id);
       const trip = mapTrip(data);
@@ -125,23 +131,18 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
       const allPlaces = trip.days.flatMap(d => d.places).concat(trip.unassigned);
       const lat = trip.centerLat ?? allPlaces.find(p => p.lat)?.lat ?? null;
       const lng = trip.centerLng ?? allPlaces.find(p => p.lng)?.lng ?? null;
-      console.log('[loadTrip] coords', { lat, lng, centerLat: trip.centerLat, centerLng: trip.centerLng });
 
       if (lat && lng) {
         try {
-          console.log('[loadTrip] fetching weather for', trip.dateFrom, '–', trip.dateTo);
           const w = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo);
-          console.log('[loadTrip] weather result', w);
           trip.weather = { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type };
           trip.days = trip.days.map(day => {
             const dw = w.days.find(d => d.date === day.date);
             return dw ? { ...day, weather: { temp: dw.temp, icon: dw.icon } } : day;
           });
         } catch (e) {
-          console.error('[loadTrip] weather fetch failed', e);
+          console.error('Weather fetch failed', e);
         }
-      } else {
-        console.warn('[loadTrip] no coords – weather skipped', { lat, lng });
       }
 
       setTrips(prev => {
