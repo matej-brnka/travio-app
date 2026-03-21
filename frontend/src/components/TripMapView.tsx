@@ -14,6 +14,8 @@ interface TripMapViewProps {
   onAddPlace?: () => void;
   className?: string;
   hideBottomCards?: boolean;
+  centerLat?: number | null;
+  centerLng?: number | null;
 }
 
 /* ─── Route polyline using Maps library ─── */
@@ -89,6 +91,8 @@ const MapContent = ({
   onPlaceClick,
   onAddPlace,
   hideBottomCards,
+  centerLat,
+  centerLng,
 }: Omit<TripMapViewProps, "className">) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -112,8 +116,12 @@ const MapContent = ({
     <>
       <Map
         mapId="trip-map"
-        defaultZoom={12}
-        defaultCenter={{ lat: 50.08, lng: 14.44 }}
+        defaultZoom={centerLat && centerLng ? 12 : 4}
+        defaultCenter={
+          centerLat && centerLng
+            ? { lat: centerLat, lng: centerLng }
+            : { lat: 48.5, lng: 14.5 }
+        }
         disableDefaultUI={false}
         gestureHandling="greedy"
         style={{ width: "100%", height: "100%" }}
@@ -241,6 +249,8 @@ const TripMapView = ({
   onAddPlace,
   className = "",
   hideBottomCards = false,
+  centerLat,
+  centerLng,
 }: TripMapViewProps) => {
   return (
     <div className={`relative w-full h-full min-h-0 ${className}`}>
@@ -250,6 +260,8 @@ const TripMapView = ({
           onPlaceClick={onPlaceClick}
           onAddPlace={onAddPlace}
           hideBottomCards={hideBottomCards}
+          centerLat={centerLat}
+          centerLng={centerLng}
         />
       </APIProvider>
     </div>

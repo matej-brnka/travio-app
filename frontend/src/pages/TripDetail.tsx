@@ -284,6 +284,8 @@ const TripDetail = () => {
                 onPlaceClick={handlePlaceClick}
                 onAddPlace={() => setShowAddPlace(true)}
                 className="w-full h-full"
+                centerLat={trip.centerLat}
+                centerLng={trip.centerLng}
               />
             )}
           </div>
@@ -417,6 +419,8 @@ const TripDetail = () => {
                 onPlaceClick={handlePlaceClick}
                 className="h-full"
                 hideBottomCards
+                centerLat={trip.centerLat}
+                centerLng={trip.centerLng}
               />
             )}
           </main>
