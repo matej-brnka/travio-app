@@ -146,11 +146,6 @@ const TripDetail = () => {
           onClick={() => setSelectedDayIndex(i)}
         >
           Den {i + 1}
-          {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
-            <span className="ml-1.5 opacity-80 font-normal text-xs">
-              {day.weather.icon} {day.weather.tempMin != null && day.weather.tempMin !== undefined ? `${day.weather.temp}°/${day.weather.tempMin}°` : `${day.weather.temp}°`}
-            </span>
-          )}
           {day.places.length > 0 && (
             <span className="ml-1 opacity-50 font-normal">({day.places.length})</span>
           )}
@@ -184,9 +179,16 @@ const TripDetail = () => {
   const placesListContent = (
     <>
       {currentDay && (
-        <p className="text-sm text-muted-foreground mb-3">
-          📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
-        </p>
+        <div className="flex items-center gap-2 mb-3">
+          <p className="text-sm text-muted-foreground">
+            📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
+          </p>
+          {trip.weather?.type === 'forecast' && currentDay.weather?.temp != null && (
+            <span className="text-sm text-muted-foreground">
+              {currentDay.weather.icon} {currentDay.weather.tempMin != null && currentDay.weather.tempMin !== undefined ? `${currentDay.weather.temp}°/${currentDay.weather.tempMin}°` : `${currentDay.weather.temp}°`}
+            </span>
+          )}
+        </div>
       )}
       {isUnassigned && (
         <p className="text-xs text-muted-foreground mb-3">
