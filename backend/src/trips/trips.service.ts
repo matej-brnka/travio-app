@@ -170,7 +170,7 @@ export class TripsService {
 
   async findByShareToken(token: string) {
     const trips = await this.supabase.query(
-      `SELECT id, name, emoji, date_from, date_to, interests FROM trips WHERE share_token = $1`,
+      `SELECT id, name, emoji, date_from, date_to, interests, center_lat, center_lng FROM trips WHERE share_token = $1`,
       [token],
     );
     if (!trips.length) throw new NotFoundException('Shared trip not found');
@@ -199,6 +199,8 @@ export class TripsService {
       dateFrom: trips[0].date_from,
       dateTo: trips[0].date_to,
       interests: trips[0].interests ?? [],
+      centerLat: trips[0].center_lat ?? null,
+      centerLng: trips[0].center_lng ?? null,
       days: days.map((d) => ({
         id: d.id,
         date: d.date,

@@ -10,3 +10,10 @@ export const deleteTrip = (id: string) =>
   apiFetch(`/trips/${id}`, { method: 'DELETE' });
 export const shareTrip = (id: string) =>
   apiFetch<{ shareUrl: string }>(`/trips/${id}/share`);
+
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3123/api';
+export const getSharedTrip = async (token: string): Promise<any> => {
+  const res = await fetch(`${BASE_URL}/shared/${token}`);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return res.json();
+};
