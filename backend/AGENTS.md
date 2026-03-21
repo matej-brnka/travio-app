@@ -117,8 +117,8 @@ CREATE TABLE places (
 | DELETE | /api/trips/:id/places/:placeId | Smazání místa |
 | PATCH | /api/trips/:id/places/:placeId/move | Přesun místa do jiného dne |
 | PATCH | /api/trips/:id/days/:dayId/reorder | Změna pořadí míst |
-| GET | /api/trips/:id/share | Vygeneruj/vrať share token |
-| GET | /api/shared/:token | Veřejný read-only detail cesty |
+| GET | /api/trips/:id/share | Vygeneruj/vrať share token; URL sestavena z `FRONTEND_URL` env + `/share/:token` |
+| GET | /api/shared/:token | Veřejný read-only detail cesty (bez auth); vrací trip + days + places + centerLat/Lng |
 | GET | /api/places/search?q=&centerLat=&centerLng= | Vyhledávání míst (location bias) |
 | GET | /api/places/search-destinations?q= | Vyhledávání destinací – vrací `{ name, description, placeId, lat, lng, viewport: { north, south, east, west } }` |
 | GET | /api/weather?lat=&lng=&date= | Počasí z yr.no |

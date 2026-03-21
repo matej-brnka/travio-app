@@ -59,7 +59,7 @@ src/
 │   ├── PlaceDetail.tsx  # Detail místa (mobilní celá stránka)
 │   ├── Landing.tsx      # Veřejná landing page
 │   ├── Login.tsx        # Přihlašovací stránka
-│   └── SharedTrip.tsx   # Read-only sdílená cesta
+│   └── SharedTrip.tsx   # Read-only sdílená cesta – fetchuje z API dle tokenu v URL, FullFrame
 └── hooks/
     ├── use-mobile.tsx
     └── use-toast.ts
@@ -124,7 +124,19 @@ interface DestinationResult {
 - Supabase vydává tokeny s algoritmem **ES256** – backend validuje přes JWKS
 
 ## API volání
-Všechna volání přes `apiFetch()` z `src/api/client.ts`.
+Většina volání přes `apiFetch()` z `src/api/client.ts` – automaticky přidává Bearer token.
+Výjimka: `getSharedTrip(token)` v `api/trips.ts` používá plain `fetch` (bez auth, veřejný endpoint).
 Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
+
+## Sdílení cest
+- `TripDetail` – tlačítko „Sdílet odkaz" zavolá `GET /api/trips/:id/share`, otevře Dialog modal
+- Modal zobrazí URL a tlačítko „Kopírovat odkaz" (`navigator.clipboard` + toast)
+- `SharedTrip.tsx` – veřejná stránka na `/share/:token`, čte token z `useParams()`,
+  fetchuje `GET /api/shared/:token` (bez autentizace), layout totožný s TripDetail (read-only)
+- Router: `/share/:token` obaleno v `FullFrame` (ne MobileFrame) – plná šířka na desktopu
+
+## Routování (`App.tsx`)
+- `MobileFrame` (`max-w-[480px]`) – Login, Dashboard, NotFound
+- `FullFrame` (bez omezení šířky) – Landing, TripDetail, PlaceDetail, **SharedTrip**
 
 ## Pokud přidáš novou funkci, endpoint nebo změníš strukturu projektu, aktualizuj příslušný AGENTS.md.
