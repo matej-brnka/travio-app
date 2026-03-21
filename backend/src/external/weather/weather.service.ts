@@ -190,11 +190,11 @@ export class WeatherService {
 
     if (!entries.length) return { date: returnDate ?? date, temp: null, icon: null };
 
-    // Average temperature across entries
+    // Maximum temperature across daytime entries
     const temps = entries
       .map((e: any) => e.data?.instant?.details?.air_temperature)
       .filter((v: any) => v != null) as number[];
-    const temp = temps.length ? Math.round(temps.reduce((a, b) => a + b, 0) / temps.length) : null;
+    const temp = temps.length ? Math.round(Math.max(...temps)) : null;
 
     // Most common symbol code
     const symbolCounts: Record<string, number> = {};
