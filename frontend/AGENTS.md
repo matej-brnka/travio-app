@@ -6,6 +6,8 @@
 - Tailwind CSS + shadcn/ui komponenty
 - react-day-picker (výběr dat)
 - Routování: react-router-dom
+- `@vis.gl/react-google-maps` – Google Maps (APIProvider, Map, AdvancedMarker, useMapsLibrary)
+- `@types/google.maps` – typy pro google.maps namespace
 
 ## Jak spustit
 ```bash
@@ -34,10 +36,10 @@ src/
 │   ├── EmojiPicker.tsx       # Výběr emoji
 │   ├── MovePlaceModal.tsx    # Modal přesunu místa do jiného dne
 │   ├── NavLink.tsx           # Navigační odkaz
-│   ├── NewTripModal.tsx      # Modal pro vytvoření cesty
+│   ├── NewTripModal.tsx      # Modal pro vytvoření cesty (ukládá viewport destinace)
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
 │   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa
-│   └── TripMapView.tsx       # Pohled mapy s piny a kartami
+│   └── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds
 ├── api/
 │   ├── client.ts        # apiFetch – přidává Bearer token ze Supabase session
 │   ├── trips.ts         # CRUD cest
@@ -82,6 +84,30 @@ interface Trip {
   weather?: { temp: number | null; icon: string | null };  // volitelné, lazy load
   days: Day[]; unassigned: Place[];
   interests?: string[];
+  centerLat?: number | null;   // střed destinace (z Google Places)
+  centerLng?: number | null;
+  viewportNorth?: number | null;  // viewport destinace pro auto-zoom mapy
+  viewportSouth?: number | null;
+  viewportEast?: number | null;
+  viewportWest?: number | null;
+}
+```
+
+## TripMapView – chování mapy
+Props: `places`, `onPlaceClick`, `onAddPlace?`, `className?`, `hideBottomCards?`, `centerLat?`, `centerLng?`, `viewportNorth/South/East/West?`
+
+Auto-zoom priorita (BoundsFitter):
+1. ≥2 místa s koordináty v aktuálním dni → `fitBounds` na tato místa
+2. 1 místo → střed + zoom 14
+3. Žádná místa → `fitBounds` na viewport destinace (stát/město/region)
+
+## DestinationResult (z `src/api/search.ts`)
+```typescript
+interface DestinationViewport { north: number; south: number; east: number; west: number; }
+interface DestinationResult {
+  name: string; description: string; placeId: string;
+  lat: number | null; lng: number | null;
+  viewport: DestinationViewport | null;  // viewport pro auto-zoom, vrací backend
 }
 ```
 

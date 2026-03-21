@@ -61,6 +61,8 @@ CREATE TABLE trips (
   share_token TEXT UNIQUE,           -- pro anonymní sdílení
   center_lat  FLOAT,                 -- souřadnice destinace (z Google Places)
   center_lng  FLOAT,
+  -- TODO migrace: viewport_north, viewport_south, viewport_east, viewport_west FLOAT
+  -- (zatím jen ve frontend Trip modelu, do DB zatím nepersistováno)
   created_at  TIMESTAMPTZ DEFAULT now(),
   updated_at  TIMESTAMPTZ DEFAULT now()
 );
@@ -118,7 +120,7 @@ CREATE TABLE places (
 | GET | /api/trips/:id/share | Vygeneruj/vrať share token |
 | GET | /api/shared/:token | Veřejný read-only detail cesty |
 | GET | /api/places/search?q=&centerLat=&centerLng= | Vyhledávání míst (location bias) |
-| GET | /api/places/search-destinations?q= | Vyhledávání destinací (města, státy, regiony) |
+| GET | /api/places/search-destinations?q= | Vyhledávání destinací – vrací `{ name, description, placeId, lat, lng, viewport: { north, south, east, west } }` |
 | GET | /api/weather?lat=&lng=&date= | Počasí z yr.no |
 | POST | /api/trips/:id/ai-generate | AI generování itineráře |
 

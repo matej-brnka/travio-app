@@ -90,6 +90,7 @@ OPENAI_MODEL=gpt-4o-mini
 Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript nebo Supabase SQL Editor:
 - `001_initial_schema.sql` – tabulky trips, days, places + RLS policies
 - `002_trip_center.sql` – sloupce center_lat, center_lng na trips
+- TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
 ## Jak spustit testy
 ```bash
