@@ -157,7 +157,7 @@ export class TripsService {
     // Return existing token if already generated
     if (trips[0].share_token) {
       const token = trips[0].share_token;
-      return { shareUrl: `${this.config.get('FRONTEND_URL') ?? 'http://localhost:5173'}/shared/${token}` };
+      return { shareUrl: `${this.config.get('FRONTEND_URL') ?? 'http://localhost:5173'}/share/${token}` };
     }
 
     const token = randomBytes(12).toString('base64url').slice(0, 16);
@@ -165,7 +165,7 @@ export class TripsService {
       `UPDATE trips SET share_token = $1 WHERE id = $2`,
       [token, tripId],
     );
-    return { shareUrl: `${this.config.get('FRONTEND_URL') ?? 'http://localhost:5173'}/shared/${token}` };
+    return { shareUrl: `${this.config.get('FRONTEND_URL') ?? 'http://localhost:5173'}/share/${token}` };
   }
 
   async findByShareToken(token: string) {
