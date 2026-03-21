@@ -274,12 +274,18 @@ const TripDetail = () => {
         <div className="px-4 py-2">{dayPills}</div>
         {viewMode === "map" ? (
           <div className="flex-1 min-h-0 relative">
-            <TripMapView
-              places={currentPlaces}
-              onPlaceClick={handlePlaceClick}
-              onAddPlace={() => setShowAddPlace(true)}
-              className="w-full h-full"
-            />
+            {!import.meta.env.VITE_GOOGLE_MAPS_KEY ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                Google Maps klíč není nastaven (VITE_GOOGLE_MAPS_KEY)
+              </div>
+            ) : (
+              <TripMapView
+                places={currentPlaces}
+                onPlaceClick={handlePlaceClick}
+                onAddPlace={() => setShowAddPlace(true)}
+                className="w-full h-full"
+              />
+            )}
           </div>
         ) : (
           <div className="px-4 pb-24">{placesListContent}</div>
@@ -401,12 +407,18 @@ const TripDetail = () => {
 
           {/* Center: full map */}
           <main className="flex-1 relative">
-            <TripMapView
-              places={currentPlaces}
-              onPlaceClick={handlePlaceClick}
-              className="h-full"
-              hideBottomCards
-            />
+            {!import.meta.env.VITE_GOOGLE_MAPS_KEY ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                Google Maps klíč není nastaven (VITE_GOOGLE_MAPS_KEY)
+              </div>
+            ) : (
+              <TripMapView
+                places={currentPlaces}
+                onPlaceClick={handlePlaceClick}
+                className="h-full"
+                hideBottomCards
+              />
+            )}
           </main>
 
           {/* Right: place detail panel */}
