@@ -117,27 +117,31 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadTrip = useCallback(async (id: string): Promise<Trip | undefined> => {
+    console.log('[loadTrip] called for', id);
     try {
       const data = await TripsApi.getTrip(id);
       const trip = mapTrip(data);
 
-      // Prefer trip center coords, fall back to first place with coords
-      const lat = trip.centerLat ?? trip.days.flatMap(d => d.places).concat(trip.unassigned).find(p => p.lat)?.lat ?? null;
-      const lng = trip.centerLng ?? trip.days.flatMap(d => d.places).concat(trip.unassigned).find(p => p.lng)?.lng ?? null;
+      const allPlaces = trip.days.flatMap(d => d.places).concat(trip.unassigned);
+      const lat = trip.centerLat ?? allPlaces.find(p => p.lat)?.lat ?? null;
+      const lng = trip.centerLng ?? allPlaces.find(p => p.lng)?.lng ?? null;
+      console.log('[loadTrip] coords', { lat, lng, centerLat: trip.centerLat, centerLng: trip.centerLng });
 
       if (lat && lng) {
         try {
+          console.log('[loadTrip] fetching weather for', trip.dateFrom, '–', trip.dateTo);
           const w = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo);
+          console.log('[loadTrip] weather result', w);
           trip.weather = { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type };
           trip.days = trip.days.map(day => {
             const dw = w.days.find(d => d.date === day.date);
             return dw ? { ...day, weather: { temp: dw.temp, icon: dw.icon } } : day;
           });
         } catch (e) {
-          console.error('Weather fetch failed for trip', trip.id, e);
+          console.error('[loadTrip] weather fetch failed', e);
         }
       } else {
-        console.warn('No coords for weather on trip', trip.id, { lat, lng });
+        console.warn('[loadTrip] no coords – weather skipped', { lat, lng });
       }
 
       setTrips(prev => {
