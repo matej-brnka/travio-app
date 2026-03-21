@@ -1347,6 +1347,10 @@ Projdi celou aplikaci, oprav případné chyby, doplň chybějící testy a ově
    - [ ] Sdílení cesty přes anonymní odkaz
    - [ ] Zobrazení sdílené cesty bez přihlášení
    - [ ] Přepínání pohledu Seznam / Mapa
+   - [ ] Kliknutí na avatar zobrazí dropdown s jménem, emailem a tlačítkem odhlášení
+   - [ ] Odhlášení přesměruje na Login stránku (`/`)
+   - [ ] Přímý přístup na `/app` bez přihlášení přesměruje na `/`
+   - [ ] Avatar v Dashboardu i TripDetail zobrazuje skutečnou profilovou fotku z Google účtu
 
 4. **Chybové stavy** – ověř:
    - Výpadek externího API → zobrazí se chybová hláška, ne white screen
@@ -1376,11 +1380,11 @@ Projdi celou aplikaci, oprav případné chyby, doplň chybějící testy a ově
 - `cd backend && npm run test` – všechny testy zelené
 - `cd frontend && npm run test` – všechny testy zelené
 - `cd frontend && npm run build` – produkční build bez chyb a TypeScript warningů
-- Všech 12 bodů MVP checklistu výše je zaškrtnuto
+- Všech 16 bodů MVP checklistu výše je zaškrtnuto
 - `.env` soubory nejsou v git historii
 
 ### Závislosti
-Chunky 1–13 (všechny předchozí).
+Chunky 1–13 + Chunk 15 (Uživatelský profil a odhlášení).
 
 ---
 
