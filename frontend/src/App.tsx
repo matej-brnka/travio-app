@@ -37,7 +37,7 @@ const App = () => (
             <Route path="/app" element={<MobileFrame><Dashboard /></MobileFrame>} />
             <Route path="/app/trip/:id" element={<FullFrame><TripDetail /></FullFrame>} />
             <Route path="/app/trip/:id/place/:placeId" element={<FullFrame><PlaceDetail /></FullFrame>} />
-            <Route path="/share/:token" element={<MobileFrame><SharedTrip /></MobileFrame>} />
+            <Route path="/share/:token" element={<FullFrame><SharedTrip /></FullFrame>} />
             <Route path="*" element={<MobileFrame><NotFound /></MobileFrame>} />
           </Routes>
         </BrowserRouter>
