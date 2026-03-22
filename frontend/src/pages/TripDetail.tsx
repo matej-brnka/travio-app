@@ -13,6 +13,7 @@ import MovePlaceModal from "@/components/MovePlaceModal";
 import EditTripModal from "@/components/EditTripModal";
 import TripMapView from "@/components/TripMapView";
 import PlaceDetailPanel from "@/components/PlaceDetailPanel";
+import { UserAvatar } from "@/components/UserAvatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -295,18 +296,21 @@ const TripDetail = () => {
             {format(parseISO(trip.dateTo), "d. M. yyyy", { locale: cs })} • {totalDays} dní · {totalNights} nocí
           </p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="p-1 text-foreground"><MoreVertical className="w-5 h-5" /></button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setShowEditTrip(true)}>Upravit cestu</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleShare} disabled={shareLoading}>
-              {shareLoading ? "Načítám…" : "🔗 Sdílet odkaz"}
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={() => setShowDeleteTrip(true)}>🗑️ Smazat cestu</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1 text-foreground"><MoreVertical className="w-5 h-5" /></button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowEditTrip(true)}>Upravit cestu</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleShare} disabled={shareLoading}>
+                {shareLoading ? "Načítám…" : "🔗 Sdílet odkaz"}
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={() => setShowDeleteTrip(true)}>🗑️ Smazat cestu</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <UserAvatar />
+        </div>
       </div>
 
       {/* ══════════════════════════════════════════
@@ -405,6 +409,7 @@ const TripDetail = () => {
               <Trash2 className="w-4 h-4 mr-1.5" />
               Smazat
             </Button>
+            <UserAvatar />
           </div>
         </header>
 

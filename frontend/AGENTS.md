@@ -32,6 +32,7 @@ src/
 ├── components/
 │   ├── ui/              # shadcn/ui – NEUPRAVUJ (generované)
 │   ├── AddPlaceSheet.tsx     # Sheet pro přidání místa (podporuje multi-dest. bias vyhledávání)
+│   ├── AuthGuard.tsx         # Ochrana /app/* rout – přesměruje na /login bez session
 │   ├── DestinationInput.tsx  # Autocomplete input pro jednu destinaci
 │   ├── EditTripModal.tsx     # Modal pro editaci cesty (multi-destinace)
 │   ├── EmojiPicker.tsx       # Výběr emoji
@@ -40,7 +41,8 @@ src/
 │   ├── NewTripModal.tsx      # Modal pro vytvoření cesty (ukládá viewport destinace)
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
 │   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa
-│   └── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds
+│   ├── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds
+│   └── UserAvatar.tsx        # Avatar uživatele + dropdown (jméno, email, odhlášení)
 ├── api/
 │   ├── client.ts        # apiFetch – přidává Bearer token ze Supabase session
 │   ├── trips.ts         # CRUD cest
@@ -126,6 +128,9 @@ interface DestinationResult {
 - `supabase.auth.signInWithOAuth({ provider: 'google' })` v `Login.tsx`
 - Token se automaticky přikládá v `api/client.ts` ke každému API volání
 - Supabase vydává tokeny s algoritmem **ES256** – backend validuje přes JWKS
+- **AuthGuard** (`components/AuthGuard.tsx`) – obaluje `/app/*` routy; při absenci session přesměruje na `/login`
+- **UserAvatar** (`components/UserAvatar.tsx`) – avatar z `user_metadata.avatar_url`, dropdown s jménem/emailem/odhlášením; zobrazen v Dashboard i TripDetail (mobile + desktop)
+- Odhlášení: `supabase.auth.signOut()` → přesměrování na `/login`
 
 ## API volání
 Většina volání přes `apiFetch()` z `src/api/client.ts` – automaticky přidává Bearer token.

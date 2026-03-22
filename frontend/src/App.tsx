@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TripProvider } from "@/context/TripContext";
+import { AuthGuard } from "@/components/AuthGuard";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -34,9 +35,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<FullFrame><Landing /></FullFrame>} />
             <Route path="/login" element={<MobileFrame><Login /></MobileFrame>} />
-            <Route path="/app" element={<MobileFrame><Dashboard /></MobileFrame>} />
-            <Route path="/app/trip/:id" element={<FullFrame><TripDetail /></FullFrame>} />
-            <Route path="/app/trip/:id/place/:placeId" element={<FullFrame><PlaceDetail /></FullFrame>} />
+            <Route path="/app" element={<MobileFrame><AuthGuard><Dashboard /></AuthGuard></MobileFrame>} />
+            <Route path="/app/trip/:id" element={<FullFrame><AuthGuard><TripDetail /></AuthGuard></FullFrame>} />
+            <Route path="/app/trip/:id/place/:placeId" element={<FullFrame><AuthGuard><PlaceDetail /></AuthGuard></FullFrame>} />
             <Route path="/share/:token" element={<FullFrame><SharedTrip /></FullFrame>} />
             <Route path="*" element={<MobileFrame><NotFound /></MobileFrame>} />
           </Routes>

@@ -7,6 +7,7 @@ import TripCard from "@/components/TripCard";
 import NewTripModal from "@/components/NewTripModal";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
+import { UserAvatar } from "@/components/UserAvatar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -24,9 +25,7 @@ const Dashboard = () => {
       <div className="flex items-center justify-between px-5 py-4">
         <span className="text-xl font-bold text-foreground">✈️ Travio</span>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-            U
-          </div>
+          <UserAvatar />
         </div>
       </div>
 
