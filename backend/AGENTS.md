@@ -30,9 +30,6 @@ SUPABASE_SERVICE_ROLE_KEY=...       # DB heslo, jen na backendu!
 # Supabase project URL (pro JWKS JWT validaci)
 SUPABASE_PROJECT_URL=https://your-project-ref.supabase.co
 
-# JWT_SECRET zachován pro zpětnou kompatibilitu, ale validace probíhá přes JWKS (ES256)
-JWT_SECRET=...
-
 GOOGLE_PLACES_API_KEY=...
 YR_NO_USER_AGENT=travio/1.0 your@email.com
 OPENAI_API_KEY=...                  # pro AI generování itineráře
@@ -43,7 +40,7 @@ OPENAI_MODEL=gpt-4o-mini
 - Supabase nově vydává tokeny s algoritmem **ES256** (asymetrické klíče)
 - Backend validuje tokeny přes **JWKS endpoint**: `${SUPABASE_PROJECT_URL}/auth/v1/.well-known/jwks.json`
 - Používá balíček `jwks-rsa` s `passportJwtSecret`
-- `JWT_SECRET` v `.env` již není potřeba pro validaci, ale může být zachován
+- `JWT_SECRET` se nepoužívá – validace probíhá výhradně přes JWKS
 
 ## Databázové schéma (Supabase / PostgreSQL)
 
