@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Place, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
+import { getPlacePhoto } from "@/api/search";
 import { ArrowLeft, MoreVertical, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,22 @@ const PlaceDetail = () => {
 
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const photoRevokeRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!place?.googlePlaceId) return;
+    let cancelled = false;
+    getPlacePhoto(place.googlePlaceId)
+      .then((url) => {
+        if (cancelled) { URL.revokeObjectURL(url); return; }
+        if (photoRevokeRef.current) URL.revokeObjectURL(photoRevokeRef.current);
+        photoRevokeRef.current = url;
+        setPhotoUrl(url);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [place?.googlePlaceId]);
 
   if (!trip || !place) {
     return (
@@ -119,13 +136,14 @@ const PlaceDetail = () => {
       </div>
 
       <div className="px-5 pb-24">
-        {/* Mini map placeholder */}
-        <div className="bg-muted rounded-lg h-40 flex items-center justify-center mt-4 mb-5">
-          <div className="text-center text-muted-foreground">
-            <span className="text-3xl block">🗺️</span>
-            <p className="text-xs mt-1">Mapbox static (TODO)</p>
+        {/* Place photo */}
+        {photoUrl ? (
+          <div className="rounded-lg overflow-hidden h-48 mt-4 mb-5">
+            <img src={photoUrl} alt={place.name} className="w-full h-full object-cover" />
           </div>
-        </div>
+        ) : place.googlePlaceId ? (
+          <div className="bg-muted rounded-lg h-48 flex items-center justify-center mt-4 mb-5 animate-pulse" />
+        ) : null}
 
         {/* Emoji + Time range */}
         <div className="space-y-3 mb-5">

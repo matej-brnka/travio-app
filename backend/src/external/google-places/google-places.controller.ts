@@ -1,4 +1,5 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Res, NotFoundException } from '@nestjs/common';
+import { Response } from 'express';
 import { GooglePlacesService } from './google-places.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
@@ -23,5 +24,14 @@ export class GooglePlacesController {
       centerLat ? parseFloat(centerLat) : undefined,
       centerLng ? parseFloat(centerLng) : undefined,
     );
+  }
+
+  @Get('photo')
+  async photo(@Query('googlePlaceId') googlePlaceId: string, @Res() res: Response) {
+    const result = await this.googlePlaces.getPhoto(googlePlaceId);
+    if (!result) throw new NotFoundException('Photo not found');
+    res.setHeader('Content-Type', result.contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.end(result.buffer);
   }
 }

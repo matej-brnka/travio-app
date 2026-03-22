@@ -16,3 +16,14 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
   return res.json();
 }
+
+export async function apiFetchBlob(path: string): Promise<string> {
+  const session = await supabase.auth.getSession();
+  const token = session.data.session?.access_token;
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}

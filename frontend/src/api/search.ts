@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, apiFetchBlob } from './client';
 
 export interface DestinationViewport {
   north: number;
@@ -25,3 +25,6 @@ export const searchPlaces = (q: string, centerLat?: number | null, centerLng?: n
 
 export const searchDestinations = (q: string) =>
   apiFetch<DestinationResult[]>(`/places/search-destinations?q=${encodeURIComponent(q)}`);
+
+export const getPlacePhoto = (googlePlaceId: string) =>
+  apiFetchBlob(`/places/photo?googlePlaceId=${encodeURIComponent(googlePlaceId)}`);

@@ -46,6 +46,28 @@ export class GooglePlacesService {
     }
   }
 
+  async getPhoto(googlePlaceId: string): Promise<{ buffer: Buffer; contentType: string } | null> {
+    if (!this.apiKey) return null;
+    try {
+      // 1. Fetch photo reference from Place Details
+      const detailUrl = `${BASE}/details/json?place_id=${googlePlaceId}&fields=photos&key=${this.apiKey}`;
+      const detailData: any = await (await fetch(detailUrl)).json();
+      const photoRef = detailData?.result?.photos?.[0]?.photo_reference;
+      if (!photoRef) return null;
+
+      // 2. Fetch the photo (Google returns a redirect; fetch follows it automatically)
+      const photoUrl = `${BASE}/photo?maxwidth=800&photo_reference=${photoRef}&key=${this.apiKey}`;
+      const photoRes = await fetch(photoUrl);
+      if (!photoRes.ok) return null;
+      const contentType = photoRes.headers.get('content-type') ?? 'image/jpeg';
+      const buffer = Buffer.from(await photoRes.arrayBuffer());
+      return { buffer, contentType };
+    } catch (err: any) {
+      this.logger.error('getPhoto failed', err.message);
+      return null;
+    }
+  }
+
   async search(query: string, centerLat?: number, centerLng?: number): Promise<any[]> {
     if (!this.apiKey) {
       throw new ServiceUnavailableException('Google Places API key is not configured');
