@@ -37,6 +37,16 @@ export class DaysService {
     return { ...inserted[0], places: [] };
   }
 
+  async updateDestination(tripId: string, dayId: string, userId: string, destinationIndex: number) {
+    await this.assertOwner(tripId, userId);
+    const rows = await this.supabase.query(
+      `UPDATE days SET destination_index = $1 WHERE id = $2 AND trip_id = $3 RETURNING id`,
+      [destinationIndex, dayId, tripId],
+    );
+    if (!rows.length) throw new NotFoundException('Day not found');
+    return { updated: true };
+  }
+
   async removeDay(tripId: string, dayId: string, userId: string) {
     await this.assertOwner(tripId, userId);
 

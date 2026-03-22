@@ -1,0 +1,1 @@
+ALTER TABLE days ADD COLUMN IF NOT EXISTS destination_index INT DEFAULT 0;

@@ -48,7 +48,7 @@ const TripDetail = () => {
   const viewParam = searchParams.get("view");
   const savedView = typeof window !== "undefined" ? localStorage.getItem("travio-view-mode") as "list" | "map" | null : null;
   const viewMode = viewParam === "list" ? "list" : viewParam === "map" ? "map" : savedView ? savedView : (isMobile ? "map" : "list");
-  const { getTrip, loadTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, deleteTrip, addDayToTrip, removeDayFromTrip } = useTripContext();
+  const { getTrip, loadTrip, addPlaceToDay, movePlace, reorderPlaces, updateTrip, deleteTrip, addDayToTrip, removeDayFromTrip, updateDayDestination } = useTripContext();
 
   const trip = getTrip(id || "");
 
@@ -179,14 +179,33 @@ const TripDetail = () => {
   const placesListContent = (
     <>
       {currentDay && (
-        <div className="flex items-center gap-2 mb-3">
-          <p className="text-sm text-muted-foreground">
-            📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
-          </p>
-          {trip.weather?.type === 'forecast' && currentDay.weather?.temp != null && (
-            <span className="text-sm text-muted-foreground">
-              {currentDay.weather.icon} {currentDay.weather.tempMin != null && currentDay.weather.tempMin !== undefined ? `${currentDay.weather.temp}°/${currentDay.weather.tempMin}°` : `${currentDay.weather.temp}°`}
-            </span>
+        <div className="mb-3 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
+            </p>
+            {trip.weather?.type === 'forecast' && currentDay.weather?.temp != null && (
+              <span className="text-sm text-muted-foreground">
+                {currentDay.weather.icon} {currentDay.weather.tempMin != null && currentDay.weather.tempMin !== undefined ? `${currentDay.weather.temp}°/${currentDay.weather.tempMin}°` : `${currentDay.weather.temp}°`}
+              </span>
+            )}
+          </div>
+          {trip.destinations && trip.destinations.length > 1 && (
+            <div className="flex flex-wrap gap-1.5">
+              {trip.destinations.map((d, i) => (
+                <button
+                  key={i}
+                  onClick={() => updateDayDestination(trip.id, currentDay.id, i)}
+                  className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                    (currentDay.destinationIndex ?? 0) === i
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50"
+                  }`}
+                >
+                  📍 {d.name}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       )}
@@ -501,7 +520,15 @@ const TripDetail = () => {
       </div>
 
       {/* Modals (shared) */}
-      <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} destinations={trip.destinations} centerLat={trip.centerLat} centerLng={trip.centerLng} />
+      <AddPlaceSheet
+        open={showAddPlace}
+        onClose={() => setShowAddPlace(false)}
+        onAdd={handleAddPlace}
+        destinations={trip.destinations}
+        initialDestIndex={currentDay?.destinationIndex ?? 0}
+        centerLat={trip.centerLat}
+        centerLng={trip.centerLng}
+      />
 
       {trip && (
         <EditTripModal

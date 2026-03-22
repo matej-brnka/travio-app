@@ -23,6 +23,7 @@ interface TripContextType {
   deleteTrip: (tripId: string) => Promise<void>;
   addDayToTrip: (tripId: string) => Promise<void>;
   removeDayFromTrip: (tripId: string, dayId: string) => Promise<void>;
+  updateDayDestination: (tripId: string, dayId: string, destinationIndex: number) => Promise<void>;
 }
 
 const TripContext = createContext<TripContextType | null>(null);
@@ -56,6 +57,7 @@ function mapTrip(t: any): Trip {
     days: (t.days ?? []).map((d: any) => ({
       id: d.id,
       date: toDate(d.date),
+      destinationIndex: d.destinationIndex ?? 0,
       places: (d.places ?? []).map(mapPlace),
     })),
     unassigned: (t.unassigned ?? []).map(mapPlace),
@@ -131,15 +133,30 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
       const trip = mapTrip(data);
 
       const allPlaces = trip.days.flatMap(d => d.places).concat(trip.unassigned);
-      const lat = trip.centerLat ?? allPlaces.find(p => p.lat)?.lat ?? null;
-      const lng = trip.centerLng ?? allPlaces.find(p => p.lng)?.lng ?? null;
+      const dests = trip.destinations?.filter(d => d.lat && d.lng) ?? [];
+      const fallbackLat = trip.centerLat ?? allPlaces.find(p => p.lat)?.lat ?? null;
+      const fallbackLng = trip.centerLng ?? allPlaces.find(p => p.lng)?.lng ?? null;
+      const primaryLat = dests[0]?.lat ?? fallbackLat;
+      const primaryLng = dests[0]?.lng ?? fallbackLng;
 
-      if (lat && lng) {
+      if (primaryLat && primaryLng) {
         try {
-          const w = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo);
-          trip.weather = { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type };
+          const usedIndices = [...new Set(trip.days.map(d => d.destinationIndex ?? 0))];
+          const weatherMap: Record<number, any> = {};
+          for (const idx of usedIndices) {
+            const dest = dests[idx];
+            const lat = dest?.lat ?? (idx === 0 ? primaryLat : null);
+            const lng = dest?.lng ?? (idx === 0 ? primaryLng : null);
+            if (lat && lng) {
+              try { weatherMap[idx] = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo); } catch { /* skip */ }
+            }
+          }
+          const primary = weatherMap[0];
+          if (primary) trip.weather = { temp: primary.summary.temp, icon: primary.summary.icon, type: primary.summary.type };
           trip.days = trip.days.map(day => {
-            const dw = w.days.find(d => d.date === day.date);
+            const w = weatherMap[day.destinationIndex ?? 0];
+            if (!w) return day;
+            const dw = w.days.find((d: any) => d.date === day.date);
             return dw ? { ...day, weather: { temp: dw.temp, tempMin: dw.tempMin, icon: dw.icon } } : day;
           });
         } catch (e) {
@@ -178,6 +195,14 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     await TripsApi.deleteTrip(tripId);
     setTrips(prev => prev.filter(t => t.id !== tripId));
   }, []);
+
+  const updateDayDestination = useCallback(async (tripId: string, dayId: string, destinationIndex: number) => {
+    await DaysApi.updateDayDestination(tripId, dayId, destinationIndex);
+    setTrips(prev => prev.map(t =>
+      t.id !== tripId ? t : { ...t, days: t.days.map(d => d.id === dayId ? { ...d, destinationIndex } : d) }
+    ));
+    loadTrip(tripId);
+  }, [loadTrip]);
 
   const addPlaceToDay = useCallback(async (tripId: string, dayId: string | null, placeData: any) => {
     const created = await PlacesApi.createPlace(tripId, { ...placeData, dayId });
@@ -285,7 +310,7 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
       loadTrip, getTrip,
       addPlaceToDay, movePlace, reorderPlaces, updatePlace, deletePlace,
       addTrip, updateTrip, deleteTrip,
-      addDayToTrip, removeDayFromTrip,
+      addDayToTrip, removeDayFromTrip, updateDayDestination,
     }}>
       {children}
     </TripContext.Provider>

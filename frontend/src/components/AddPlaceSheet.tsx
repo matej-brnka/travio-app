@@ -20,11 +20,12 @@ interface AddPlaceSheetProps {
   onClose: () => void;
   onAdd: (place: PlaceData) => Promise<void>;
   destinations?: TripDestination[] | null;
+  initialDestIndex?: number;
   centerLat?: number | null;
   centerLng?: number | null;
 }
 
-const AddPlaceSheet = ({ open, onClose, onAdd, destinations, centerLat, centerLng }: AddPlaceSheetProps) => {
+const AddPlaceSheet = ({ open, onClose, onAdd, destinations, initialDestIndex = 0, centerLat, centerLng }: AddPlaceSheetProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceData[]>([]);
   const [searching, setSearching] = useState(false);
@@ -32,7 +33,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd, destinations, centerLat, centerLn
   const [manualName, setManualName] = useState("");
   const [manualAddress, setManualAddress] = useState("");
   const [adding, setAdding] = useState(false);
-  const [selectedDestIndex, setSelectedDestIndex] = useState(0);
+  const [selectedDestIndex, setSelectedDestIndex] = useState(initialDestIndex);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -48,7 +49,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd, destinations, centerLat, centerLn
       setShowManual(false);
       setManualName("");
       setManualAddress("");
-      setSelectedDestIndex(0);
+      setSelectedDestIndex(initialDestIndex);
       setTimeout(() => inputRef.current?.focus(), 200);
     }
   }, [open]);

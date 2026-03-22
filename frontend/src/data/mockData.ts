@@ -45,6 +45,7 @@ export interface Day {
   date: string;
   places: Place[];
   weather?: DayWeather | null;
+  destinationIndex?: number;
 }
 
 export interface Trip {

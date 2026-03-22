@@ -34,7 +34,7 @@ export class TripsService {
     if (!trips.length) throw new NotFoundException('Trip not found');
 
     const days = await this.supabase.query(
-      `SELECT id, date, position FROM days WHERE trip_id = $1 ORDER BY position`,
+      `SELECT id, date, position, destination_index FROM days WHERE trip_id = $1 ORDER BY position`,
       [tripId],
     );
 
@@ -56,6 +56,7 @@ export class TripsService {
         id: d.id,
         date: d.date,
         position: d.position,
+        destinationIndex: d.destination_index ?? 0,
         places: placesMap.get(d.id) ?? [],
       })),
       unassigned: placesMap.get(null) ?? [],
@@ -179,7 +180,7 @@ export class TripsService {
 
     const tripId = trips[0].id;
     const days = await this.supabase.query(
-      `SELECT id, date, position FROM days WHERE trip_id = $1 ORDER BY position`,
+      `SELECT id, date, position, destination_index FROM days WHERE trip_id = $1 ORDER BY position`,
       [tripId],
     );
     const places = await this.supabase.query(
@@ -209,6 +210,7 @@ export class TripsService {
         id: d.id,
         date: d.date,
         position: d.position,
+        destinationIndex: d.destination_index ?? 0,
         places: placesMap.get(d.id) ?? [],
       })),
       unassigned: placesMap.get(null) ?? [],
