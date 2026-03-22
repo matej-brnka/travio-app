@@ -22,6 +22,8 @@ export interface Place {
   time?: string;
   timeFrom?: string;
   timeTo?: string;
+  position?: number;
+  googlePlaceId?: string | null;
 }
 
 export interface TripDestination {
