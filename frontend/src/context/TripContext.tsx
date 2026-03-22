@@ -80,6 +80,7 @@ function mapPlace(p: any): Place {
     priority: p.priority ?? null,
     timeFrom: p.timeFrom ?? undefined,
     timeTo: p.timeTo ?? undefined,
+    googlePlaceId: p.googlePlaceId ?? null,
   };
 }
 
