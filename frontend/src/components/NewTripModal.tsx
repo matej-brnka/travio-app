@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Trip } from "@/data/mockData";
+import { useState } from "react";
+import { Trip, TripDestination } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { DateRange } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "@/components/EmojiPicker";
-import { searchDestinations, DestinationResult, DestinationViewport } from "@/api/search";
+import DestinationInput from "@/components/DestinationInput";
 
 const interestCategories = [
   {
@@ -73,31 +73,18 @@ interface NewTripModalProps {
   onCreate: (trip: Trip) => Promise<void>;
 }
 
+const emptyDest = (): TripDestination => ({ name: "", lat: null, lng: null });
+
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
-  const [destination, setDestination] = useState("");
+  const [destinations, setDestinations] = useState<TripDestination[]>([emptyDest()]);
   const [title, setTitle] = useState("");
-  const [destinationLat, setDestinationLat] = useState<number | null>(null);
-  const [destinationLng, setDestinationLng] = useState<number | null>(null);
-  const [destinationViewport, setDestinationViewport] = useState<DestinationViewport | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [emoji, setEmoji] = useState("✈️");
   const [dateTo, setDateTo] = useState("");
   const [aiHelp, setAiHelp] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [suggestions, setSuggestions] = useState<DestinationResult[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [creating, setCreating] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    clearTimeout(debounceRef.current);
-    if (!destination.trim() || destinationLat != null) { setSuggestions([]); return; }
-    debounceRef.current = setTimeout(async () => {
-      try { setSuggestions(await searchDestinations(destination)); } catch { setSuggestions([]); }
-    }, 350);
-    return () => clearTimeout(debounceRef.current);
-  }, [destination, destinationLat]);
 
   // +1 to include the last day
   const totalDays =
@@ -105,7 +92,12 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const totalNights =
     dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) : 0;
 
-  const isValid = destination.trim() && dateFrom && dateTo && totalDays > 0;
+  const isValid = destinations[0]?.name.trim() && dateFrom && dateTo && totalDays > 0;
+
+  const updateDest = (i: number, v: TripDestination) =>
+    setDestinations((prev) => prev.map((d, idx) => (idx === i ? v : d)));
+  const removeDest = (i: number) =>
+    setDestinations((prev) => prev.filter((_, idx) => idx !== i));
 
   const toggleInterest = (id: string) => {
     setSelectedInterests((prev) =>
@@ -115,6 +107,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
 
   const handleCreate = async () => {
     if (!isValid || creating) return;
+    const primary = destinations[0];
     const days = Array.from({ length: totalDays }, (_, i) => ({
       id: `new-day-${i}`,
       date: format(addDays(parseISO(dateFrom), i), "yyyy-MM-dd"),
@@ -122,7 +115,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     }));
     const trip: Trip = {
       id: `trip-${Date.now()}`,
-      name: destination,
+      name: primary.name,
       title: title.trim() || null,
       emoji,
       dateFrom,
@@ -131,27 +124,24 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       days,
       unassigned: [],
       interests: aiHelp ? selectedInterests : undefined,
-      centerLat: destinationLat,
-      centerLng: destinationLng,
-      viewportNorth: destinationViewport?.north ?? null,
-      viewportSouth: destinationViewport?.south ?? null,
-      viewportEast: destinationViewport?.east ?? null,
-      viewportWest: destinationViewport?.west ?? null,
+      centerLat: primary.lat,
+      centerLng: primary.lng,
+      viewportNorth: primary.viewportNorth ?? null,
+      viewportSouth: primary.viewportSouth ?? null,
+      viewportEast: primary.viewportEast ?? null,
+      viewportWest: primary.viewportWest ?? null,
+      destinations,
     };
     setCreating(true);
     try {
       await onCreate(trip);
-      setDestination("");
+      setDestinations([emptyDest()]);
       setTitle("");
-      setDestinationLat(null);
-      setDestinationLng(null);
-      setDestinationViewport(null);
       setDateFrom("");
       setDateTo("");
       setAiHelp(false);
       setEmoji("✈️");
       setSelectedInterests([]);
-      setSuggestions([]);
       setCalendarOpen(false);
     } finally {
       setCreating(false);
@@ -184,41 +174,26 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
             />
           </div>
 
-          <div className="relative">
+          <div>
             <Label className="text-foreground text-sm">Destinace</Label>
-            <Input
-              placeholder="🔍 Kam chceš jet?"
-              value={destination}
-              onChange={(e) => {
-                setDestination(e.target.value);
-                setDestinationLat(null);
-                setDestinationLng(null);
-                setDestinationViewport(null);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              className="mt-1"
-            />
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-10 w-full bg-card border border-border rounded-md mt-1 shadow-card max-h-48 overflow-y-auto">
-                {suggestions.map((s) => (
-                  <button
-                    key={s.placeId}
-                    className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-                    onClick={() => {
-                      setDestination(s.name);
-                      setDestinationLat(s.lat);
-                      setDestinationLng(s.lng);
-                      setDestinationViewport(s.viewport);
-                      setShowSuggestions(false);
-                    }}
-                  >
-                    <span className="font-medium">📍 {s.name}</span>
-                    {s.description && <span className="text-muted-foreground ml-1 text-xs">{s.description}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="mt-1 space-y-2">
+              {destinations.map((dest, i) => (
+                <DestinationInput
+                  key={i}
+                  value={dest}
+                  onChange={(v) => updateDest(i, v)}
+                  onRemove={i > 0 ? () => removeDest(i) : undefined}
+                  placeholder={i === 0 ? "🔍 Kam chceš jet?" : "🔍 Další destinace..."}
+                />
+              ))}
+              <button
+                type="button"
+                onClick={() => setDestinations((prev) => [...prev, emptyDest()])}
+                className="text-xs text-primary hover:underline"
+              >
+                + Přidat další destinaci
+              </button>
+            </div>
           </div>
 
           <div>

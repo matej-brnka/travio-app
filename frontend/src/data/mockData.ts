@@ -24,6 +24,16 @@ export interface Place {
   timeTo?: string;
 }
 
+export interface TripDestination {
+  name: string;
+  lat: number | null;
+  lng: number | null;
+  viewportNorth?: number | null;
+  viewportSouth?: number | null;
+  viewportEast?: number | null;
+  viewportWest?: number | null;
+}
+
 export interface DayWeather {
   temp: number | null;
   tempMin?: number | null;
@@ -42,6 +52,7 @@ export interface Trip {
   name: string;
   title?: string | null;
   emoji: string;
+  destinations?: TripDestination[] | null;
   dateFrom: string;
   dateTo: string;
   weather?: { temp: number | null; icon: string | null; type?: 'forecast' | 'historical' };

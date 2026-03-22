@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trip } from "@/data/mockData";
+import { Trip, TripDestination } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,16 +11,19 @@ import { cs } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "@/components/EmojiPicker";
+import DestinationInput from "@/components/DestinationInput";
 
 interface EditTripModalProps {
   open: boolean;
   trip: Trip;
   onClose: () => void;
-  onSave: (updates: { name: string; title: string | null; emoji: string; dateFrom: string; dateTo: string }) => void;
+  onSave: (updates: { name: string; title: string | null; emoji: string; dateFrom: string; dateTo: string; destinations: TripDestination[] }) => void;
 }
 
 const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
-  const [name, setName] = useState(trip.name);
+  const [destinations, setDestinations] = useState<TripDestination[]>(
+    trip.destinations?.length ? trip.destinations : [{ name: trip.name, lat: trip.centerLat ?? null, lng: trip.centerLng ?? null }]
+  );
   const [title, setTitle] = useState(trip.title ?? "");
   const [emoji, setEmoji] = useState(trip.emoji);
   const [dateFrom, setDateFrom] = useState(trip.dateFrom);
@@ -29,7 +32,7 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
   // Sync when trip changes or modal opens
   useEffect(() => {
     if (open) {
-      setName(trip.name);
+      setDestinations(trip.destinations?.length ? trip.destinations : [{ name: trip.name, lat: trip.centerLat ?? null, lng: trip.centerLng ?? null }]);
       setTitle(trip.title ?? "");
       setEmoji(trip.emoji);
       setDateFrom(trip.dateFrom);
@@ -41,11 +44,16 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
     dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) + 1 : 0;
   const totalNights =
     dateFrom && dateTo ? differenceInDays(parseISO(dateTo), parseISO(dateFrom)) : 0;
-  const isValid = name.trim() && dateFrom && dateTo && totalDays > 0;
+  const isValid = destinations[0]?.name.trim() && dateFrom && dateTo && totalDays > 0;
+
+  const updateDest = (i: number, v: TripDestination) =>
+    setDestinations((prev) => prev.map((d, idx) => (idx === i ? v : d)));
+  const removeDest = (i: number) =>
+    setDestinations((prev) => prev.filter((_, idx) => idx !== i));
 
   const handleSave = () => {
     if (!isValid) return;
-    onSave({ name, title: title.trim() || null, emoji, dateFrom, dateTo });
+    onSave({ name: destinations[0].name, title: title.trim() || null, emoji, dateFrom, dateTo, destinations });
   };
 
   return (
@@ -75,15 +83,27 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
             />
           </div>
 
-          {/* Destination */}
+          {/* Destinations */}
           <div>
             <Label className="text-foreground text-sm">Destinace</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Např. New York"
-              className="mt-1"
-            />
+            <div className="mt-1 space-y-2">
+              {destinations.map((dest, i) => (
+                <DestinationInput
+                  key={i}
+                  value={dest}
+                  onChange={(v) => updateDest(i, v)}
+                  onRemove={i > 0 ? () => removeDest(i) : undefined}
+                  placeholder={i === 0 ? "Např. New York" : "🔍 Další destinace..."}
+                />
+              ))}
+              <button
+                type="button"
+                onClick={() => setDestinations((prev) => [...prev, { name: "", lat: null, lng: null }])}
+                className="text-xs text-primary hover:underline"
+              >
+                + Přidat další destinaci
+              </button>
+            </div>
           </div>
 
           {/* Dates */}

@@ -46,6 +46,7 @@ function mapTrip(t: any): Trip {
     name: t.name,
     title: t.title ?? null,
     emoji: t.emoji,
+    destinations: t.destinations ?? null,
     dateFrom: toDate(t.dateFrom),
     dateTo: toDate(t.dateTo),
     interests: t.interests ?? [],

@@ -269,7 +269,7 @@ const TripDetail = () => {
         </button>
         <div className="text-center flex-1 min-w-0 px-2">
           <h1 className="text-lg font-bold text-foreground truncate">
-            {trip.emoji} {trip.title || trip.name}
+            {trip.emoji} {trip.title || (trip.destinations?.map(d => d.name).join(" → ") ?? trip.name)}
           </h1>
           <p className="text-xs text-muted-foreground">
             {format(parseISO(trip.dateFrom), "d. M.", { locale: cs })} –{" "}
@@ -356,8 +356,14 @@ const TripDetail = () => {
             <div className="flex items-center gap-2">
               <span className="text-2xl">{trip.emoji}</span>
               <div>
-                <h1 className="text-xl font-bold text-foreground">{trip.title || trip.name}</h1>
-                {trip.title && <p className="text-xs text-muted-foreground">{trip.name}</p>}
+                <h1 className="text-xl font-bold text-foreground">
+                  {trip.title || (trip.destinations?.map(d => d.name).join(" → ") ?? trip.name)}
+                </h1>
+                {trip.title && (
+                  <p className="text-xs text-muted-foreground">
+                    {trip.destinations?.map(d => d.name).join(" → ") ?? trip.name}
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground">
                   {format(parseISO(trip.dateFrom), "d. MMMM", { locale: cs })} –{" "}
                   {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní · {totalNights} nocí
@@ -495,7 +501,7 @@ const TripDetail = () => {
       </div>
 
       {/* Modals (shared) */}
-      <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} centerLat={trip.centerLat} centerLng={trip.centerLng} />
+      <AddPlaceSheet open={showAddPlace} onClose={() => setShowAddPlace(false)} onAdd={handleAddPlace} destinations={trip.destinations} centerLat={trip.centerLat} centerLng={trip.centerLng} />
 
       {trip && (
         <EditTripModal
@@ -503,7 +509,16 @@ const TripDetail = () => {
           trip={trip}
           onClose={() => setShowEditTrip(false)}
           onSave={(updates) => {
-            updateTrip(trip.id, updates);
+            const primary = updates.destinations[0];
+            updateTrip(trip.id, {
+              ...updates,
+              centerLat: primary?.lat ?? null,
+              centerLng: primary?.lng ?? null,
+              viewportNorth: primary?.viewportNorth ?? null,
+              viewportSouth: primary?.viewportSouth ?? null,
+              viewportEast: primary?.viewportEast ?? null,
+              viewportWest: primary?.viewportWest ?? null,
+            });
             setShowEditTrip(false);
             toast.success("Cesta upravena ✅");
           }}

@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { searchPlaces } from "@/api/search";
+import { TripDestination } from "@/data/mockData";
 
 export interface PlaceData {
   name: string;
@@ -18,11 +19,12 @@ interface AddPlaceSheetProps {
   open: boolean;
   onClose: () => void;
   onAdd: (place: PlaceData) => Promise<void>;
+  destinations?: TripDestination[] | null;
   centerLat?: number | null;
   centerLng?: number | null;
 }
 
-const AddPlaceSheet = ({ open, onClose, onAdd, centerLat, centerLng }: AddPlaceSheetProps) => {
+const AddPlaceSheet = ({ open, onClose, onAdd, destinations, centerLat, centerLng }: AddPlaceSheetProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceData[]>([]);
   const [searching, setSearching] = useState(false);
@@ -30,8 +32,14 @@ const AddPlaceSheet = ({ open, onClose, onAdd, centerLat, centerLng }: AddPlaceS
   const [manualName, setManualName] = useState("");
   const [manualAddress, setManualAddress] = useState("");
   const [adding, setAdding] = useState(false);
+  const [selectedDestIndex, setSelectedDestIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const multiDest = destinations && destinations.length > 1;
+  const activeDest = multiDest ? destinations[selectedDestIndex] : null;
+  const searchLat = activeDest?.lat ?? centerLat;
+  const searchLng = activeDest?.lng ?? centerLng;
 
   useEffect(() => {
     if (open) {
@@ -40,6 +48,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd, centerLat, centerLng }: AddPlaceS
       setShowManual(false);
       setManualName("");
       setManualAddress("");
+      setSelectedDestIndex(0);
       setTimeout(() => inputRef.current?.focus(), 200);
     }
   }, [open]);
@@ -50,7 +59,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd, centerLat, centerLng }: AddPlaceS
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const data = await searchPlaces(query, centerLat, centerLng);
+        const data = await searchPlaces(query, searchLat, searchLng);
         setResults(data);
       } catch {
         setResults([]);
@@ -59,7 +68,7 @@ const AddPlaceSheet = ({ open, onClose, onAdd, centerLat, centerLng }: AddPlaceS
       }
     }, 400);
     return () => clearTimeout(debounceRef.current);
-  }, [query]);
+  }, [query, selectedDestIndex]);
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
@@ -69,6 +78,25 @@ const AddPlaceSheet = ({ open, onClose, onAdd, centerLat, centerLng }: AddPlaceS
         </div>
 
         <div className="px-5 pb-6 space-y-4">
+          {multiDest && (
+            <div className="flex flex-wrap gap-1.5">
+              {destinations.map((d, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedDestIndex(i)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                    i === selectedDestIndex
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50"
+                  }`}
+                >
+                  📍 {d.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           {!showManual ? (
             <>
               <Input

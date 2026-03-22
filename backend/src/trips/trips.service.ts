@@ -18,7 +18,7 @@ export class TripsService {
 
   async findAll(userId: string) {
     const rows = await this.supabase.query(
-      `SELECT id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, created_at, updated_at
+      `SELECT id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, destinations, created_at, updated_at
        FROM trips WHERE user_id = $1 ORDER BY created_at DESC`,
       [userId],
     );
@@ -27,7 +27,7 @@ export class TripsService {
 
   async findOne(tripId: string, userId: string) {
     const trips = await this.supabase.query(
-      `SELECT id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng
+      `SELECT id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, destinations
        FROM trips WHERE id = $1 AND user_id = $2`,
       [tripId, userId],
     );
@@ -68,10 +68,10 @@ export class TripsService {
     }
 
     const trips = await this.supabase.query(
-      `INSERT INTO trips (user_id, name, title, emoji, date_from, date_to, interests, center_lat, center_lng)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, created_at, updated_at`,
-      [userId, dto.name, dto.title ?? null, dto.emoji, dto.dateFrom, dto.dateTo, dto.interests ?? null, dto.centerLat ?? null, dto.centerLng ?? null],
+      `INSERT INTO trips (user_id, name, title, emoji, date_from, date_to, interests, center_lat, center_lng, destinations)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, destinations, created_at, updated_at`,
+      [userId, dto.name, dto.title ?? null, dto.emoji, dto.dateFrom, dto.dateTo, dto.interests ?? null, dto.centerLat ?? null, dto.centerLng ?? null, dto.destinations ? JSON.stringify(dto.destinations) : null],
     );
     const trip = trips[0];
 
@@ -126,10 +126,11 @@ export class TripsService {
          interests = COALESCE($8, interests),
          center_lat = COALESCE($9, center_lat),
          center_lng = COALESCE($10, center_lng),
+         destinations = COALESCE($11, destinations),
          updated_at = now()
        WHERE id = $1 AND user_id = $2
-       RETURNING id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, created_at, updated_at`,
-      [tripId, userId, dto.name ?? null, dto.title ?? null, dto.emoji ?? null, dto.dateFrom ?? null, dto.dateTo ?? null, dto.interests ?? null, dto.centerLat ?? null, dto.centerLng ?? null],
+       RETURNING id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, destinations, created_at, updated_at`,
+      [tripId, userId, dto.name ?? null, dto.title ?? null, dto.emoji ?? null, dto.dateFrom ?? null, dto.dateTo ?? null, dto.interests ?? null, dto.centerLat ?? null, dto.centerLng ?? null, dto.destinations ? JSON.stringify(dto.destinations) : null],
     );
 
     const dateChanged = dto.dateFrom || dto.dateTo;
@@ -171,7 +172,7 @@ export class TripsService {
 
   async findByShareToken(token: string) {
     const trips = await this.supabase.query(
-      `SELECT id, name, title, emoji, date_from, date_to, interests, center_lat, center_lng FROM trips WHERE share_token = $1`,
+      `SELECT id, name, title, emoji, date_from, date_to, interests, center_lat, center_lng, destinations FROM trips WHERE share_token = $1`,
       [token],
     );
     if (!trips.length) throw new NotFoundException('Shared trip not found');
@@ -203,6 +204,7 @@ export class TripsService {
       interests: trips[0].interests ?? [],
       centerLat: trips[0].center_lat ?? null,
       centerLng: trips[0].center_lng ?? null,
+      destinations: trips[0].destinations ?? null,
       days: days.map((d) => ({
         id: d.id,
         date: d.date,
@@ -239,6 +241,7 @@ export class TripsService {
       name: row.name,
       title: row.title ?? null,
       emoji: row.emoji,
+      destinations: row.destinations ?? null,
       dateFrom: row.date_from,
       dateTo: row.date_to,
       interests: row.interests ?? [],
