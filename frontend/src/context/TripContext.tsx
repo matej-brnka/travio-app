@@ -133,7 +133,7 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
       const trip = mapTrip(data);
 
       const allPlaces = trip.days.flatMap(d => d.places).concat(trip.unassigned);
-      const dests = trip.destinations?.filter(d => d.lat && d.lng) ?? [];
+      const dests = trip.destinations ?? [];
       const fallbackLat = trip.centerLat ?? allPlaces.find(p => p.lat)?.lat ?? null;
       const fallbackLng = trip.centerLng ?? allPlaces.find(p => p.lng)?.lng ?? null;
       const primaryLat = dests[0]?.lat ?? fallbackLat;
@@ -145,8 +145,8 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
           const weatherMap: Record<number, any> = {};
           for (const idx of usedIndices) {
             const dest = dests[idx];
-            const lat = dest?.lat ?? (idx === 0 ? primaryLat : null);
-            const lng = dest?.lng ?? (idx === 0 ? primaryLng : null);
+            const lat = dest?.lat ?? primaryLat;
+            const lng = dest?.lng ?? primaryLng;
             if (lat && lng) {
               try { weatherMap[idx] = await getTripWeather(lat, lng, trip.dateFrom, trip.dateTo); } catch { /* skip */ }
             }
