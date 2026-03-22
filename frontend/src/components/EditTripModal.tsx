@@ -16,11 +16,12 @@ interface EditTripModalProps {
   open: boolean;
   trip: Trip;
   onClose: () => void;
-  onSave: (updates: { name: string; emoji: string; dateFrom: string; dateTo: string }) => void;
+  onSave: (updates: { name: string; title: string | null; emoji: string; dateFrom: string; dateTo: string }) => void;
 }
 
 const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
   const [name, setName] = useState(trip.name);
+  const [title, setTitle] = useState(trip.title ?? "");
   const [emoji, setEmoji] = useState(trip.emoji);
   const [dateFrom, setDateFrom] = useState(trip.dateFrom);
   const [dateTo, setDateTo] = useState(trip.dateTo);
@@ -29,6 +30,7 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
   useEffect(() => {
     if (open) {
       setName(trip.name);
+      setTitle(trip.title ?? "");
       setEmoji(trip.emoji);
       setDateFrom(trip.dateFrom);
       setDateTo(trip.dateTo);
@@ -43,7 +45,7 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
 
   const handleSave = () => {
     if (!isValid) return;
-    onSave({ name, emoji, dateFrom, dateTo });
+    onSave({ name, title: title.trim() || null, emoji, dateFrom, dateTo });
   };
 
   return (
@@ -62,9 +64,20 @@ const EditTripModal = ({ open, trip, onClose, onSave }: EditTripModalProps) => {
             </div>
           </div>
 
-          {/* Name */}
+          {/* Title */}
           <div>
-            <Label className="text-foreground text-sm">Název cesty</Label>
+            <Label className="text-foreground text-sm">Název výletu <span className="text-muted-foreground text-xs">(nepovinné)</span></Label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Např. Líbánky v Paříži"
+              className="mt-1"
+            />
+          </div>
+
+          {/* Destination */}
+          <div>
+            <Label className="text-foreground text-sm">Destinace</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}

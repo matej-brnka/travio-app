@@ -40,6 +40,7 @@ export interface Day {
 export interface Trip {
   id: string;
   name: string;
+  title?: string | null;
   emoji: string;
   dateFrom: string;
   dateTo: string;

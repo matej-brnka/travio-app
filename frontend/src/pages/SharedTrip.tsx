@@ -202,7 +202,7 @@ const SharedTrip = () => {
         <div className="flex items-center px-4 py-3 bg-card shadow-sm flex-shrink-0">
           <div className="flex-1 text-center min-w-0">
             <h1 className="text-lg font-bold text-foreground truncate">
-              {trip.emoji} {trip.name}
+              {trip.emoji} {trip.title || trip.name}
             </h1>
             <p className="text-xs text-muted-foreground">
               {format(parseISO(trip.dateFrom), "d. M.", { locale: cs })} –{" "}
@@ -269,7 +269,8 @@ const SharedTrip = () => {
             <div className="flex items-center gap-2">
               <span className="text-2xl">{trip.emoji}</span>
               <div>
-                <h1 className="text-xl font-bold text-foreground">{trip.name}</h1>
+                <h1 className="text-xl font-bold text-foreground">{trip.title || trip.name}</h1>
+                {trip.title && <p className="text-xs text-muted-foreground">{trip.name}</p>}
                 <p className="text-sm text-muted-foreground">
                   {format(parseISO(trip.dateFrom), "d. MMMM", { locale: cs })} –{" "}
                   {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní · {totalNights} nocí

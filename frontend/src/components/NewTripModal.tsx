@@ -75,6 +75,7 @@ interface NewTripModalProps {
 
 const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
   const [destination, setDestination] = useState("");
+  const [title, setTitle] = useState("");
   const [destinationLat, setDestinationLat] = useState<number | null>(null);
   const [destinationLng, setDestinationLng] = useState<number | null>(null);
   const [destinationViewport, setDestinationViewport] = useState<DestinationViewport | null>(null);
@@ -122,6 +123,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     const trip: Trip = {
       id: `trip-${Date.now()}`,
       name: destination,
+      title: title.trim() || null,
       emoji,
       dateFrom,
       dateTo,
@@ -140,6 +142,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
     try {
       await onCreate(trip);
       setDestination("");
+      setTitle("");
       setDestinationLat(null);
       setDestinationLng(null);
       setDestinationViewport(null);
@@ -169,6 +172,16 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
             <div className="mt-1">
               <EmojiPicker value={emoji} onChange={setEmoji} />
             </div>
+          </div>
+
+          <div>
+            <Label className="text-foreground text-sm">Název výletu <span className="text-muted-foreground text-xs">(nepovinné)</span></Label>
+            <Input
+              placeholder="Např. Líbánky v Paříži"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-1"
+            />
           </div>
 
           <div className="relative">

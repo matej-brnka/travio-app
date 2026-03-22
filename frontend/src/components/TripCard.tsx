@@ -31,7 +31,8 @@ const TripCard = ({ trip, onClick }: TripCardProps) => {
       <div className="flex items-start gap-3">
         <span className="text-3xl">{trip.emoji}</span>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold text-foreground">{trip.name}</h2>
+          <h2 className="text-lg font-bold text-foreground">{trip.title || trip.name}</h2>
+          {trip.title && <p className="text-xs text-muted-foreground -mt-0.5">{trip.name}</p>}
           <p className="text-sm text-muted-foreground">
             {format(from, "d. M.", { locale: cs })} – {format(to, "d. M. yyyy", { locale: cs })}
           </p>

@@ -269,7 +269,7 @@ const TripDetail = () => {
         </button>
         <div className="text-center flex-1 min-w-0 px-2">
           <h1 className="text-lg font-bold text-foreground truncate">
-            {trip.emoji} {trip.name}
+            {trip.emoji} {trip.title || trip.name}
           </h1>
           <p className="text-xs text-muted-foreground">
             {format(parseISO(trip.dateFrom), "d. M.", { locale: cs })} –{" "}
@@ -356,7 +356,8 @@ const TripDetail = () => {
             <div className="flex items-center gap-2">
               <span className="text-2xl">{trip.emoji}</span>
               <div>
-                <h1 className="text-xl font-bold text-foreground">{trip.name}</h1>
+                <h1 className="text-xl font-bold text-foreground">{trip.title || trip.name}</h1>
+                {trip.title && <p className="text-xs text-muted-foreground">{trip.name}</p>}
                 <p className="text-sm text-muted-foreground">
                   {format(parseISO(trip.dateFrom), "d. MMMM", { locale: cs })} –{" "}
                   {format(parseISO(trip.dateTo), "d. MMMM yyyy", { locale: cs })} · {totalDays} dní · {totalNights} nocí
@@ -512,7 +513,7 @@ const TripDetail = () => {
       <AlertDialog open={showDeleteTrip} onOpenChange={setShowDeleteTrip}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Smazat cestu {trip.emoji} {trip.name}?</AlertDialogTitle>
+            <AlertDialogTitle>Smazat cestu {trip.emoji} {trip.title || trip.name}?</AlertDialogTitle>
             <AlertDialogDescription>
               Tato akce je nevratná. Smažou se všechny dny a místa v této cestě.
             </AlertDialogDescription>

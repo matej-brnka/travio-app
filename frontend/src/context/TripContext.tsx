@@ -44,6 +44,7 @@ function mapTrip(t: any): Trip {
   return {
     id: t.id,
     name: t.name,
+    title: t.title ?? null,
     emoji: t.emoji,
     dateFrom: toDate(t.dateFrom),
     dateTo: toDate(t.dateTo),
