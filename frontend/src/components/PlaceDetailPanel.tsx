@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Place, Trip, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import EmojiPicker from "@/components/EmojiPicker";
 import MovePlaceModal from "@/components/MovePlaceModal";
+import { getPlacePhoto } from "@/api/search";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -71,6 +72,23 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
 
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const photoRevokeRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setPhotoUrl(null);
+    if (!place?.googlePlaceId) return;
+    let cancelled = false;
+    getPlacePhoto(place.googlePlaceId)
+      .then((url) => {
+        if (cancelled) { URL.revokeObjectURL(url); return; }
+        if (photoRevokeRef.current) URL.revokeObjectURL(photoRevokeRef.current);
+        photoRevokeRef.current = url;
+        setPhotoUrl(url);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [place?.googlePlaceId]);
 
   if (!place) {
     return (
@@ -123,13 +141,14 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
       {/* Scrollable content */}
       <ScrollArea className="flex-1">
         <div className="px-4 py-4 space-y-4">
-          {/* Mini map placeholder */}
-          <div className="bg-muted rounded-lg h-32 flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <span className="text-2xl block">🗺️</span>
-              <p className="text-xs mt-1">Mapbox (TODO)</p>
+          {/* Place photo */}
+          {photoUrl ? (
+            <div className="rounded-lg overflow-hidden h-36">
+              <img src={photoUrl} alt={place.name} className="w-full h-full object-cover" />
             </div>
-          </div>
+          ) : place.googlePlaceId ? (
+            <div className="bg-muted rounded-lg h-36 animate-pulse" />
+          ) : null}
 
           {/* Emoji + Time range */}
           <div className="space-y-3">
