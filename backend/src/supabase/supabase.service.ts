@@ -27,8 +27,13 @@ export class SupabaseService implements OnModuleDestroy {
   }
 
   async query<T = any>(sql: string, params?: any[]): Promise<T[]> {
-    const result = await this.pool.query(sql, params);
-    return result.rows;
+    try {
+      const result = await this.pool.query(sql, params);
+      return result.rows;
+    } catch (err: any) {
+      this.logger.error(`DB query failed: ${err.message}`, { sql: sql.slice(0, 120), params });
+      throw err;
+    }
   }
 
   async withClient<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {

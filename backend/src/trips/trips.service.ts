@@ -69,7 +69,7 @@ export class TripsService {
 
     const trips = await this.supabase.query(
       `INSERT INTO trips (user_id, name, title, emoji, date_from, date_to, interests, center_lat, center_lng, destinations)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
        RETURNING id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, destinations, created_at, updated_at`,
       [userId, dto.name, dto.title ?? null, dto.emoji, dto.dateFrom, dto.dateTo, dto.interests ?? null, dto.centerLat ?? null, dto.centerLng ?? null, dto.destinations ? JSON.stringify(dto.destinations) : null],
     );
@@ -126,7 +126,7 @@ export class TripsService {
          interests = COALESCE($8, interests),
          center_lat = COALESCE($9, center_lat),
          center_lng = COALESCE($10, center_lng),
-         destinations = COALESCE($11, destinations),
+         destinations = COALESCE($11::jsonb, destinations),
          updated_at = now()
        WHERE id = $1 AND user_id = $2
        RETURNING id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, destinations, created_at, updated_at`,
