@@ -1,6 +1,10 @@
 import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient, types } from 'pg';
+
+// Parse DATE columns as plain strings (YYYY-MM-DD) instead of JS Date objects
+// to avoid local-timezone midnight causing off-by-one date bugs
+types.setTypeParser(1082, (val: string) => val);
 
 @Injectable()
 export class SupabaseService implements OnModuleDestroy {

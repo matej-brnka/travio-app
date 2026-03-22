@@ -136,14 +136,44 @@ export class TripsService {
 
     const dateChanged = dto.dateFrom || dto.dateTo;
     if (dateChanged) {
-      const updated = trips[0];
-      await this.supabase.query(`DELETE FROM days WHERE trip_id = $1`, [tripId]);
-      const dates = this.dateRange(updated.date_from, updated.date_to);
-      for (let i = 0; i < dates.length; i++) {
+      const normDate = (v: any): string => {
+        if (v instanceof Date) {
+          return `${v.getFullYear()}-${String(v.getMonth() + 1).padStart(2, '0')}-${String(v.getDate()).padStart(2, '0')}`;
+        }
+        return String(v ?? '').slice(0, 10);
+      };
+      const newFrom = normDate(trips[0].date_from);
+      const newTo = normDate(trips[0].date_to);
+
+      // Move places from out-of-range days to unassigned, then delete those days
+      await this.supabase.query(
+        `UPDATE places SET day_id = NULL WHERE trip_id = $1 AND day_id IN (
+           SELECT id FROM days WHERE trip_id = $1 AND (date < $2::date OR date > $3::date)
+         )`,
+        [tripId, newFrom, newTo],
+      );
+      await this.supabase.query(
+        `DELETE FROM days WHERE trip_id = $1 AND (date < $2::date OR date > $3::date)`,
+        [tripId, newFrom, newTo],
+      );
+
+      // Insert missing days (WHERE NOT EXISTS prevents duplicates)
+      for (const date of this.dateRange(newFrom, newTo)) {
         await this.supabase.query(
-          `INSERT INTO days (trip_id, date, position) VALUES ($1, $2, $3)`,
-          [tripId, dates[i], i],
+          `INSERT INTO days (trip_id, date, position)
+           SELECT $1, $2::date, 0
+           WHERE NOT EXISTS (SELECT 1 FROM days WHERE trip_id = $1 AND date = $2::date)`,
+          [tripId, date],
         );
+      }
+
+      // Re-assign positions in date order
+      const allDays = await this.supabase.query(
+        `SELECT id FROM days WHERE trip_id = $1 ORDER BY date`,
+        [tripId],
+      );
+      for (let i = 0; i < allDays.length; i++) {
+        await this.supabase.query(`UPDATE days SET position = $1 WHERE id = $2`, [i, allDays[i].id]);
       }
     }
 
@@ -226,13 +256,19 @@ export class TripsService {
     return { deleted: true };
   }
 
-  private dateRange(from: string, to: string): string[] {
+  private dateRange(from: any, to: any): string[] {
+    const norm = (v: any): string => {
+      if (v instanceof Date) {
+        return `${v.getFullYear()}-${String(v.getMonth() + 1).padStart(2, '0')}-${String(v.getDate()).padStart(2, '0')}`;
+      }
+      return String(v ?? '').slice(0, 10);
+    };
     const dates: string[] = [];
-    const current = new Date(from);
-    const end = new Date(to);
+    const current = new Date(norm(from) + 'T12:00:00Z');
+    const end = new Date(norm(to) + 'T12:00:00Z');
     while (current <= end) {
-      dates.push(current.toISOString().split('T')[0]);
-      current.setDate(current.getDate() + 1);
+      dates.push(current.toISOString().slice(0, 10));
+      current.setUTCDate(current.getUTCDate() + 1);
     }
     return dates;
   }

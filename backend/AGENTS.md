@@ -126,6 +126,12 @@ CREATE TABLE places (
 | GET | /api/weather/trip?lat=&lng=&dateFrom=&dateTo= | Počasí pro celou cestu – forecast (yr.no, ≤9 dní) nebo historical (Open-Meteo, >9 dní); vrací `{ summary: { temp, icon, type }, days: [{ date, temp, tempMin, icon }] }` |
 | POST | /api/trips/:id/ai-generate | AI generování itineráře |
 
+## Důležité poznámky k pg / DATE typům
+- `pg` (node-postgres) defaultně parsuje DATE sloupce jako JS `Date` objekty s lokální půlnocí
+- V CET (UTC+1) se `"2026-03-22"` stane `Date{2026-03-21T23:00:00Z}` → `toISOString()` vrátí špatné datum
+- **Fix**: `SupabaseService` nastavuje `types.setTypeParser(1082, val => val)` – DATE sloupce se vracejí jako plain stringy `"YYYY-MM-DD"`
+- `trips.service.ts` obsahuje navíc `normDate()` helper jako pojistku pro případ Date objektu
+
 ## Struktura NestJS modulů
 ```
 src/
@@ -150,5 +156,12 @@ src/
 5. Chráněné endpointy označ `@UseGuards(JwtAuthGuard)`
 6. Napiš Jest test do `*.spec.ts` souboru
 7. **Aktualizuj tuto tabulku endpointů výše**
+
+## Editace termínu cesty (trips.service.ts – update)
+- Zachovává existující dny (nemaže a nepřidává znovu)
+- Místa z dní mimo nový rozsah přesune do unassigned (`day_id = NULL`)
+- Dny mimo rozsah smaže, chybějící dny přidá (`WHERE NOT EXISTS`)
+- Pozice dnů přepočítá dle data
+- Normalizuje DATE hodnoty z pg před SQL dotazy (ochrana proti timezone posunu)
 
 ## Pokud přidáš novou funkci, endpoint nebo změníš strukturu projektu, aktualizuj příslušný AGENTS.md.

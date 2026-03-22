@@ -94,6 +94,11 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - `005_day_destination_index.sql` – sloupec destination_index INT na days (přiřazení dne k destinaci)
 - TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
+## Technické poznámky
+
+### pg DATE sloupce
+`pg` defaultně parsuje DATE jako JS `Date` s lokální půlnocí → timezone bug. `SupabaseService` to řeší pomocí `types.setTypeParser(1082, val => val)` – DATE se vrací jako plain string. Viz `backend/src/supabase/supabase.service.ts`.
+
 ## Jak spustit testy
 ```bash
 cd frontend && npm run test    # Vitest
