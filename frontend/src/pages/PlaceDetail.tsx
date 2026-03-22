@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Place, PlacePriority, priorityConfig } from "@/data/mockData";
 import { useTripContext } from "@/context/TripContext";
 import { ArrowLeft, MoreVertical, X } from "lucide-react";
@@ -31,6 +31,9 @@ import {
 const PlaceDetail = () => {
   const { id, placeId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const dayParam = searchParams.get("day") ?? "0";
+  const backUrl = `/app/trip/${id}?day=${dayParam}`;
   const { getTrip, updatePlace, deletePlace, movePlace } = useTripContext();
 
   const trip = getTrip(id || "");
@@ -85,14 +88,14 @@ const PlaceDetail = () => {
   const handleDelete = () => {
     deletePlace(trip.id, place.id);
     toast.success("Místo smazáno 🗑️");
-    navigate(`/app/trip/${id}`);
+    navigate(backUrl);
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3 bg-card shadow-sm">
-        <button onClick={() => navigate(`/app/trip/${id}`)} className="p-1 text-foreground">
+        <button onClick={() => navigate(backUrl)} className="p-1 text-foreground">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-bold text-foreground truncate flex-1 text-center px-2">
@@ -308,7 +311,7 @@ const PlaceDetail = () => {
             variant="outline"
             className="flex-1 rounded-md"
             disabled={!prevPlace}
-            onClick={() => prevPlace && navigate(`/app/trip/${id}/place/${prevPlace.id}`)}
+            onClick={() => prevPlace && navigate(`/app/trip/${id}/place/${prevPlace.id}?day=${dayParam}`)}
           >
             ← Předchozí
           </Button>
@@ -316,7 +319,7 @@ const PlaceDetail = () => {
             variant="outline"
             className="flex-1 rounded-md"
             disabled={!nextPlace}
-            onClick={() => nextPlace && navigate(`/app/trip/${id}/place/${nextPlace.id}`)}
+            onClick={() => nextPlace && navigate(`/app/trip/${id}/place/${nextPlace.id}?day=${dayParam}`)}
           >
             Další →
           </Button>

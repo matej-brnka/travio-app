@@ -56,7 +56,8 @@ const TripDetail = () => {
   useEffect(() => {
     if (id) loadTrip(id);
   }, [id]);
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const dayParam = parseInt(searchParams.get("day") ?? "0", 10);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(isNaN(dayParam) ? 0 : dayParam);
   const [showAddPlace, setShowAddPlace] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [movingPlace, setMovingPlace] = useState<Place | null>(null);
@@ -119,7 +120,7 @@ const TripDetail = () => {
     if (isDesktop) {
       setSelectedPlaceId(placeId);
     } else {
-      navigate(`/app/trip/${id}/place/${placeId}`);
+      navigate(`/app/trip/${id}/place/${placeId}?day=${selectedDayIndex}`);
     }
   };
 
