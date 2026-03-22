@@ -31,8 +31,9 @@ VITE_GOOGLE_MAPS_KEY=your-google-maps-api-key
 src/
 ├── components/
 │   ├── ui/              # shadcn/ui – NEUPRAVUJ (generované)
-│   ├── AddPlaceSheet.tsx     # Sheet pro přidání místa
-│   ├── EditTripModal.tsx     # Modal pro editaci cesty
+│   ├── AddPlaceSheet.tsx     # Sheet pro přidání místa (podporuje multi-dest. bias vyhledávání)
+│   ├── DestinationInput.tsx  # Autocomplete input pro jednu destinaci
+│   ├── EditTripModal.tsx     # Modal pro editaci cesty (multi-destinace)
 │   ├── EmojiPicker.tsx       # Výběr emoji
 │   ├── MovePlaceModal.tsx    # Modal přesunu místa do jiného dne
 │   ├── NavLink.tsx           # Navigační odkaz
@@ -77,15 +78,17 @@ interface Place {
   priority?: "must-see" | "chci-videt" | "mozna" | null;
   timeFrom?: string; timeTo?: string;
 }
+interface TripDestination { name: string; lat: number | null; lng: number | null; viewportNorth?: number | null; viewportSouth?: number | null; viewportEast?: number | null; viewportWest?: number | null; }
 interface DayWeather { temp: number | null; tempMin?: number | null; icon: string | null; }
-interface Day { id: string; date: string; places: Place[]; weather?: DayWeather | null; }
+interface Day { id: string; date: string; places: Place[]; weather?: DayWeather | null; destinationIndex?: number; }
 interface Trip {
-  id: string; name: string; emoji: string;
+  id: string; name: string; title?: string | null; emoji: string;
+  destinations?: TripDestination[] | null;  // multi-destinace (NY → SF → LA)
   dateFrom: string; dateTo: string;
   weather?: { temp: number | null; icon: string | null; type?: 'forecast' | 'historical' };
   days: Day[]; unassigned: Place[];
   interests?: string[];
-  centerLat?: number | null;   // střed destinace (z Google Places)
+  centerLat?: number | null;   // střed primární destinace (z Google Places)
   centerLng?: number | null;
   viewportNorth?: number | null;  // viewport destinace pro auto-zoom mapy
   viewportSouth?: number | null;
@@ -130,11 +133,11 @@ Výjimka: `getSharedTrip(token)` v `api/trips.ts` používá plain `fetch` (bez 
 Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
 
 ## Počasí
-- `TripContext.loadTrips()` – po načtení cest fire-and-forget `getTripWeather` pro každou cestu s coords → nastaví `trip.weather` (summary)
-- `TripContext.loadTrip()` – načte weather + nastaví `trip.weather` (summary) i `day.weather` (per-day forecast)
+- `TripContext.loadTrips()` – po načtení cest fire-and-forget `getTripWeather` pro každou cestu s coords → nastaví `trip.weather` (summary); auth listener reaguje pouze na `SIGNED_IN`/`SIGNED_OUT` (ne TOKEN_REFRESHED) aby nepřepisoval načtené dny
+- `TripContext.loadTrip()` – načte weather per-destinaci: každá unikátní `destinationIndex` dostane vlastní volání, dny pak dostanou počasí své destinace
 - `TripCard` – zobrazuje `trip.weather.temp` + label „předpověď" / „hist. průměr"
 - `TripDetail` + `SharedTrip` – jednotlivé dny zobrazují `max°/min°` pouze pokud `trip.weather.type === 'forecast'`
-- Logika forecast vs historical je na backendu: ≤9 dní → yr.no, >9 dní → Open-Meteo archiv (stejné období -1 rok)
+- Backend blending: yr.no forecast + Open-Meteo historical fallback pro dny mimo forecast okno (min. starší dny, nebo dny >9d od dnes)
 - `getTripWeather` v `src/api/weather.ts` – vrací `TripWeatherResult { summary, days }`
 
 ## Sdílení cest
@@ -142,7 +145,7 @@ Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
 - Modal zobrazí URL a tlačítko „Kopírovat odkaz" (`navigator.clipboard` + toast)
 - `SharedTrip.tsx` – veřejná stránka na `/share/:token`, čte token z `useParams()`,
   fetchuje `GET /api/shared/:token` (bez autentizace), layout totožný s TripDetail (read-only),
-  po načtení cesty fetchuje weather a zobrazuje per-day forecast (max°/min°) stejně jako TripDetail
+  per-destinační weather stejně jako TripDetail, zobrazuje aktuální destinaci dne (readonly badge)
 - Router: `/share/:token` obaleno v `FullFrame` (ne MobileFrame) – plná šířka na desktopu
 
 ## Routování (`App.tsx`)

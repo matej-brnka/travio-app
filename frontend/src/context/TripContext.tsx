@@ -94,7 +94,16 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await TripsApi.getTrips();
       const trips = data.map(mapTrip);
-      setTrips(trips);
+      setTrips(prev => {
+        const prevMap = new Map(prev.map(t => [t.id, t]));
+        return trips.map(t => {
+          const existing = prevMap.get(t.id);
+          if (existing && existing.days.length > 0) {
+            return { ...t, days: existing.days, unassigned: existing.unassigned };
+          }
+          return t;
+        });
+      });
 
       // Fire-and-forget: fetch weather for each trip that has center coords
       trips.forEach(trip => {
@@ -117,9 +126,9 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) loadTrips();
-      else setTrips([]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') loadTrips();
+      else if (event === 'SIGNED_OUT') setTrips([]);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) loadTrips();

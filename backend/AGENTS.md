@@ -48,28 +48,31 @@ OPENAI_MODEL=gpt-4o-mini
 -- Uživatelé jsou spravováni Supabase Auth (tabulka auth.users)
 
 CREATE TABLE trips (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name        TEXT NOT NULL,
-  emoji       TEXT NOT NULL DEFAULT '✈️',
-  date_from   DATE NOT NULL,
-  date_to     DATE NOT NULL,
-  interests   TEXT[],
-  share_token TEXT UNIQUE,           -- pro anonymní sdílení
-  center_lat  FLOAT,                 -- souřadnice destinace (z Google Places)
-  center_lng  FLOAT,
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name         TEXT NOT NULL,          -- název destinace (např. "Praha")
+  title        TEXT,                   -- volitelný uživatelský název výletu (např. "Líbánky 2026")
+  emoji        TEXT NOT NULL DEFAULT '✈️',
+  date_from    DATE NOT NULL,
+  date_to      DATE NOT NULL,
+  interests    TEXT[],
+  share_token  TEXT UNIQUE,            -- pro anonymní sdílení
+  center_lat   FLOAT,                  -- souřadnice primární destinace (z Google Places)
+  center_lng   FLOAT,
+  destinations JSONB,                  -- pole { name, lat, lng, viewport... } pro multi-destinaci
   -- TODO migrace: viewport_north, viewport_south, viewport_east, viewport_west FLOAT
   -- (zatím jen ve frontend Trip modelu, do DB zatím nepersistováno)
-  created_at  TIMESTAMPTZ DEFAULT now(),
-  updated_at  TIMESTAMPTZ DEFAULT now()
+  created_at   TIMESTAMPTZ DEFAULT now(),
+  updated_at   TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE days (
-  id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  trip_id   UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
-  date      DATE NOT NULL,
-  position  INT NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT now()
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  trip_id           UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  date              DATE NOT NULL,
+  position          INT NOT NULL DEFAULT 0,
+  destination_index INT DEFAULT 0,     -- index do trips.destinations (která destinace daný den)
+  created_at        TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE places (
@@ -114,6 +117,7 @@ CREATE TABLE places (
 | DELETE | /api/trips/:id/places/:placeId | Smazání místa |
 | PATCH | /api/trips/:id/places/:placeId/move | Přesun místa do jiného dne |
 | PATCH | /api/trips/:id/days/:dayId/reorder | Změna pořadí míst |
+| PATCH | /api/trips/:id/days/:dayId/destination | Změna destinace dne (`{ destinationIndex }`) |
 | GET | /api/trips/:id/share | Vygeneruj/vrať share token; URL sestavena z `FRONTEND_URL` env + `/share/:token` |
 | GET | /api/shared/:token | Veřejný read-only detail cesty (bez auth); vrací trip + days + places + centerLat/Lng |
 | GET | /api/places/search?q=&centerLat=&centerLng= | Vyhledávání míst (location bias) |
@@ -130,7 +134,7 @@ src/
 ├── days/           # DaysModule – CRUD dnů
 ├── places/         # PlacesModule – CRUD míst, přesun, řazení
 ├── external/
-│   ├── weather/    # WeatherModule – yr.no
+│   ├── weather/    # WeatherModule – yr.no + Open-Meteo (blending forecast + historical)
 │   ├── google-places/ # GooglePlacesModule
 │   └── ai/         # AiModule – generování itineráře
 ├── supabase/       # SupabaseModule – shared Supabase client

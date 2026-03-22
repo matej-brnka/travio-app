@@ -39,18 +39,35 @@ const SharedTrip = () => {
 
         setTrip(data);
 
-        const lat = data.centerLat ?? data.days.flatMap((d: any) => d.places).find((p: any) => p.lat)?.lat ?? null;
-        const lng = data.centerLng ?? data.days.flatMap((d: any) => d.places).find((p: any) => p.lng)?.lng ?? null;
-        if (lat && lng && data.dateFrom && data.dateTo) {
+        const dests = data.destinations ?? [];
+        const allPlaces = data.days.flatMap((d: any) => d.places).concat(data.unassigned ?? []);
+        const fallbackLat = data.centerLat ?? allPlaces.find((p: any) => p.lat)?.lat ?? null;
+        const fallbackLng = data.centerLng ?? allPlaces.find((p: any) => p.lng)?.lng ?? null;
+        const primaryLat = dests[0]?.lat ?? fallbackLat;
+        const primaryLng = dests[0]?.lng ?? fallbackLng;
+
+        if (primaryLat && primaryLng && data.dateFrom && data.dateTo) {
           try {
-            const w = await getTripWeather(lat, lng, data.dateFrom, data.dateTo);
+            const usedIndices = [...new Set(data.days.map((d: any) => d.destinationIndex ?? 0))] as number[];
+            const weatherMap: Record<number, any> = {};
+            for (const idx of usedIndices) {
+              const dest = dests[idx];
+              const lat = dest?.lat ?? primaryLat;
+              const lng = dest?.lng ?? primaryLng;
+              if (lat && lng) {
+                try { weatherMap[idx] = await getTripWeather(lat, lng, data.dateFrom, data.dateTo); } catch { /* skip */ }
+              }
+            }
+            const primary = weatherMap[0];
             setTrip(prev => {
               if (!prev) return prev;
               return {
                 ...prev,
-                weather: { temp: w.summary.temp, icon: w.summary.icon, type: w.summary.type },
+                weather: primary ? { temp: primary.summary.temp, icon: primary.summary.icon, type: primary.summary.type } : prev.weather,
                 days: prev.days.map(day => {
-                  const dw = w.days.find(d => d.date === day.date);
+                  const w = weatherMap[day.destinationIndex ?? 0];
+                  if (!w) return day;
+                  const dw = w.days.find((d: any) => d.date === day.date);
                   return dw ? { ...day, weather: { temp: dw.temp, tempMin: dw.tempMin, icon: dw.icon } } : day;
                 }),
               };
@@ -144,9 +161,34 @@ const SharedTrip = () => {
   const placesList = (
     <>
       {currentDay && (
-        <p className="text-sm text-muted-foreground mb-3">
-          📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
-        </p>
+        <div className="mb-3 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              📅 {format(parseISO(currentDay.date), "EEEE d. MMMM", { locale: cs })}
+            </p>
+            {trip.weather?.type === 'forecast' && currentDay.weather?.temp != null && (
+              <span className="text-sm text-muted-foreground">
+                {currentDay.weather.icon} {currentDay.weather.tempMin != null ? `${currentDay.weather.temp}°/${currentDay.weather.tempMin}°` : `${currentDay.weather.temp}°`}
+              </span>
+            )}
+          </div>
+          {trip.destinations && trip.destinations.length > 1 && (
+            <div className="flex flex-wrap gap-1.5">
+              {trip.destinations.map((d: any, i: number) => (
+                <span
+                  key={i}
+                  className={`text-xs px-2 py-0.5 rounded-full border ${
+                    (currentDay.destinationIndex ?? 0) === i
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground"
+                  }`}
+                >
+                  📍 {d.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       )}
       {currentPlaces.length === 0 ? (
         <div className="bg-card rounded-lg shadow-card p-8 text-center">
@@ -315,6 +357,11 @@ const SharedTrip = () => {
                     <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                       {format(parseISO(day.date), "EE d. M.", { locale: cs })}
                     </span>
+                    {trip.destinations && trip.destinations.length > 1 && (
+                      <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                        📍 {(trip.destinations as any[])[day.destinationIndex ?? 0]?.name}
+                      </span>
+                    )}
                     {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
                       <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                         {day.weather.icon} {day.weather.tempMin != null && day.weather.tempMin !== undefined ? `${day.weather.temp}°/${day.weather.tempMin}°` : `${day.weather.temp}°`}

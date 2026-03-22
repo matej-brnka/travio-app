@@ -433,6 +433,11 @@ const TripDetail = () => {
                     <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                       {format(parseISO(day.date), "EE d. M.", { locale: cs })}
                     </span>
+                    {trip.destinations && trip.destinations.length > 1 && (
+                      <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                        📍 {trip.destinations[day.destinationIndex ?? 0]?.name}
+                      </span>
+                    )}
                     {trip.weather?.type === 'forecast' && day.weather?.temp != null && (
                       <span className={`ml-2 text-xs ${selectedDayIndex === i ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                         {day.weather.icon} {day.weather.tempMin != null && day.weather.tempMin !== undefined ? `${day.weather.temp}°/${day.weather.tempMin}°` : `${day.weather.temp}°`}

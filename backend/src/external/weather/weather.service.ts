@@ -102,7 +102,18 @@ export class WeatherService {
       if (!res.ok) throw new Error(`yr.no ${res.status}`);
       const data: any = await res.json();
 
-      const days = this.eachDay(dateFrom, dateTo).map(date => this.extractForDate(data, date, date));
+      let days = this.eachDay(dateFrom, dateTo).map(date => this.extractForDate(data, date, date));
+
+      // Fill in days beyond the forecast window using historical data
+      const missingDates = days.filter(d => d.temp === null).map(d => d.date);
+      if (missingDates.length > 0) {
+        const histResult = await this.getHistoricalWeather(lat, lng, dateFrom, dateTo).catch(() => null);
+        if (histResult) {
+          const histMap = new Map<string, DayWeather>(histResult.days.map(d => [d.date, d]));
+          days = days.map(d => (d.temp === null && histMap.has(d.date)) ? histMap.get(d.date)! : d);
+        }
+      }
+
       const summary = this.summarize(days, 'forecast');
       return { summary, days };
     } catch (err: any) {
@@ -126,8 +137,8 @@ export class WeatherService {
       if (!res.ok) throw new Error(`open-meteo ${res.status}`);
       const data: any = await res.json();
 
-      const dates: string[] = data?.daily?.time ?? [];
       const temps: number[] = data?.daily?.temperature_2m_max ?? [];
+      const tempsMin: number[] = data?.daily?.temperature_2m_min ?? [];
       const codes: number[] = data?.daily?.weathercode ?? [];
 
       // Map historical dates back to trip dates
@@ -135,7 +146,7 @@ export class WeatherService {
       const days: DayWeather[] = tripDates.map((tripDate, i) => ({
         date: tripDate,
         temp: temps[i] != null ? Math.round(temps[i]) : null,
-        tempMin: null,
+        tempMin: tempsMin[i] != null ? Math.round(tempsMin[i]) : null,
         icon: codes[i] != null ? wmoIcon(codes[i]) : null,
       }));
 
