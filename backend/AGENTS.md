@@ -122,6 +122,7 @@ CREATE TABLE places (
 | GET | /api/shared/:token | Veřejný read-only detail cesty (bez auth); vrací trip + days + places + centerLat/Lng |
 | GET | /api/places/search?q=&centerLat=&centerLng= | Vyhledávání míst (location bias) |
 | GET | /api/places/search-destinations?q= | Vyhledávání destinací – vrací `{ name, description, placeId, lat, lng, viewport: { north, south, east, west } }` |
+| GET | /api/places/photo?googlePlaceId= | Proxy fotky z Google Places (Place Details → photo_reference → obrázek); Cache-Control 1 den |
 | GET | /api/weather?lat=&lng=&date= | Počasí z yr.no (legacy, single-day) |
 | GET | /api/weather/trip?lat=&lng=&dateFrom=&dateTo= | Počasí pro celou cestu – forecast (yr.no, ≤9 dní) nebo historical (Open-Meteo, >9 dní); vrací `{ summary: { temp, icon, type }, days: [{ date, temp, tempMin, icon }] }` |
 | POST | /api/trips/:id/ai-generate | AI generování itineráře |

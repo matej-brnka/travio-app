@@ -51,19 +51,13 @@ export class GooglePlacesService {
     try {
       // 1. Fetch photo reference from Place Details
       const detailUrl = `${BASE}/details/json?place_id=${googlePlaceId}&fields=photos&key=${this.apiKey}`;
-      const detailRes = await fetch(detailUrl);
-      const detailData: any = await detailRes.json();
-      this.logger.debug(`getPhoto details status=${detailData?.status} photos=${detailData?.result?.photos?.length ?? 0} placeId=${googlePlaceId}`);
+      const detailData: any = await (await fetch(detailUrl)).json();
       const photoRef = detailData?.result?.photos?.[0]?.photo_reference;
-      if (!photoRef) {
-        this.logger.warn(`getPhoto: no photo_reference for placeId=${googlePlaceId} status=${detailData?.status}`);
-        return null;
-      }
+      if (!photoRef) return null;
 
       // 2. Fetch the photo (Google returns a redirect; fetch follows it automatically)
       const photoUrl = `${BASE}/photo?maxwidth=800&photo_reference=${photoRef}&key=${this.apiKey}`;
       const photoRes = await fetch(photoUrl);
-      this.logger.debug(`getPhoto photo fetch status=${photoRes.status} contentType=${photoRes.headers.get('content-type')}`);
       if (!photoRes.ok) return null;
       const contentType = photoRes.headers.get('content-type') ?? 'image/jpeg';
       const buffer = Buffer.from(await photoRes.arrayBuffer());

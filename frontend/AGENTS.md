@@ -40,15 +40,15 @@ src/
 │   ├── NavLink.tsx           # Navigační odkaz
 │   ├── NewTripModal.tsx      # Modal pro vytvoření cesty (ukládá viewport destinace)
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
-│   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa
+│   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa – zobrazuje foto z Google Places
 │   ├── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds
 │   └── UserAvatar.tsx        # Avatar uživatele + dropdown (jméno, email, odhlášení)
 ├── api/
-│   ├── client.ts        # apiFetch – přidává Bearer token ze Supabase session
+│   ├── client.ts        # apiFetch + apiFetchBlob – přidává Bearer token ze Supabase session
 │   ├── trips.ts         # CRUD cest
 │   ├── days.ts          # CRUD dnů
 │   ├── places.ts        # CRUD míst
-│   ├── search.ts        # Vyhledávání míst (Google Places)
+│   ├── search.ts        # Vyhledávání míst + getPlacePhoto (blob přes /api/places/photo proxy)
 │   └── weather.ts       # Počasí
 ├── context/
 │   └── TripContext.tsx  # State management – načítá data z backendu přes API
@@ -79,6 +79,7 @@ interface Place {
   visited: boolean; note?: string;
   priority?: "must-see" | "chci-videt" | "mozna" | null;
   timeFrom?: string; timeTo?: string;
+  googlePlaceId?: string | null;
 }
 interface TripDestination { name: string; lat: number | null; lng: number | null; viewportNorth?: number | null; viewportSouth?: number | null; viewportEast?: number | null; viewportWest?: number | null; }
 interface DayWeather { temp: number | null; tempMin?: number | null; icon: string | null; }
@@ -144,6 +145,12 @@ Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
 - `TripDetail` + `SharedTrip` – jednotlivé dny zobrazují `max°/min°` pouze pokud `trip.weather.type === 'forecast'`
 - Backend blending: yr.no forecast + Open-Meteo historical fallback pro dny mimo forecast okno (min. starší dny, nebo dny >9d od dnes)
 - `getTripWeather` v `src/api/weather.ts` – vrací `TripWeatherResult { summary, days }`
+
+## Fotky míst (Google Places)
+- `PlaceDetail` (mobile) a `PlaceDetailPanel` (desktop) zobrazují fotku místa pokud má `googlePlaceId`
+- Frontend volá `getPlacePhoto(googlePlaceId)` z `api/search.ts` → `apiFetchBlob` → blob object URL
+- Backend proxy: `GET /api/places/photo?googlePlaceId=xxx` – Place Details API → `photo_reference` → streamuje obrázek s `Cache-Control: 1 den`
+- Během načítání: animovaný skeleton; pokud `googlePlaceId` chybí, sekce se nezobrazí
 
 ## Sdílení cest
 - `TripDetail` – tlačítko „Sdílet odkaz" zavolá `GET /api/trips/:id/share`, otevře Dialog modal
