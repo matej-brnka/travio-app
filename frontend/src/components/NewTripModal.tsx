@@ -70,7 +70,7 @@ const interestCategories = [
 interface NewTripModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (trip: Trip) => Promise<void>;
+  onCreate: (trip: Trip & { useAi?: boolean }) => Promise<void>;
 }
 
 const emptyDest = (): TripDestination => ({ name: "", lat: null, lng: null });
@@ -113,7 +113,7 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       date: format(addDays(parseISO(dateFrom), i), "yyyy-MM-dd"),
       places: [],
     }));
-    const trip: Trip = {
+    const trip: Trip & { useAi?: boolean } = {
       id: `trip-${Date.now()}`,
       name: primary.name,
       title: title.trim() || null,
@@ -131,10 +131,19 @@ const NewTripModal = ({ open, onClose, onCreate }: NewTripModalProps) => {
       viewportEast: primary.viewportEast ?? null,
       viewportWest: primary.viewportWest ?? null,
       destinations,
+      useAi: aiHelp,
     };
     setCreating(true);
     try {
+      console.log("[AI TRIP] Creating trip payload", {
+        useAi: trip.useAi,
+        name: trip.name,
+        dateFrom: trip.dateFrom,
+        dateTo: trip.dateTo,
+        interests: trip.interests ?? [],
+      });
       await onCreate(trip);
+      console.log("[AI TRIP] Trip creation completed");
       setDestinations([emptyDest()]);
       setTitle("");
       setDateFrom("");

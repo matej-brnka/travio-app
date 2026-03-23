@@ -12,6 +12,7 @@ import TripDetail from "./pages/TripDetail";
 import PlaceDetail from "./pages/PlaceDetail";
 import SharedTrip from "./pages/SharedTrip";
 import NotFound from "./pages/NotFound";
+import OpenAiService from "./pages/OpenAiService";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/" element={<FullFrame><Landing /></FullFrame>} />
             <Route path="/login" element={<MobileFrame><Login /></MobileFrame>} />
             <Route path="/app" element={<MobileFrame><AuthGuard><Dashboard /></AuthGuard></MobileFrame>} />
+            <Route path="/app/service/openai" element={<FullFrame><OpenAiService /></FullFrame>} />
             <Route path="/app/trip/:id" element={<FullFrame><AuthGuard><TripDetail /></AuthGuard></FullFrame>} />
             <Route path="/app/trip/:id/place/:placeId" element={<FullFrame><AuthGuard><PlaceDetail /></AuthGuard></FullFrame>} />
             <Route path="/share/:token" element={<FullFrame><SharedTrip /></FullFrame>} />

@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { PlacesService } from '../../places/places.service';
+import { GooglePlacesService } from '../google-places/google-places.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('trips/:id/ai-generate')
@@ -12,6 +13,7 @@ export class AiController {
     private ai: AiService,
     private supabase: SupabaseService,
     private places: PlacesService,
+    private googlePlaces: GooglePlacesService,
   ) {}
 
   @Post()
@@ -38,10 +40,24 @@ export class AiController {
     const created: any[] = [];
     for (const p of aiPlaces) {
       const day = days[p.dayIndex] ?? days[days.length - 1];
+      let googleData: any = null;
+      try {
+        const query = `${p.name} ${trip.name}`.trim();
+        const results = await this.googlePlaces.search(query);
+        googleData = results[0] ?? null;
+      } catch {
+        googleData = null;
+      }
       const place = await this.places.create(tripId, user.userId, {
         name: p.name,
         dayId: day?.id ?? undefined,
         emoji: p.emoji,
+        address: googleData?.address ?? undefined,
+        website: googleData?.website ?? undefined,
+        lat: googleData?.lat ?? undefined,
+        lng: googleData?.lng ?? undefined,
+        openingHours: googleData?.openingHours ?? undefined,
+        googlePlaceId: googleData?.googlePlaceId ?? undefined,
         note: p.note,
         priority: p.priority,
       });

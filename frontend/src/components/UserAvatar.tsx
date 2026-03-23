@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut } from "lucide-react";
+import { LogOut, Wrench } from "lucide-react";
 
 interface UserInfo {
   name: string;
@@ -85,6 +85,11 @@ export const UserAvatar = () => {
             <DropdownMenuSeparator />
           </>
         )}
+        <DropdownMenuItem onClick={() => navigate("/app/service/openai")} className="cursor-pointer">
+          <Wrench className="w-4 h-4 mr-2" />
+          Servis OpenAI
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="w-4 h-4 mr-2" />
           Odhlásit se

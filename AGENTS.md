@@ -92,12 +92,22 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - `003_trip_title.sql` – sloupec title na trips (uživatelský název výletu)
 - `004_trip_destinations.sql` – sloupec destinations JSONB na trips (pole destinací)
 - `005_day_destination_index.sql` – sloupec destination_index INT na days (přiřazení dne k destinaci)
+- `006_llm_calls.sql` – tabulka `llm_calls` pro servisní log OpenAI volání (prompty + tokeny)
 - TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
 ## Technické poznámky
 
 ### pg DATE sloupce
 `pg` defaultně parsuje DATE jako JS `Date` s lokální půlnocí → timezone bug. `SupabaseService` to řeší pomocí `types.setTypeParser(1082, val => val)` – DATE se vrací jako plain string. Viz `backend/src/supabase/supabase.service.ts`.
+
+### Servisní log OpenAI volání
+- Backend endpoint: `GET /api/llm/calls?limit=100` (aktuálně bez auth guardu pro testování)
+- Endpoint vrací poslední volání OpenAI uložená v DB tabulce `llm_calls`:
+  - přesný `messages` payload (system/user)
+  - model + options
+  - `usage.promptTokens`, `usage.completionTokens`, `usage.totalTokens`
+- Frontend servisní stránka: `/app/service/openai`
+- Migrace: `backend/supabase/migrations/006_llm_calls.sql`
 
 ## Jak spustit testy
 ```bash

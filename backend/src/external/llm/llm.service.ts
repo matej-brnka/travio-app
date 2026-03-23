@@ -1,17 +1,13 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import { LlmMessage, LlmOptions, LlmProvider } from './interfaces/llm-provider.interface';
 import { OpenAiProvider } from './providers/openai.provider';
 
 @Injectable()
-export class LlmService implements OnModuleInit {
+export class LlmService {
   private provider: LlmProvider;
 
-  constructor(private config: ConfigService) {}
-
-  onModuleInit() {
-    // Default provider is OpenAI. Can be made configurable via env if needed.
-    this.provider = new OpenAiProvider(this.config);
+  constructor(private openAiProvider: OpenAiProvider) {
+    this.provider = this.openAiProvider;
   }
 
   async generateCompletion(messages: LlmMessage[], options?: LlmOptions): Promise<string> {

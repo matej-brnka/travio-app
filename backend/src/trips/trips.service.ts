@@ -1,19 +1,23 @@
-import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional, Logger } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
-import type { AiService } from '../external/ai/ai.service';
-import type { PlacesService } from '../places/places.service';
+import { AiService } from '../external/ai/ai.service';
+import { PlacesService } from '../places/places.service';
+import { GooglePlacesService } from '../external/google-places/google-places.service';
 
 @Injectable()
 export class TripsService {
+  private readonly logger = new Logger(TripsService.name);
+
   constructor(
     private supabase: SupabaseService,
     private config: ConfigService,
     @Optional() private ai?: AiService,
     @Optional() private places?: PlacesService,
+    @Optional() private googlePlaces?: GooglePlacesService,
   ) {}
 
   async findAll(userId: string) {
@@ -85,6 +89,7 @@ export class TripsService {
     }
 
     if (dto.useAi && this.ai && this.places) {
+      this.logger.log(`[AI TRIP] Starting AI generation for trip ${trip.id} (${dto.name})`);
       const days = await this.supabase.query(
         `SELECT id, position FROM days WHERE trip_id = $1 ORDER BY position`,
         [trip.id],
@@ -95,16 +100,29 @@ export class TripsService {
         dateTo: dto.dateTo,
         interests: dto.interests ?? [],
       });
+      this.logger.log(`[AI TRIP] AI returned ${aiPlaces.length} places for trip ${trip.id}`);
       for (const p of aiPlaces) {
         const day = days[p.dayIndex] ?? days[days.length - 1];
+        const googleData = await this.searchGooglePlace(p.name, dto.name, dto.centerLat ?? null, dto.centerLng ?? null);
         await this.places.create(trip.id, userId, {
           name: p.name,
           dayId: day?.id,
           emoji: p.emoji,
+          address: googleData?.address ?? undefined,
+          website: googleData?.website ?? undefined,
+          lat: googleData?.lat ?? undefined,
+          lng: googleData?.lng ?? undefined,
+          openingHours: googleData?.openingHours ?? undefined,
+          googlePlaceId: googleData?.googlePlaceId ?? undefined,
           note: p.note,
           priority: p.priority,
         });
       }
+      this.logger.log(`[AI TRIP] Saved ${aiPlaces.length} AI places for trip ${trip.id}`);
+    } else if (dto.useAi) {
+      this.logger.warn(
+        `[AI TRIP] useAi=true but AI services are not available (ai=${Boolean(this.ai)}, places=${Boolean(this.places)})`,
+      );
     }
 
     return this.findOne(trip.id, userId);
@@ -310,5 +328,34 @@ export class TripsService {
       position: row.position,
       googlePlaceId: row.google_place_id,
     };
+  }
+
+  private async searchGooglePlace(
+    placeName: string,
+    destinationName: string,
+    centerLat: number | null,
+    centerLng: number | null,
+  ): Promise<{
+    googlePlaceId: string | null;
+    address: string | null;
+    lat: number | null;
+    lng: number | null;
+    website: string | null;
+    openingHours: string[] | null;
+  } | null> {
+    if (!this.googlePlaces) return null;
+    try {
+      const query = `${placeName} ${destinationName}`.trim();
+      const results = await this.googlePlaces.search(
+        query,
+        centerLat ?? undefined,
+        centerLng ?? undefined,
+      );
+      if (!results.length) return null;
+      return results[0];
+    } catch (err: any) {
+      this.logger.warn(`[AI TRIP] Google Places enrichment failed for "${placeName}": ${err?.message ?? err}`);
+      return null;
+    }
   }
 }

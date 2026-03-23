@@ -1,7 +1,9 @@
-import { Logger, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LlmMessage, LlmOptions, LlmProvider } from '../interfaces/llm-provider.interface';
+import { LlmCallsService } from '../llm-calls.service';
 
+@Injectable()
 export class OpenAiProvider implements LlmProvider {
   private readonly logger = new Logger(OpenAiProvider.name);
   private readonly apiKey: string | undefined;
@@ -9,7 +11,10 @@ export class OpenAiProvider implements LlmProvider {
   private readonly defaultTemperature: number;
   private readonly defaultMaxTokens: number;
 
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private llmCalls: LlmCallsService,
+  ) {
     this.apiKey = config.get<string>('OPENAI_API_KEY');
     this.defaultModel = config.get<string>('OPENAI_MODEL') ?? 'gpt-4o-mini';
     this.defaultTemperature = parseFloat(config.get<string>('OPENAI_TEMPERATURE') ?? '0.7');
@@ -44,6 +49,32 @@ export class OpenAiProvider implements LlmProvider {
       }
 
       const data = await response.json();
+      const model = options?.model ?? this.defaultModel;
+      const usedOptions: LlmOptions = {
+        model,
+        temperature: options?.temperature ?? this.defaultTemperature,
+        maxTokens: options?.maxTokens ?? this.defaultMaxTokens,
+        responseFormat: options?.responseFormat ?? 'text',
+      };
+      const usage = data?.usage;
+      if (usage) {
+        this.logger.log(
+          `[AI TOKENS] prompt=${usage.prompt_tokens ?? 'n/a'} completion=${usage.completion_tokens ?? 'n/a'} total=${usage.total_tokens ?? 'n/a'}`,
+        );
+      } else {
+        this.logger.warn('[AI TOKENS] usage is missing in OpenAI response');
+      }
+      await this.llmCalls.logCall({
+        provider: 'openai',
+        model,
+        options: usedOptions,
+        messages,
+        usage: {
+          promptTokens: usage?.prompt_tokens ?? null,
+          completionTokens: usage?.completion_tokens ?? null,
+          totalTokens: usage?.total_tokens ?? null,
+        },
+      });
       return data.choices?.[0]?.message?.content ?? '';
     } catch (error) {
       this.logger.error(`Failed to generate completion from OpenAI: ${error.message}`);

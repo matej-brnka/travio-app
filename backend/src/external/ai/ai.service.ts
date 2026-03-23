@@ -25,12 +25,28 @@ export class AiService {
 
   async generateItinerary(params: AiParams): Promise<AiPlace[]> {
     const days = this.daysBetween(params.dateFrom, params.dateTo);
+    const systemPrompt = ITINERARY_PROMPTS.system;
+    const userPrompt = ITINERARY_PROMPTS.user(params.destination, days, params.interests);
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: userPrompt },
+    ];
+
+    this.logger.log('[AI PROMPT][START]');
+    this.logger.log(
+      `[AI PROMPT][PAYLOAD] ${JSON.stringify(
+        {
+          responseFormat: 'json_object',
+          messages,
+        },
+        null,
+        2,
+      )}`,
+    );
+    this.logger.log('[AI PROMPT][END]');
     
     try {
-      const result = await this.llm.generateJson<{ places: AiPlace[] }>([
-        { role: 'system', content: ITINERARY_PROMPTS.system },
-        { role: 'user', content: ITINERARY_PROMPTS.user(params.destination, days, params.interests) },
-      ]);
+      const result = await this.llm.generateJson<{ places: AiPlace[] }>(messages);
 
       return result.places ?? [];
     } catch (err: any) {

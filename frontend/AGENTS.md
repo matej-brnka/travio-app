@@ -39,17 +39,19 @@ src/
 │   ├── MovePlaceModal.tsx    # Modal přesunu místa do jiného dne
 │   ├── NavLink.tsx           # Navigační odkaz
 │   ├── NewTripModal.tsx      # Modal pro vytvoření cesty (ukládá viewport destinace)
+│   ├── OpenAiService.tsx     # Servisní stránka přehledu OpenAI volání (prompty + tokeny)
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
 │   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa – zobrazuje foto z Google Places
 │   ├── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds
-│   └── UserAvatar.tsx        # Avatar uživatele + dropdown (jméno, email, odhlášení)
+│   └── UserAvatar.tsx        # Avatar uživatele + dropdown (jméno, email, servis OpenAI, odhlášení)
 ├── api/
 │   ├── client.ts        # apiFetch + apiFetchBlob – přidává Bearer token ze Supabase session
 │   ├── trips.ts         # CRUD cest
 │   ├── days.ts          # CRUD dnů
 │   ├── places.ts        # CRUD míst
 │   ├── search.ts        # Vyhledávání míst + getPlacePhoto (blob přes /api/places/photo proxy)
-│   └── weather.ts       # Počasí
+│   ├── weather.ts       # Počasí
+│   └── llm.ts           # Servisní endpointy pro OpenAI call log
 ├── context/
 │   └── TripContext.tsx  # State management – načítá data z backendu přes API; řadí výlety chronologicky (dateFrom ASC)
 ├── lib/
@@ -162,6 +164,7 @@ Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
 
 ## Routování (`App.tsx`)
 - `MobileFrame` (`max-w-[480px]`) – Login, Dashboard, NotFound
-- `FullFrame` (bez omezení šířky) – Landing, TripDetail, PlaceDetail, **SharedTrip**
+- `FullFrame` (bez omezení šířky) – Landing, TripDetail, PlaceDetail, **SharedTrip**, `OpenAiService`
+- Servisní route: `/app/service/openai` (aktuálně bez `AuthGuard` pro testování)
 
 ## Pokud přidáš novou funkci, endpoint nebo změníš strukturu projektu, aktualizuj příslušný AGENTS.md.
