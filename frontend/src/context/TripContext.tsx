@@ -97,13 +97,14 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
       const trips = data.map(mapTrip);
       setTrips(prev => {
         const prevMap = new Map(prev.map(t => [t.id, t]));
-        return trips.map(t => {
+        const merged = trips.map(t => {
           const existing = prevMap.get(t.id);
           if (existing && existing.days.length > 0) {
             return { ...t, days: existing.days, unassigned: existing.unassigned };
           }
           return t;
         });
+        return merged.sort((a, b) => a.dateFrom.localeCompare(b.dateFrom));
       });
 
       // Fire-and-forget: fetch weather for each trip that has center coords
