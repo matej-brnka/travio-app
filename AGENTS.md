@@ -104,10 +104,12 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - Backend endpoint: `GET /api/llm/calls?limit=100` (aktuálně bez auth guardu pro testování)
 - Endpoint vrací poslední volání OpenAI uložená v DB tabulce `llm_calls`:
   - přesný `messages` payload (system/user)
+  - `responseContent` (1:1 obsah odpovědi modelu)
   - model + options
   - `usage.promptTokens`, `usage.completionTokens`, `usage.totalTokens`
 - Frontend servisní stránka: `/app/service/openai`
 - Migrace: `backend/supabase/migrations/006_llm_calls.sql`
+- Migrace: `backend/supabase/migrations/007_llm_response_content.sql`
 
 ## Jak spustit testy
 ```bash

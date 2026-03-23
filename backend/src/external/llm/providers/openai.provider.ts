@@ -56,6 +56,7 @@ export class OpenAiProvider implements LlmProvider {
         maxTokens: options?.maxTokens ?? this.defaultMaxTokens,
         responseFormat: options?.responseFormat ?? 'text',
       };
+      const responseContent = data?.choices?.[0]?.message?.content ?? '';
       const usage = data?.usage;
       if (usage) {
         this.logger.log(
@@ -69,13 +70,14 @@ export class OpenAiProvider implements LlmProvider {
         model,
         options: usedOptions,
         messages,
+        responseContent,
         usage: {
           promptTokens: usage?.prompt_tokens ?? null,
           completionTokens: usage?.completion_tokens ?? null,
           totalTokens: usage?.total_tokens ?? null,
         },
       });
-      return data.choices?.[0]?.message?.content ?? '';
+      return responseContent;
     } catch (error) {
       this.logger.error(`Failed to generate completion from OpenAI: ${error.message}`);
       throw error;

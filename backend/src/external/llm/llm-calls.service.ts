@@ -8,6 +8,7 @@ export interface LlmCallRecord {
   model: string;
   options: LlmOptions;
   messages: LlmMessage[];
+  responseContent: string;
   usage: {
     promptTokens: number | null;
     completionTokens: number | null;
@@ -27,6 +28,7 @@ export class LlmCallsService {
     model: string;
     options: LlmOptions;
     messages: LlmMessage[];
+    responseContent: string;
     usage: {
       promptTokens: number | null;
       completionTokens: number | null;
@@ -36,13 +38,14 @@ export class LlmCallsService {
     try {
       await this.supabase.query(
         `INSERT INTO llm_calls
-          (provider, model, options, messages, prompt_tokens, completion_tokens, total_tokens)
-         VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6, $7)`,
+          (provider, model, options, messages, response_content, prompt_tokens, completion_tokens, total_tokens)
+         VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6, $7, $8)`,
         [
           data.provider,
           data.model,
           JSON.stringify(data.options ?? {}),
           JSON.stringify(data.messages ?? []),
+          data.responseContent ?? '',
           data.usage.promptTokens,
           data.usage.completionTokens,
           data.usage.totalTokens,
@@ -56,7 +59,7 @@ export class LlmCallsService {
   async listCalls(limit = 100): Promise<LlmCallRecord[]> {
     const safeLimit = Math.max(1, Math.min(limit, 500));
     const rows = await this.supabase.query<any>(
-      `SELECT id, provider, model, options, messages, prompt_tokens, completion_tokens, total_tokens, created_at
+      `SELECT id, provider, model, options, messages, response_content, prompt_tokens, completion_tokens, total_tokens, created_at
        FROM llm_calls
        ORDER BY created_at DESC
        LIMIT $1`,
@@ -68,6 +71,7 @@ export class LlmCallsService {
       model: r.model,
       options: r.options ?? {},
       messages: r.messages ?? [],
+      responseContent: r.response_content ?? '',
       usage: {
         promptTokens: r.prompt_tokens ?? null,
         completionTokens: r.completion_tokens ?? null,

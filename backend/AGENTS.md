@@ -108,6 +108,7 @@ CREATE TABLE llm_calls (
   model TEXT NOT NULL,
   options JSONB NOT NULL DEFAULT '{}'::jsonb,
   messages JSONB NOT NULL,
+  response_content TEXT,
   prompt_tokens INT,
   completion_tokens INT,
   total_tokens INT,
@@ -123,6 +124,7 @@ Aplikace používá abstrakční vrstvu pro komunikaci s LLM modely.
   - `generateCompletion(messages, options)`: Základní textový výstup.
   - `generateJson<T>(messages, options)`: Vrátí typovaný JSON objekt (využívá `response_format: json_object`).
 - **LlmCallsService**: Persistuje OpenAI call log do DB (`llm_calls`) včetně `messages` a token usage.
+- Log obsahuje také `response_content` (1:1 text odpovědi modelu).
 - **Prompty**: Prompty jsou vyčleněny do samostatných souborů (např. `ai.prompts.ts`) pro snadnou úpravu bez nutnosti měnit logiku services.
 
 ## API endpointy (přehled)
@@ -152,7 +154,7 @@ Aplikace používá abstrakční vrstvu pro komunikaci s LLM modely.
 | GET | /api/weather?lat=&lng=&date= | Počasí z yr.no (legacy, single-day) |
 | GET | /api/weather/trip?lat=&lng=&dateFrom=&dateTo= | Počasí pro celou cestu – forecast (yr.no, ≤9 dní) nebo historical (Open-Meteo, >9 dní); vrací `{ summary: { temp, icon, type }, days: [{ date, temp, tempMin, icon }] }` |
 | POST | /api/trips/:id/ai-generate | AI generování itineráře |
-| GET | /api/llm/calls?limit=100 | Servisní log OpenAI (prompt/messages + token usage), aktuálně bez auth guardu pro test |
+| GET | /api/llm/calls?limit=100 | Servisní log OpenAI (prompt/messages + 1:1 response + token usage), aktuálně bez auth guardu pro test |
 
 ## Důležité poznámky k pg / DATE typům
 - `pg` (node-postgres) defaultně parsuje DATE sloupce jako JS `Date` objekty s lokální půlnocí

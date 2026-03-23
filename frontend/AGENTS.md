@@ -39,7 +39,7 @@ src/
 │   ├── MovePlaceModal.tsx    # Modal přesunu místa do jiného dne
 │   ├── NavLink.tsx           # Navigační odkaz
 │   ├── NewTripModal.tsx      # Modal pro vytvoření cesty (ukládá viewport destinace)
-│   ├── OpenAiService.tsx     # Servisní stránka přehledu OpenAI volání (prompty + tokeny)
+│   ├── OpenAiService.tsx     # Servisní stránka přehledu OpenAI volání (prompty + 1:1 odpověď + tokeny)
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
 │   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa – zobrazuje foto z Google Places
 │   ├── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds

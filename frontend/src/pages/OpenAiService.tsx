@@ -87,6 +87,12 @@ const OpenAiService = () => {
                 </p>
               </CardHeader>
               <CardContent className="space-y-3">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">ai response (1:1)</p>
+                  <pre className="text-xs md:text-sm whitespace-pre-wrap break-words bg-muted rounded-md p-3 overflow-auto">
+                    {call.responseContent || "(prázdná odpověď)"}
+                  </pre>
+                </div>
                 {call.messages.map((msg, idx) => (
                   <div key={`${call.id}-${idx}`} className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{msg.role}</p>

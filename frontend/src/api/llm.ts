@@ -12,6 +12,7 @@ export interface LlmCall {
     responseFormat?: 'json_object' | 'text';
   };
   messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
+  responseContent: string;
   usage: {
     promptTokens: number | null;
     completionTokens: number | null;
