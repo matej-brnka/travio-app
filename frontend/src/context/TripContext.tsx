@@ -190,7 +190,7 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
   const addTrip = useCallback(async (data: any): Promise<Trip> => {
     const created = await TripsApi.createTrip(data);
     const trip = mapTrip(created);
-    setTrips(prev => [...prev, trip]);
+    setTrips(prev => [...prev, trip].sort((a, b) => a.dateFrom.localeCompare(b.dateFrom)));
     return trip;
   }, []);
 
@@ -198,7 +198,10 @@ export const TripProvider = ({ children }: { children: ReactNode }) => {
     await TripsApi.updateTrip(tripId, updates);
     const refreshed = await TripsApi.getTrip(tripId);
     const trip = mapTrip(refreshed);
-    setTrips(prev => prev.map(t => t.id === tripId ? { ...trip, weather: t.weather } : t));
+    setTrips(prev => prev
+      .map(t => t.id === tripId ? { ...trip, weather: t.weather } : t)
+      .sort((a, b) => a.dateFrom.localeCompare(b.dateFrom))
+    );
   }, []);
 
   const deleteTrip = useCallback(async (tripId: string) => {

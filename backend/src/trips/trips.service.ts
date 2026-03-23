@@ -19,7 +19,7 @@ export class TripsService {
   async findAll(userId: string) {
     const rows = await this.supabase.query(
       `SELECT id, name, title, emoji, date_from, date_to, interests, share_token, center_lat, center_lng, destinations, created_at, updated_at
-       FROM trips WHERE user_id = $1 ORDER BY created_at DESC`,
+       FROM trips WHERE user_id = $1 ORDER BY date_from ASC`,
       [userId],
     );
     return rows.map(this.formatTrip);

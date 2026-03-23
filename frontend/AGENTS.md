@@ -51,7 +51,7 @@ src/
 │   ├── search.ts        # Vyhledávání míst + getPlacePhoto (blob přes /api/places/photo proxy)
 │   └── weather.ts       # Počasí
 ├── context/
-│   └── TripContext.tsx  # State management – načítá data z backendu přes API
+│   └── TripContext.tsx  # State management – načítá data z backendu přes API; řadí výlety chronologicky (dateFrom ASC)
 ├── lib/
 │   └── supabase.ts      # Supabase klient (auth)
 ├── data/
