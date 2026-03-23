@@ -15,6 +15,7 @@ export interface AiPlace {
   emoji: string;
   note: string;
   priority: 'must-see' | 'chci-videt' | 'mozna';
+  ticket?: 'need' | 'none';
 }
 
 @Injectable()

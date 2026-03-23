@@ -100,6 +100,9 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 ### pg DATE sloupce
 `pg` defaultně parsuje DATE jako JS `Date` s lokální půlnocí → timezone bug. `SupabaseService` to řeší pomocí `types.setTypeParser(1082, val => val)` – DATE se vrací jako plain string. Viz `backend/src/supabase/supabase.service.ts`.
 
+### AI itinerář – ticket pole
+- AI generování míst vrací i `ticket` u každého místa (`need` nebo `none`), které se ukládá do `places.ticket`.
+
 ### Servisní log OpenAI volání
 - Backend endpoint: `GET /api/llm/calls?limit=100` (aktuálně bez auth guardu pro testování)
 - Endpoint vrací poslední volání OpenAI uložená v DB tabulce `llm_calls`:

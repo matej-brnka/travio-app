@@ -116,6 +116,7 @@ export class TripsService {
           googlePlaceId: googleData?.googlePlaceId ?? undefined,
           note: p.note,
           priority: p.priority,
+          ticket: p.ticket,
         });
       }
       this.logger.log(`[AI TRIP] Saved ${aiPlaces.length} AI places for trip ${trip.id}`);

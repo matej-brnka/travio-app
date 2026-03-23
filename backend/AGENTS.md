@@ -153,7 +153,7 @@ Aplikace používá abstrakční vrstvu pro komunikaci s LLM modely.
 | GET | /api/places/photo?googlePlaceId= | Proxy fotky z Google Places (Place Details → photo_reference → obrázek); Cache-Control 1 den |
 | GET | /api/weather?lat=&lng=&date= | Počasí z yr.no (legacy, single-day) |
 | GET | /api/weather/trip?lat=&lng=&dateFrom=&dateTo= | Počasí pro celou cestu – forecast (yr.no, ≤9 dní) nebo historical (Open-Meteo, >9 dní); vrací `{ summary: { temp, icon, type }, days: [{ date, temp, tempMin, icon }] }` |
-| POST | /api/trips/:id/ai-generate | AI generování itineráře |
+| POST | /api/trips/:id/ai-generate | AI generování itineráře (včetně `ticket: need|none` pro místa) |
 | GET | /api/llm/calls?limit=100 | Servisní log OpenAI (prompt/messages + 1:1 response + token usage), aktuálně bez auth guardu pro test |
 
 ## Důležité poznámky k pg / DATE typům

@@ -60,6 +60,7 @@ export class AiController {
         googlePlaceId: googleData?.googlePlaceId ?? undefined,
         note: p.note,
         priority: p.priority,
+        ticket: p.ticket,
       });
       created.push(place);
     }
