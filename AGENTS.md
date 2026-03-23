@@ -28,7 +28,7 @@ Uživatel může:
 │       ├── days/         # CRUD dnů
 │       ├── places/       # CRUD míst
 │       ├── auth/         # JWT guard (ES256 / JWKS)
-│       └── external/     # Integrace yr.no, Google Places, OpenAI
+│       └── external/     # Integrace yr.no, Google Places, AI, LLM
 ├── chunks.MD          # Implementační plán (chunky)
 └── AGENTS.md          # Tento soubor
 ```

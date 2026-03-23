@@ -32,8 +32,12 @@ SUPABASE_PROJECT_URL=https://your-project-ref.supabase.co
 
 GOOGLE_PLACES_API_KEY=...
 YR_NO_USER_AGENT=travio/1.0 your@email.com
-OPENAI_API_KEY=...                  # pro AI generování itineráře
+
+# LLM / AI Configuration
+OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-4o-mini
+OPENAI_TEMPERATURE=0.7
+OPENAI_MAX_TOKENS=2000
 ```
 
 ## Poznámky k autentizaci
@@ -98,6 +102,15 @@ CREATE TABLE places (
   updated_at    TIMESTAMPTZ DEFAULT now()
 );
 ```
+
+## LLM Architektura (external/llm)
+Aplikace používá abstrakční vrstvu pro komunikaci s LLM modely.
+- **LlmProvider** (interface): Definuje metodu `generateCompletion`.
+- **OpenAiProvider**: Konkrétní implementace pro OpenAI API. Používá `fetch` a konfiguraci z `.env`.
+- **LlmService**: Jednotný vstupní bod pro zbytek aplikace. Umožňuje snadnou záměnu providera.
+  - `generateCompletion(messages, options)`: Základní textový výstup.
+  - `generateJson<T>(messages, options)`: Vrátí typovaný JSON objekt (využívá `response_format: json_object`).
+- **Prompty**: Prompty jsou vyčleněny do samostatných souborů (např. `ai.prompts.ts`) pro snadnou úpravu bez nutnosti měnit logiku services.
 
 ## API endpointy (přehled)
 
