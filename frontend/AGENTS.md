@@ -130,7 +130,7 @@ interface DestinationResult {
 - Token se automaticky přikládá v `api/client.ts` ke každému API volání
 - Supabase vydává tokeny s algoritmem **ES256** – backend validuje přes JWKS
 - **AuthGuard** (`components/AuthGuard.tsx`) – obaluje `/app/*` routy; při absenci session přesměruje na `/login`
-- **UserAvatar** (`components/UserAvatar.tsx`) – avatar z `user_metadata.avatar_url`, dropdown s jménem/emailem/odhlášením; zobrazen v Dashboard i TripDetail (mobile + desktop)
+- **UserAvatar** (`components/UserAvatar.tsx`) – avatar z `user_metadata.avatar_url` (nebo `picture` fallback), dropdown s jménem/emailem/odhlášením; zobrazen v Dashboard i TripDetail (mobile + desktop)
 - Odhlášení: `supabase.auth.signOut()` → přesměrování na `/login`
 
 ## API volání

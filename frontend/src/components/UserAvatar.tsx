@@ -22,15 +22,33 @@ export const UserAvatar = () => {
   const [user, setUser] = useState<UserInfo | null>(null);
 
   useEffect(() => {
+    // Initial session fetch
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        const meta = session.user.user_metadata;
         setUser({
-          name: session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? "Uživatel",
+          name: meta?.full_name ?? meta?.name ?? "Uživatel",
           email: session.user.email ?? "",
-          avatarUrl: session.user.user_metadata?.avatar_url ?? null,
+          avatarUrl: meta?.avatar_url ?? meta?.picture ?? null,
         });
       }
     });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const meta = session.user.user_metadata;
+        setUser({
+          name: meta?.full_name ?? meta?.name ?? "Uživatel",
+          email: session.user.email ?? "",
+          avatarUrl: meta?.avatar_url ?? meta?.picture ?? null,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSignOut = async () => {
