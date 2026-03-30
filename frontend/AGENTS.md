@@ -39,7 +39,8 @@ src/
 │   ├── MovePlaceModal.tsx    # Modal přesunu místa do jiného dne
 │   ├── NavLink.tsx           # Navigační odkaz
 │   ├── NewTripModal.tsx      # Modal pro vytvoření cesty (ukládá viewport destinace)
-│   ├── OpenAiService.tsx     # Servisní stránka přehledu OpenAI volání – collapsible ribbony, filtr podle data, odhadovaná cena v USD
+│   ├── OpenAiService.tsx          # Servisní stránka přehledu OpenAI volání – collapsible ribbony, filtr podle data, odhadovaná cena v USD
+│   ├── GooglePlacesService.tsx    # Servisní stránka Google Places/Maps volání – taby Places/Maps, filtr podle data, odhadovaná cena v USD
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
 │   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa – zobrazuje foto z Google Places
 │   ├── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds
@@ -51,9 +52,11 @@ src/
 │   ├── places.ts        # CRUD míst
 │   ├── search.ts        # Vyhledávání míst + getPlacePhoto (blob přes /api/places/photo proxy)
 │   ├── weather.ts       # Počasí
-│   └── llm.ts           # Servisní endpointy pro OpenAI call log
+│   ├── llm.ts           # Servisní endpointy pro OpenAI call log
+│   └── googlePlaces.ts  # Servisní endpointy pro Google Places call log
 ├── config/
-│   └── llmPricing.ts    # Ceník OpenAI modelů (USD/1M tokenů) – 3 sazby: inputPer1M, cachedInputPer1M, outputPer1M; manuálně aktualizuj při změně ceníku
+│   ├── llmPricing.ts           # Ceník OpenAI modelů (USD/1M tokenů) – 3 sazby: inputPer1M, cachedInputPer1M, outputPer1M; manuálně aktualizuj při změně ceníku
+│   └── googlePlacesPricing.ts  # Ceník Google Places/Maps API (USD/volání) – manuálně aktualizuj při změně ceníku (USD/1M tokenů) – 3 sazby: inputPer1M, cachedInputPer1M, outputPer1M; manuálně aktualizuj při změně ceníku
 ├── context/
 │   └── TripContext.tsx  # State management – načítá data z backendu přes API; řadí výlety chronologicky (dateFrom ASC)
 ├── lib/
@@ -167,6 +170,6 @@ Base URL z `VITE_API_URL` (výchozí `http://localhost:3123/api`).
 ## Routování (`App.tsx`)
 - `MobileFrame` (`max-w-[480px]`) – Login, Dashboard, NotFound
 - `FullFrame` (bez omezení šířky) – Landing, TripDetail, PlaceDetail, **SharedTrip**, `OpenAiService`
-- Servisní route: `/app/service/openai` (aktuálně bez `AuthGuard` pro testování)
+- Servisní route: `/app/service/openai` a `/app/service/google-places` (bez `AuthGuard` pro testování)
 
 ## Pokud přidáš novou funkci, endpoint nebo změníš strukturu projektu, aktualizuj příslušný AGENTS.md.

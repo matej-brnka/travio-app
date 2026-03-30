@@ -13,6 +13,7 @@ import PlaceDetail from "./pages/PlaceDetail";
 import SharedTrip from "./pages/SharedTrip";
 import NotFound from "./pages/NotFound";
 import OpenAiService from "./pages/OpenAiService";
+import GooglePlacesService from "./pages/GooglePlacesService";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/login" element={<MobileFrame><Login /></MobileFrame>} />
             <Route path="/app" element={<MobileFrame><AuthGuard><Dashboard /></AuthGuard></MobileFrame>} />
             <Route path="/app/service/openai" element={<FullFrame><OpenAiService /></FullFrame>} />
+            <Route path="/app/service/google-places" element={<FullFrame><GooglePlacesService /></FullFrame>} />
             <Route path="/app/trip/:id" element={<FullFrame><AuthGuard><TripDetail /></AuthGuard></FullFrame>} />
             <Route path="/app/trip/:id/place/:placeId" element={<FullFrame><AuthGuard><PlaceDetail /></AuthGuard></FullFrame>} />
             <Route path="/share/:token" element={<FullFrame><SharedTrip /></FullFrame>} />

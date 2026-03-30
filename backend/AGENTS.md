@@ -155,6 +155,7 @@ Aplikace používá abstrakční vrstvu pro komunikaci s LLM modely.
 | GET | /api/weather/trip?lat=&lng=&dateFrom=&dateTo= | Počasí pro celou cestu – forecast (yr.no, ≤9 dní) nebo historical (Open-Meteo, >9 dní); vrací `{ summary: { temp, icon, type }, days: [{ date, temp, tempMin, icon }] }` |
 | POST | /api/trips/:id/ai-generate | AI generování itineráře (včetně `ticket: need|none` pro místa) |
 | GET | /api/llm/calls?limit=100 | Servisní log OpenAI (prompt/messages + 1:1 response + token usage), aktuálně bez auth guardu pro test |
+| GET | /api/google-places/calls?limit=500 | Servisní log Google Places/Maps API volání (api_type, query, place_id, result_count), bez auth guardu |
 
 ## Důležité poznámky k pg / DATE typům
 - `pg` (node-postgres) defaultně parsuje DATE sloupce jako JS `Date` objekty s lokální půlnocí
@@ -173,6 +174,7 @@ src/
 │   ├── weather/    # WeatherModule – yr.no + Open-Meteo (blending forecast + historical)
 │   ├── google-places/ # GooglePlacesModule
 │   └── ai/         # AiModule – generování itineráře
+│       # GooglePlacesModule obsahuje: GooglePlacesService, GooglePlacesCallsService (log do DB), GooglePlacesCallsController
 ├── supabase/       # SupabaseModule – shared Supabase client
 ├── app.module.ts
 └── main.ts

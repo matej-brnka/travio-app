@@ -93,6 +93,7 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - `004_trip_destinations.sql` – sloupec destinations JSONB na trips (pole destinací)
 - `005_day_destination_index.sql` – sloupec destination_index INT na days (přiřazení dne k destinaci)
 - `006_llm_calls.sql` – tabulka `llm_calls` pro servisní log OpenAI volání (prompty + tokeny)
+- `008_google_places_calls.sql` – tabulka `google_places_calls` pro servisní log Google Places/Maps API volání
 - TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
 ## Technické poznámky
@@ -115,6 +116,9 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
   - Každý záznam je collapsible ribbon – v základu jen datum, model, provider, tokeny, cena
   - Detail (rozbalitelný): AI Response 1:1, System zpráva, User zpráva
   - Součty tokenů a odhadovaná cena reagují na aktuální filtr
+- Ceník Google Places/Maps: `frontend/src/config/googlePlacesPricing.ts` – cena za volání (USD/call): text_search $0.032, place_details $0.017, place_photo $0.007
+- Frontend servisní stránka: `/app/service/google-places` (tabs Places / Maps, filtr podle data, odhadovaná cena)
+- Backend endpoint: `GET /api/google-places/calls?limit=500` (bez auth guardu)
 - Ceník modelů: `frontend/src/config/llmPricing.ts` – manuálně udržovaná tabulka cen (USD/1M tokenů), 3 sazby: `inputPer1M`, `cachedInputPer1M`, `outputPer1M`; `calcCost` počítá worst-case (bez cache slevy, DB cached tokeny neukládá zvlášť)
 - Migrace: `backend/supabase/migrations/006_llm_calls.sql`
 - Migrace: `backend/supabase/migrations/007_llm_response_content.sql`

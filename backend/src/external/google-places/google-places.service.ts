@@ -1,5 +1,6 @@
 import { Injectable, ServiceUnavailableException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { GooglePlacesCallsService } from './google-places-calls.service';
 
 const BASE = 'https://maps.googleapis.com/maps/api/place';
 
@@ -10,7 +11,10 @@ export class GooglePlacesService {
   private readonly logger = new Logger(GooglePlacesService.name);
   private readonly apiKey: string | undefined;
 
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private calls: GooglePlacesCallsService,
+  ) {
     this.apiKey = config.get<string>('GOOGLE_PLACES_API_KEY');
   }
 
@@ -21,8 +25,11 @@ export class GooglePlacesService {
       const url = `${BASE}/textsearch/json?query=${encodeURIComponent(query)}&key=${this.apiKey}&language=cs`;
       const res = await fetch(url);
       const data: any = await res.json();
-      if (data.status === 'ZERO_RESULTS' || !data.results?.length) return [];
-      return data.results
+      if (data.status === 'ZERO_RESULTS' || !data.results?.length) {
+        void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: 0 });
+        return [];
+      }
+      const results = data.results
         .filter((r: any) => r.types?.some((t: string) => DESTINATION_TYPES.includes(t)))
         .slice(0, 6)
         .map((r: any) => ({
@@ -40,6 +47,8 @@ export class GooglePlacesService {
               }
             : null,
         }));
+      void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: results.length });
+      return results;
     } catch (err: any) {
       this.logger.error('Destination search failed', err.message);
       return [];
@@ -52,12 +61,14 @@ export class GooglePlacesService {
       // 1. Fetch photo reference from Place Details
       const detailUrl = `${BASE}/details/json?place_id=${googlePlaceId}&fields=photos&key=${this.apiKey}`;
       const detailData: any = await (await fetch(detailUrl)).json();
+      void this.calls.logCall({ api: 'places', apiType: 'place_details', placeId: googlePlaceId });
       const photoRef = detailData?.result?.photos?.[0]?.photo_reference;
       if (!photoRef) return null;
 
       // 2. Fetch the photo (Google returns a redirect; fetch follows it automatically)
       const photoUrl = `${BASE}/photo?maxwidth=800&photo_reference=${photoRef}&key=${this.apiKey}`;
       const photoRes = await fetch(photoUrl);
+      void this.calls.logCall({ api: 'places', apiType: 'place_photo', placeId: googlePlaceId });
       if (!photoRes.ok) return null;
       const contentType = photoRes.headers.get('content-type') ?? 'image/jpeg';
       const buffer = Buffer.from(await photoRes.arrayBuffer());
@@ -82,13 +93,20 @@ export class GooglePlacesService {
       const searchRes = await fetch(searchUrl);
       const searchData: any = await searchRes.json();
 
-      if (searchData.status === 'ZERO_RESULTS' || !searchData.results?.length) return [];
+      if (searchData.status === 'ZERO_RESULTS' || !searchData.results?.length) {
+        void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: 0 });
+        return [];
+      }
+
+      const topResults = searchData.results.slice(0, 5);
+      void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: topResults.length });
 
       const results = await Promise.all(
-        searchData.results.slice(0, 5).map(async (r: any) => {
+        topResults.map(async (r: any) => {
           try {
             const detailUrl = `${BASE}/details/json?place_id=${r.place_id}&fields=name,formatted_address,geometry,website,opening_hours,place_id&key=${this.apiKey}&language=cs`;
             const detailData: any = await (await fetch(detailUrl)).json();
+            void this.calls.logCall({ api: 'places', apiType: 'place_details', placeId: r.place_id });
             const d = detailData.result ?? r;
             return {
               googlePlaceId: r.place_id,

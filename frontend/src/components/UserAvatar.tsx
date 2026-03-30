@@ -89,6 +89,10 @@ export const UserAvatar = () => {
           <Wrench className="w-4 h-4 mr-2" />
           Servis OpenAI
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/app/service/google-places")} className="cursor-pointer">
+          <Wrench className="w-4 h-4 mr-2" />
+          Servis Google Places
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="w-4 h-4 mr-2" />
