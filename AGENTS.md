@@ -104,13 +104,18 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - AI generování míst vrací i `ticket` u každého místa (`need` nebo `none`), které se ukládá do `places.ticket`.
 
 ### Servisní log OpenAI volání
-- Backend endpoint: `GET /api/llm/calls?limit=100` (aktuálně bez auth guardu pro testování)
+- Backend endpoint: `GET /api/llm/calls?limit=500` (aktuálně bez auth guardu pro testování)
 - Endpoint vrací poslední volání OpenAI uložená v DB tabulce `llm_calls`:
   - přesný `messages` payload (system/user)
   - `responseContent` (1:1 obsah odpovědi modelu)
   - model + options
   - `usage.promptTokens`, `usage.completionTokens`, `usage.totalTokens`
 - Frontend servisní stránka: `/app/service/openai`
+  - Filtrování záznamů podle data (Od / Do) klientsky
+  - Každý záznam je collapsible ribbon – v základu jen datum, model, provider, tokeny, cena
+  - Detail (rozbalitelný): AI Response 1:1, System zpráva, User zpráva
+  - Součty tokenů a odhadovaná cena reagují na aktuální filtr
+- Ceník modelů: `frontend/src/config/llmPricing.ts` – manuálně udržovaná tabulka cen (USD/1M tokenů), 3 sazby: `inputPer1M`, `cachedInputPer1M`, `outputPer1M`; `calcCost` počítá worst-case (bez cache slevy, DB cached tokeny neukládá zvlášť)
 - Migrace: `backend/supabase/migrations/006_llm_calls.sql`
 - Migrace: `backend/supabase/migrations/007_llm_response_content.sql`
 

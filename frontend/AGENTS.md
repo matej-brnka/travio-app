@@ -39,7 +39,7 @@ src/
 │   ├── MovePlaceModal.tsx    # Modal přesunu místa do jiného dne
 │   ├── NavLink.tsx           # Navigační odkaz
 │   ├── NewTripModal.tsx      # Modal pro vytvoření cesty (ukládá viewport destinace)
-│   ├── OpenAiService.tsx     # Servisní stránka přehledu OpenAI volání (prompty + 1:1 odpověď + tokeny)
+│   ├── OpenAiService.tsx     # Servisní stránka přehledu OpenAI volání – collapsible ribbony, filtr podle data, odhadovaná cena v USD
 │   ├── PlaceCard.tsx         # Karta místa v seznamu
 │   ├── PlaceDetailPanel.tsx  # Desktop panel detailu místa – zobrazuje foto z Google Places
 │   ├── TripMapView.tsx       # Google mapa s piny, polyline, auto-fit bounds
@@ -52,6 +52,8 @@ src/
 │   ├── search.ts        # Vyhledávání míst + getPlacePhoto (blob přes /api/places/photo proxy)
 │   ├── weather.ts       # Počasí
 │   └── llm.ts           # Servisní endpointy pro OpenAI call log
+├── config/
+│   └── llmPricing.ts    # Ceník OpenAI modelů (USD/1M tokenů) – 3 sazby: inputPer1M, cachedInputPer1M, outputPer1M; manuálně aktualizuj při změně ceníku
 ├── context/
 │   └── TripContext.tsx  # State management – načítá data z backendu přes API; řadí výlety chronologicky (dateFrom ASC)
 ├── lib/
