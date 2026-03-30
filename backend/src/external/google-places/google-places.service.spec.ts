@@ -4,6 +4,8 @@ import { GooglePlacesService } from './google-places.service';
 const mockConfig = (key?: string) =>
   ({ get: () => key }) as any;
 
+const mockCalls = { logCall: jest.fn().mockResolvedValue(undefined) } as any;
+
 const mockFetch = (responses: any[]) => {
   let i = 0;
   return jest.fn().mockImplementation(() =>
@@ -17,19 +19,19 @@ describe('GooglePlacesService', () => {
   });
 
   it('throws 503 when API key not configured', async () => {
-    const service = new GooglePlacesService(mockConfig(undefined));
+    const service = new GooglePlacesService(mockConfig(undefined), mockCalls);
     await expect(service.search('paris')).rejects.toThrow(ServiceUnavailableException);
   });
 
   it('returns [] for empty query', async () => {
-    const service = new GooglePlacesService(mockConfig('test-key'));
+    const service = new GooglePlacesService(mockConfig('test-key'), mockCalls);
     expect(await service.search('')).toEqual([]);
     expect(await service.search('   ')).toEqual([]);
   });
 
   it('returns [] when ZERO_RESULTS', async () => {
     (global as any).fetch = mockFetch([{ status: 'ZERO_RESULTS', results: [] }]);
-    const service = new GooglePlacesService(mockConfig('test-key'));
+    const service = new GooglePlacesService(mockConfig('test-key'), mockCalls);
     expect(await service.search('xyznotfound')).toEqual([]);
   });
 
@@ -50,7 +52,7 @@ describe('GooglePlacesService', () => {
         },
       },
     ]);
-    const service = new GooglePlacesService(mockConfig('test-key'));
+    const service = new GooglePlacesService(mockConfig('test-key'), mockCalls);
     const results = await service.search('eiffel');
     expect(results).toHaveLength(1);
     expect(results[0].googlePlaceId).toBe('ChIJ1');
