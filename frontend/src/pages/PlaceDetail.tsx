@@ -138,11 +138,11 @@ const PlaceDetail = () => {
       <div className="px-5 pb-24">
         {/* Place photo */}
         {photoUrl ? (
-          <div className="rounded-lg overflow-hidden h-48 mt-4 mb-5">
+          <div className="rounded-lg overflow-hidden aspect-square w-full mt-4 mb-5">
             <img src={photoUrl} alt={place.name} className="w-full h-full object-cover" />
           </div>
         ) : place.googlePlaceId ? (
-          <div className="bg-muted rounded-lg h-48 flex items-center justify-center mt-4 mb-5 animate-pulse" />
+          <div className="bg-muted rounded-lg aspect-square w-full flex items-center justify-center mt-4 mb-5 animate-pulse" />
         ) : null}
 
         {/* Emoji + Time range */}

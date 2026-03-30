@@ -143,11 +143,11 @@ const PlaceDetailPanel = ({ trip, placeId, onClose, onNavigatePlace }: PlaceDeta
         <div className="px-4 py-4 space-y-4">
           {/* Place photo */}
           {photoUrl ? (
-            <div className="rounded-lg overflow-hidden h-36">
+            <div className="rounded-lg overflow-hidden aspect-square w-full">
               <img src={photoUrl} alt={place.name} className="w-full h-full object-cover" />
             </div>
           ) : place.googlePlaceId ? (
-            <div className="bg-muted rounded-lg h-36 animate-pulse" />
+            <div className="bg-muted rounded-lg aspect-square w-full animate-pulse" />
           ) : null}
 
           {/* Emoji + Time range */}
