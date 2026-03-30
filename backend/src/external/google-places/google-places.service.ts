@@ -26,7 +26,7 @@ export class GooglePlacesService {
       const res = await fetch(url);
       const data: any = await res.json();
       if (data.status === 'ZERO_RESULTS' || !data.results?.length) {
-        void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: 0 });
+        void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: 0 });
         return [];
       }
       const results = data.results
@@ -47,7 +47,7 @@ export class GooglePlacesService {
               }
             : null,
         }));
-      void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: results.length });
+      void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: results.length });
       return results;
     } catch (err: any) {
       this.logger.error('Destination search failed', err.message);
@@ -61,7 +61,7 @@ export class GooglePlacesService {
       // 1. Fetch photo reference from Place Details
       const detailUrl = `${BASE}/details/json?place_id=${googlePlaceId}&fields=photos&key=${this.apiKey}`;
       const detailData: any = await (await fetch(detailUrl)).json();
-      void this.calls.logCall({ api: 'places', apiType: 'place_details', placeId: googlePlaceId });
+      void this.calls.logCall({ api: 'places', apiType: 'place_details_essentials', placeId: googlePlaceId });
       const photoRef = detailData?.result?.photos?.[0]?.photo_reference;
       if (!photoRef) return null;
 
@@ -94,19 +94,19 @@ export class GooglePlacesService {
       const searchData: any = await searchRes.json();
 
       if (searchData.status === 'ZERO_RESULTS' || !searchData.results?.length) {
-        void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: 0 });
+        void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: 0 });
         return [];
       }
 
       const topResults = searchData.results.slice(0, 5);
-      void this.calls.logCall({ api: 'places', apiType: 'text_search', query, resultCount: topResults.length });
+      void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: topResults.length });
 
       const results = await Promise.all(
         topResults.map(async (r: any) => {
           try {
             const detailUrl = `${BASE}/details/json?place_id=${r.place_id}&fields=name,formatted_address,geometry,website,opening_hours,place_id&key=${this.apiKey}&language=cs`;
             const detailData: any = await (await fetch(detailUrl)).json();
-            void this.calls.logCall({ api: 'places', apiType: 'place_details', placeId: r.place_id });
+            void this.calls.logCall({ api: 'places', apiType: 'place_details_pro', placeId: r.place_id });
             const d = detailData.result ?? r;
             return {
               googlePlaceId: r.place_id,

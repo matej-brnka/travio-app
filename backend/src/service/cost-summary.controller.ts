@@ -44,11 +44,12 @@ export class CostSummaryController {
       this.supabase.query<any>(
         `SELECT
            DATE(created_at AT TIME ZONE 'UTC') AS date,
+           api,
            api_type,
            COUNT(*)::int AS calls
          FROM google_places_calls
          WHERE created_at >= NOW() - ($1 || ' days')::INTERVAL
-         GROUP BY date, api_type
+         GROUP BY date, api, api_type
          ORDER BY date ASC`,
         [days],
       ),

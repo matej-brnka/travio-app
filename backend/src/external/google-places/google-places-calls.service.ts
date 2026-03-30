@@ -2,7 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SupabaseService } from '../../supabase/supabase.service';
 
 export type GooglePlacesApi = 'places' | 'maps';
-export type GooglePlacesApiType = 'text_search' | 'place_details' | 'place_photo';
+export type GooglePlacesApiType =
+  | 'text_search_pro'
+  | 'text_search'
+  | 'place_details_pro'
+  | 'place_details_essentials'
+  | 'place_details'
+  | 'place_photo'
+  | 'map_load';
 
 export interface GooglePlacesCallRecord {
   id: number;

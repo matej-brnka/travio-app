@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 import { getGooglePlacesCalls, GooglePlacesCall } from "@/api/googlePlaces";
-import { calcGoogleCost } from "@/config/googlePlacesPricing";
+import { calcGoogleCost, GOOGLE_PRICING } from "@/config/googlePlacesPricing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,22 +10,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const API_TYPE_LABELS: Record<string, string> = {
-  text_search:   "Text Search",
-  place_details: "Place Details",
-  place_photo:   "Place Photo",
-};
+const isBillableType = (apiType: string) => (GOOGLE_PRICING[apiType]?.per1000 ?? 0) > 0;
 
 const CallRow = ({ call }: { call: GooglePlacesCall }) => {
-  const cost = calcGoogleCost(call.apiType);
+  const entry = GOOGLE_PRICING[call.apiType];
+  const cost = calcGoogleCost(call.apiType, 1) ?? 0;
   return (
     <div className="flex items-center gap-3 px-4 py-2.5 border-b last:border-0 text-sm">
       <span className="text-muted-foreground w-36 shrink-0 text-xs">
         {format(new Date(call.createdAt), "d. M. yyyy HH:mm", { locale: cs })}
       </span>
       <Badge variant="secondary" className="text-xs shrink-0">
-        {API_TYPE_LABELS[call.apiType] ?? call.apiType}
+        {entry?.label ?? call.apiType}
       </Badge>
+      {entry && (
+        <span className="text-xs text-muted-foreground shrink-0 hidden md:inline" title="Google ceník SKU">
+          {entry.sku}
+        </span>
+      )}
       {call.query && (
         <span className="text-xs text-muted-foreground truncate max-w-xs" title={call.query}>
           &ldquo;{call.query}&rdquo;
@@ -40,7 +42,7 @@ const CallRow = ({ call }: { call: GooglePlacesCall }) => {
         <span className="text-xs text-muted-foreground ml-1">→ {call.resultCount} výsl.</span>
       )}
       <span className="ml-auto text-xs font-medium shrink-0">
-        {cost != null ? `$${cost.toFixed(3)}` : "–"}
+        ${cost.toFixed(4)}
       </span>
     </div>
   );
@@ -112,14 +114,14 @@ const GooglePlacesService = () => {
     });
   }, [calls, dateFrom, dateTo]);
 
-  const placesCalls = useMemo(() => filtered.filter((c) => c.api === 'places'), [filtered]);
-  const mapsCalls = useMemo(() => filtered.filter((c) => c.api === 'maps'), [filtered]);
+  const billableCalls = useMemo(() => filtered.filter((c) => isBillableType(c.apiType)), [filtered]);
+  const placesCalls = useMemo(() => billableCalls.filter((c) => c.api === 'places'), [billableCalls]);
+  const mapsCalls = useMemo(() => billableCalls.filter((c) => c.api === 'maps'), [billableCalls]);
 
   const totals = useMemo(() => {
-    const cost = filtered.reduce((acc, c) => acc + (calcGoogleCost(c.apiType) ?? 0), 0);
-    const hasUnknown = filtered.some((c) => calcGoogleCost(c.apiType) == null);
-    return { count: filtered.length, cost, hasUnknown };
-  }, [filtered]);
+    const cost = billableCalls.reduce((acc, c) => acc + (calcGoogleCost(c.apiType, 1) ?? 0), 0);
+    return { count: billableCalls.length, cost };
+  }, [billableCalls]);
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 md:px-8">
@@ -128,7 +130,7 @@ const GooglePlacesService = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Servis: Google Places / Maps</h1>
             <p className="text-sm text-muted-foreground">
-              Přehled volání a odhadované náklady. Google poskytuje $200 kredit měsíčně.
+              Přehled volání a odhadované náklady dle Google ceníku (USD / 1 000 volání).
             </p>
           </div>
           <Button variant="outline" onClick={load} disabled={loading}>
@@ -164,7 +166,7 @@ const GooglePlacesService = () => {
             </Button>
           )}
           <span className="text-xs text-muted-foreground ml-auto">
-            {totals.count} / {calls.length} volání
+            {totals.count} účtovaných / {calls.length} celkem
           </span>
         </div>
 
@@ -187,9 +189,6 @@ const GooglePlacesService = () => {
               <p className="text-xs text-muted-foreground">Odhadovaná cena</p>
               <p className="text-xl font-bold">
                 ${totals.cost.toFixed(3)}
-                {totals.hasUnknown && (
-                  <span className="text-xs font-normal text-muted-foreground ml-1" title="Některá volání nemají cenu v ceníku">+?</span>
-                )}
               </p>
             </CardContent>
           </Card>

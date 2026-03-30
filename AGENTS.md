@@ -116,7 +116,9 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
   - Každý záznam je collapsible ribbon – v základu jen datum, model, provider, tokeny, cena
   - Detail (rozbalitelný): AI Response 1:1, System zpráva, User zpráva
   - Součty tokenů a odhadovaná cena reagují na aktuální filtr
-- Ceník Google Places/Maps: `frontend/src/config/googlePlacesPricing.ts` – cena za volání (USD/call): text_search $0.032, place_details $0.017, place_photo $0.007
+- Ceník Google Places/Maps: `frontend/src/config/googlePlacesPricing.ts` – ceník podle Google SKU v USD / 1 000 volání (`per1000`) + `label` + `sku`; výpočet ceny dělá `calcGoogleCost(apiType, calls)`.
+- Google Places servisní výpis (`/app/service/google-places`) zobrazuje pouze fakticky účtované API typy (`per1000 > 0`), včetně přesné SKU položky.
+- Map telemetry (`POST /api/service/telemetry`) loguje pouze účtovaný event `map_load` (Dynamic Maps). Interakce mapy (zoom/pan) se do cost výpisu nezahrnují.
 - Frontend servisní stránka: `/app/service/google-places` (tabs Places / Maps, filtr podle data, odhadovaná cena)
 - Backend endpoint: `GET /api/google-places/calls?limit=500` (bez auth guardu)
 - Ceník modelů: `frontend/src/config/llmPricing.ts` – manuálně udržovaná tabulka cen (USD/1M tokenů), 3 sazby: `inputPer1M`, `cachedInputPer1M`, `outputPer1M`; `calcCost` počítá worst-case (bez cache slevy, DB cached tokeny neukládá zvlášť)

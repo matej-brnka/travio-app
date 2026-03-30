@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { format, subDays, eachDayOfInterval, parseISO } from "date-fns";
+import { format, subDays, eachDayOfInterval } from "date-fns";
 import { cs } from "date-fns/locale";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { getCostSummary, CostSummary } from "@/api/costs";
 import { LLM_PRICING, calcCost } from "@/config/llmPricing";
-import { GOOGLE_PLACES_PRICING } from "@/config/googlePlacesPricing";
+import { GOOGLE_PRICING, calcGoogleCost } from "@/config/googlePlacesPricing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,12 +16,6 @@ const PERIODS = [
   { label: "90 dní", days: 90 },
 ];
 
-const GP_LABELS: Record<string, string> = {
-  text_search:   "Text Search",
-  place_details: "Place Details",
-  place_photo:   "Place Photo",
-};
-
 const fmt = (n: number) => `$${n.toFixed(4)}`;
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -31,7 +25,10 @@ function calcLlmCost(model: string, prompt: number, completion: number): number 
 }
 
 function calcGpCost(apiType: string, calls: number): number {
-  return (GOOGLE_PLACES_PRICING[apiType] ?? 0) * calls;
+  return calcGoogleCost(apiType, calls) ?? 0;
+}
+function isBillableType(apiType: string): boolean {
+  return (GOOGLE_PRICING[apiType]?.per1000 ?? 0) > 0;
 }
 
 // ── Trend badge ─────────────────────────────────────────────────────────────
@@ -97,6 +94,7 @@ const CostDashboard = () => {
     });
 
     data.googlePlaces.forEach(({ date, api, apiType, calls }) => {
+      if (!isBillableType(apiType)) return;
       const cost = calcGpCost(apiType, calls);
       if (api === 'maps') {
         mapsByDay[date] = (mapsByDay[date] ?? 0) + cost;
@@ -133,7 +131,7 @@ const CostDashboard = () => {
 
     // Google Places (api=places) by api_type
     const gpMap: Record<string, { calls: number; cost: number }> = {};
-    data.googlePlaces.filter(r => r.api === 'places').forEach(({ apiType, calls }) => {
+    data.googlePlaces.filter(r => r.api === 'places' && isBillableType(r.apiType)).forEach(({ apiType, calls }) => {
       if (!gpMap[apiType]) gpMap[apiType] = { calls: 0, cost: 0 };
       gpMap[apiType].calls += calls;
       gpMap[apiType].cost += calcGpCost(apiType, calls);
@@ -142,7 +140,7 @@ const CostDashboard = () => {
 
     // Maps JS (api=maps) by api_type
     const mapsMap: Record<string, { calls: number; cost: number }> = {};
-    data.googlePlaces.filter(r => r.api === 'maps').forEach(({ apiType, calls }) => {
+    data.googlePlaces.filter(r => r.api === 'maps' && isBillableType(r.apiType)).forEach(({ apiType, calls }) => {
       if (!mapsMap[apiType]) mapsMap[apiType] = { calls: 0, cost: 0 };
       mapsMap[apiType].calls += calls;
       mapsMap[apiType].cost += calcGpCost(apiType, calls);
@@ -277,13 +275,20 @@ const CostDashboard = () => {
               )}
               {gpBreakdown.map(([apiType, s]) => (
                 <div key={apiType} className="flex items-center gap-2 text-sm">
-                  <Badge variant="secondary" className="text-xs shrink-0">{GP_LABELS[apiType] ?? apiType}</Badge>
+                  <Badge variant="secondary" className="text-xs shrink-0">
+                    {GOOGLE_PRICING[apiType]?.label ?? apiType}
+                  </Badge>
+                  {GOOGLE_PRICING[apiType]?.sku && (
+                    <span className="text-xs text-muted-foreground truncate" title={GOOGLE_PRICING[apiType].sku}>
+                      {GOOGLE_PRICING[apiType].sku}
+                    </span>
+                  )}
                   <span className="text-xs text-muted-foreground">{s.calls}×</span>
                   <span className="ml-auto font-medium text-xs">{fmt(s.cost)}</span>
                 </div>
               ))}
               {gpBreakdown.length > 0 && (
-                <p className="text-xs text-muted-foreground pt-1">Google kredit $200/měsíc.</p>
+                <p className="text-xs text-muted-foreground pt-1">Google free usage cap se liší podle SKU.</p>
               )}
             </CardContent>
           </Card>
@@ -300,14 +305,19 @@ const CostDashboard = () => {
               {mapsBreakdown.map(([apiType, s]) => (
                 <div key={apiType} className="flex items-center gap-2 text-sm">
                   <Badge variant="secondary" className="text-xs shrink-0">
-                    {apiType === 'map_load' ? 'Map Load' : apiType}
+                    {GOOGLE_PRICING[apiType]?.label ?? apiType}
                   </Badge>
+                  {GOOGLE_PRICING[apiType]?.sku && (
+                    <span className="text-xs text-muted-foreground truncate" title={GOOGLE_PRICING[apiType].sku}>
+                      {GOOGLE_PRICING[apiType].sku}
+                    </span>
+                  )}
                   <span className="text-xs text-muted-foreground">{s.calls}×</span>
                   <span className="ml-auto font-medium text-xs">{fmt(s.cost)}</span>
                 </div>
               ))}
               {mapsBreakdown.length > 0 && (
-                <p className="text-xs text-muted-foreground pt-1">$7 / 1 000 map loadů.</p>
+                <p className="text-xs text-muted-foreground pt-1">Dynamic Maps (map load): $7 / 1 000.</p>
               )}
             </CardContent>
           </Card>
