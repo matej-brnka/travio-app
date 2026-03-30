@@ -85,6 +85,10 @@ export const UserAvatar = () => {
             <DropdownMenuSeparator />
           </>
         )}
+        <DropdownMenuItem onClick={() => navigate("/app/service/costs")} className="cursor-pointer">
+          <Wrench className="w-4 h-4 mr-2" />
+          Náklady na provoz
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/app/service/openai")} className="cursor-pointer">
           <Wrench className="w-4 h-4 mr-2" />
           Servis OpenAI

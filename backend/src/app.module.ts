@@ -11,6 +11,7 @@ import { PlacesModule } from './places/places.module';
 import { GooglePlacesModule } from './external/google-places/google-places.module';
 import { WeatherModule } from './external/weather/weather.module';
 import { AiModule } from './external/ai/ai.module';
+import { ServiceModule } from './service/service.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AiModule } from './external/ai/ai.module';
     GooglePlacesModule,
     WeatherModule,
     AiModule,
+    ServiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
