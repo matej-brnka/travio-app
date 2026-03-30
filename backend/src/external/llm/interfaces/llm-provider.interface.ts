@@ -10,6 +10,11 @@ export interface LlmMessage {
   content: string;
 }
 
+export interface LlmActor {
+  userId?: string;
+  userEmail?: string;
+}
+
 export interface LlmProvider {
-  generateCompletion(messages: LlmMessage[], options?: LlmOptions): Promise<string>;
+  generateCompletion(messages: LlmMessage[], options?: LlmOptions, actor?: LlmActor): Promise<string>;
 }

@@ -2,6 +2,8 @@ import { apiFetch } from './client';
 
 export interface GooglePlacesCall {
   id: number;
+  userId: string | null;
+  userEmail: string | null;
   api: 'places' | 'maps';
   apiType:
     | 'text_search_pro'

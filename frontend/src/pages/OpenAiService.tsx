@@ -181,6 +181,9 @@ const OpenAiService = () => {
                       <span className="text-sm text-muted-foreground w-36 shrink-0">
                         {format(new Date(call.createdAt), "d. M. yyyy HH:mm", { locale: cs })}
                       </span>
+                      <span className="text-xs text-muted-foreground truncate max-w-[220px]" title={call.userEmail ?? undefined}>
+                        {call.userEmail ?? "unknown user"}
+                      </span>
                       <Badge variant="outline" className="text-xs shrink-0">OpenAI</Badge>
                       <Badge variant="secondary" className="text-xs shrink-0">{call.model}</Badge>
                       <div className="flex gap-2 ml-auto shrink-0 flex-wrap justify-end">

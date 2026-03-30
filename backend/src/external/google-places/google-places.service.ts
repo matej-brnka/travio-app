@@ -18,7 +18,11 @@ export class GooglePlacesService {
     this.apiKey = config.get<string>('GOOGLE_PLACES_API_KEY');
   }
 
-  async searchDestinations(query: string): Promise<any[]> {
+  private actor(user?: { userId?: string; userEmail?: string }) {
+    return { userId: user?.userId, userEmail: user?.userEmail };
+  }
+
+  async searchDestinations(query: string, user?: { userId?: string; userEmail?: string }): Promise<any[]> {
     if (!this.apiKey) throw new ServiceUnavailableException('Google Places API key is not configured');
     if (!query?.trim()) return [];
     try {
@@ -26,7 +30,7 @@ export class GooglePlacesService {
       const res = await fetch(url);
       const data: any = await res.json();
       if (data.status === 'ZERO_RESULTS' || !data.results?.length) {
-        void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: 0 });
+        void this.calls.logCall({ ...this.actor(user), api: 'places', apiType: 'text_search_pro', query, resultCount: 0 });
         return [];
       }
       const results = data.results
@@ -47,7 +51,7 @@ export class GooglePlacesService {
               }
             : null,
         }));
-      void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: results.length });
+      void this.calls.logCall({ ...this.actor(user), api: 'places', apiType: 'text_search_pro', query, resultCount: results.length });
       return results;
     } catch (err: any) {
       this.logger.error('Destination search failed', err.message);
@@ -55,20 +59,20 @@ export class GooglePlacesService {
     }
   }
 
-  async getPhoto(googlePlaceId: string): Promise<{ buffer: Buffer; contentType: string } | null> {
+  async getPhoto(googlePlaceId: string, user?: { userId?: string; userEmail?: string }): Promise<{ buffer: Buffer; contentType: string } | null> {
     if (!this.apiKey) return null;
     try {
       // 1. Fetch photo reference from Place Details
       const detailUrl = `${BASE}/details/json?place_id=${googlePlaceId}&fields=photos&key=${this.apiKey}`;
       const detailData: any = await (await fetch(detailUrl)).json();
-      void this.calls.logCall({ api: 'places', apiType: 'place_details_essentials', placeId: googlePlaceId });
+      void this.calls.logCall({ ...this.actor(user), api: 'places', apiType: 'place_details_essentials', placeId: googlePlaceId });
       const photoRef = detailData?.result?.photos?.[0]?.photo_reference;
       if (!photoRef) return null;
 
       // 2. Fetch the photo (Google returns a redirect; fetch follows it automatically)
       const photoUrl = `${BASE}/photo?maxwidth=800&photo_reference=${photoRef}&key=${this.apiKey}`;
       const photoRes = await fetch(photoUrl);
-      void this.calls.logCall({ api: 'places', apiType: 'place_photo', placeId: googlePlaceId });
+      void this.calls.logCall({ ...this.actor(user), api: 'places', apiType: 'place_photo', placeId: googlePlaceId });
       if (!photoRes.ok) return null;
       const contentType = photoRes.headers.get('content-type') ?? 'image/jpeg';
       const buffer = Buffer.from(await photoRes.arrayBuffer());
@@ -79,7 +83,7 @@ export class GooglePlacesService {
     }
   }
 
-  async search(query: string, centerLat?: number, centerLng?: number): Promise<any[]> {
+  async search(query: string, centerLat?: number, centerLng?: number, user?: { userId?: string; userEmail?: string }): Promise<any[]> {
     if (!this.apiKey) {
       throw new ServiceUnavailableException('Google Places API key is not configured');
     }
@@ -94,19 +98,19 @@ export class GooglePlacesService {
       const searchData: any = await searchRes.json();
 
       if (searchData.status === 'ZERO_RESULTS' || !searchData.results?.length) {
-        void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: 0 });
+        void this.calls.logCall({ ...this.actor(user), api: 'places', apiType: 'text_search_pro', query, resultCount: 0 });
         return [];
       }
 
       const topResults = searchData.results.slice(0, 5);
-      void this.calls.logCall({ api: 'places', apiType: 'text_search_pro', query, resultCount: topResults.length });
+      void this.calls.logCall({ ...this.actor(user), api: 'places', apiType: 'text_search_pro', query, resultCount: topResults.length });
 
       const results = await Promise.all(
         topResults.map(async (r: any) => {
           try {
             const detailUrl = `${BASE}/details/json?place_id=${r.place_id}&fields=name,formatted_address,geometry,website,opening_hours,place_id&key=${this.apiKey}&language=cs`;
             const detailData: any = await (await fetch(detailUrl)).json();
-            void this.calls.logCall({ api: 'places', apiType: 'place_details_pro', placeId: r.place_id });
+            void this.calls.logCall({ ...this.actor(user), api: 'places', apiType: 'place_details_pro', placeId: r.place_id });
             const d = detailData.result ?? r;
             return {
               googlePlaceId: r.place_id,

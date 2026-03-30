@@ -20,6 +20,9 @@ const CallRow = ({ call }: { call: GooglePlacesCall }) => {
       <span className="text-muted-foreground w-36 shrink-0 text-xs">
         {format(new Date(call.createdAt), "d. M. yyyy HH:mm", { locale: cs })}
       </span>
+      <span className="text-xs text-muted-foreground truncate max-w-[220px]" title={call.userEmail ?? undefined}>
+        {call.userEmail ?? "unknown user"}
+      </span>
       <Badge variant="secondary" className="text-xs shrink-0">
         {entry?.label ?? call.apiType}
       </Badge>

@@ -4,6 +4,8 @@ import { LlmMessage, LlmOptions } from './interfaces/llm-provider.interface';
 
 export interface LlmCallRecord {
   id: number;
+  userId: string | null;
+  userEmail: string | null;
   provider: string;
   model: string;
   options: LlmOptions;
@@ -24,6 +26,8 @@ export class LlmCallsService {
   constructor(private supabase: SupabaseService) {}
 
   async logCall(data: {
+    userId?: string;
+    userEmail?: string;
     provider: string;
     model: string;
     options: LlmOptions;
@@ -38,9 +42,11 @@ export class LlmCallsService {
     try {
       await this.supabase.query(
         `INSERT INTO llm_calls
-          (provider, model, options, messages, response_content, prompt_tokens, completion_tokens, total_tokens)
-         VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6, $7, $8)`,
+          (user_id, user_email, provider, model, options, messages, response_content, prompt_tokens, completion_tokens, total_tokens)
+         VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10)`,
         [
+          data.userId ?? null,
+          data.userEmail ?? null,
           data.provider,
           data.model,
           JSON.stringify(data.options ?? {}),
@@ -59,7 +65,7 @@ export class LlmCallsService {
   async listCalls(limit = 100): Promise<LlmCallRecord[]> {
     const safeLimit = Math.max(1, Math.min(limit, 500));
     const rows = await this.supabase.query<any>(
-      `SELECT id, provider, model, options, messages, response_content, prompt_tokens, completion_tokens, total_tokens, created_at
+      `SELECT id, user_id, user_email, provider, model, options, messages, response_content, prompt_tokens, completion_tokens, total_tokens, created_at
        FROM llm_calls
        ORDER BY created_at DESC
        LIMIT $1`,
@@ -67,6 +73,8 @@ export class LlmCallsService {
     );
     return rows.map((r) => ({
       id: r.id,
+      userId: r.user_id ?? null,
+      userEmail: r.user_email ?? null,
       provider: r.provider,
       model: r.model,
       options: r.options ?? {},

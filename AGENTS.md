@@ -96,6 +96,7 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - `008_google_places_calls.sql` – tabulka `google_places_calls` pro servisní log Google Places/Maps API volání
 - `010_auth_invite_allowlist.sql` – tabulka `auth_signup_invites` + Auth Hook funkce `hook_check_invite_allowlist(jsonb)` pro invite-only registrace
 - `011_user_roles.sql` – tabulka `user_roles` (`admin`/`user`) + trigger pro auto-default role `user` při vytvoření účtu
+- `012_calls_user_identity.sql` – sloupce `user_id` + `user_email` v `llm_calls` a `google_places_calls` pro audit/report podle uživatele
 - TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
 ## Technické poznámky
@@ -132,6 +133,8 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - Login stránka dělá před Google OAuth pre-check pozvánky přes `GET /api/service/invite-gate/check?email=...`; bez aktivní pozvánky uživatele do OAuth flow nepustí.
 - RBAC: pouze role `admin` má přístup na servisní/report stránky a endpointy (`/app/service/*`, `/api/llm/calls`, `/api/google-places/calls`, `/api/service/costs`, `/api/service/invites*`).
 - `user_roles` lze spravovat v DB (promote/demote uživatele na admin/user). `Auth /me` vrací `role` + `isAdmin`.
+- Servisní reporty OpenAI/Google Places zobrazují i uživatele (`userEmail`) u každého logu.
+- LLM/Places logování ukládá `user_id` + `user_email` server-side (kde je dostupný `CurrentUser`); telemetry endpoint je nyní autentizovaný (`JwtAuthGuard`) a loguje uživatele také.
 - Ceník modelů: `frontend/src/config/llmPricing.ts` – manuálně udržovaná tabulka cen (USD/1M tokenů), 3 sazby: `inputPer1M`, `cachedInputPer1M`, `outputPer1M`; `calcCost` počítá worst-case (bez cache slevy, DB cached tokeny neukládá zvlášť)
 - Migrace: `backend/supabase/migrations/006_llm_calls.sql`
 - Migrace: `backend/supabase/migrations/007_llm_response_content.sql`

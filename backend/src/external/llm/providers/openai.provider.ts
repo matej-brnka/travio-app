@@ -1,6 +1,6 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { LlmMessage, LlmOptions, LlmProvider } from '../interfaces/llm-provider.interface';
+import { LlmActor, LlmMessage, LlmOptions, LlmProvider } from '../interfaces/llm-provider.interface';
 import { LlmCallsService } from '../llm-calls.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class OpenAiProvider implements LlmProvider {
     this.defaultMaxTokens = parseInt(config.get<string>('OPENAI_MAX_TOKENS') ?? '1000');
   }
 
-  async generateCompletion(messages: LlmMessage[], options?: LlmOptions): Promise<string> {
+  async generateCompletion(messages: LlmMessage[], options?: LlmOptions, actor?: LlmActor): Promise<string> {
     if (!this.apiKey) {
       throw new ServiceUnavailableException('OpenAI API key is not configured');
     }
@@ -66,6 +66,8 @@ export class OpenAiProvider implements LlmProvider {
         this.logger.warn('[AI TOKENS] usage is missing in OpenAI response');
       }
       await this.llmCalls.logCall({
+        userId: actor?.userId,
+        userEmail: actor?.userEmail,
         provider: 'openai',
         model,
         options: usedOptions,

@@ -2,13 +2,18 @@ import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Controller('service')
 export class CostSummaryController {
   constructor(private supabase: SupabaseService) {}
 
   @Post('telemetry')
-  async telemetry(@Body() body: { event: string; metadata?: Record<string, any> }) {
+  @UseGuards(JwtAuthGuard)
+  async telemetry(
+    @Body() body: { event: string; metadata?: Record<string, any> },
+    @CurrentUser() user: { userId: string; email?: string },
+  ) {
     const EVENT_MAP: Record<string, { api: string; apiType: string }> = {
       map_load: { api: 'maps', apiType: 'map_load' },
       place_details_pro_client: { api: 'places', apiType: 'place_details_pro' },
@@ -17,8 +22,8 @@ export class CostSummaryController {
     if (!mapped) return { ok: false };
     try {
       await this.supabase.query(
-        `INSERT INTO google_places_calls (api, api_type) VALUES ($1, $2)`,
-        [mapped.api, mapped.apiType],
+        `INSERT INTO google_places_calls (user_id, user_email, api, api_type) VALUES ($1, $2, $3, $4)`,
+        [user.userId, user.email ?? null, mapped.api, mapped.apiType],
       );
     } catch {
       // fire-and-forget – never break the client

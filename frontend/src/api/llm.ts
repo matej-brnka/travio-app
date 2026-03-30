@@ -2,6 +2,8 @@ import { apiFetch } from './client';
 
 export interface LlmCall {
   id: number;
+  userId: string | null;
+  userEmail: string | null;
   createdAt: string;
   provider: 'openai';
   model: string;

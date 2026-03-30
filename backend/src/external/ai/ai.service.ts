@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { LlmService } from '../llm/llm.service';
 import { ITINERARY_PROMPTS } from './ai.prompts';
+import { LlmActor } from '../llm/interfaces/llm-provider.interface';
 
 export interface AiParams {
   destination: string;
@@ -24,7 +25,7 @@ export class AiService {
 
   constructor(private llm: LlmService) {}
 
-  async generateItinerary(params: AiParams): Promise<AiPlace[]> {
+  async generateItinerary(params: AiParams, actor?: LlmActor): Promise<AiPlace[]> {
     const days = this.daysBetween(params.dateFrom, params.dateTo);
     const systemPrompt = ITINERARY_PROMPTS.system;
     const userPrompt = ITINERARY_PROMPTS.user(params.destination, days, params.interests);
@@ -47,7 +48,7 @@ export class AiService {
     this.logger.log('[AI PROMPT][END]');
     
     try {
-      const result = await this.llm.generateJson<{ places: AiPlace[] }>(messages);
+      const result = await this.llm.generateJson<{ places: AiPlace[] }>(messages, undefined, actor);
 
       return result.places ?? [];
     } catch (err: any) {

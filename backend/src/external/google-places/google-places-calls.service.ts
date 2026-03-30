@@ -13,6 +13,8 @@ export type GooglePlacesApiType =
 
 export interface GooglePlacesCallRecord {
   id: number;
+  userId: string | null;
+  userEmail: string | null;
   api: GooglePlacesApi;
   apiType: GooglePlacesApiType;
   query: string | null;
@@ -28,6 +30,8 @@ export class GooglePlacesCallsService {
   constructor(private supabase: SupabaseService) {}
 
   async logCall(data: {
+    userId?: string;
+    userEmail?: string;
     api: GooglePlacesApi;
     apiType: GooglePlacesApiType;
     query?: string;
@@ -36,9 +40,17 @@ export class GooglePlacesCallsService {
   }): Promise<void> {
     try {
       await this.supabase.query(
-        `INSERT INTO google_places_calls (api, api_type, query, place_id, result_count)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [data.api, data.apiType, data.query ?? null, data.placeId ?? null, data.resultCount ?? null],
+        `INSERT INTO google_places_calls (user_id, user_email, api, api_type, query, place_id, result_count)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          data.userId ?? null,
+          data.userEmail ?? null,
+          data.api,
+          data.apiType,
+          data.query ?? null,
+          data.placeId ?? null,
+          data.resultCount ?? null,
+        ],
       );
     } catch (err: any) {
       this.logger.warn(`Failed to save Google Places call to DB: ${err?.message ?? err}`);
@@ -48,7 +60,7 @@ export class GooglePlacesCallsService {
   async listCalls(limit = 100): Promise<GooglePlacesCallRecord[]> {
     const safeLimit = Math.max(1, Math.min(limit, 500));
     const rows = await this.supabase.query<any>(
-      `SELECT id, api, api_type, query, place_id, result_count, created_at
+      `SELECT id, user_id, user_email, api, api_type, query, place_id, result_count, created_at
        FROM google_places_calls
        ORDER BY created_at DESC
        LIMIT $1`,
@@ -56,6 +68,8 @@ export class GooglePlacesCallsService {
     );
     return rows.map((r) => ({
       id: r.id,
+      userId: r.user_id ?? null,
+      userEmail: r.user_email ?? null,
       api: r.api,
       apiType: r.api_type,
       query: r.query ?? null,

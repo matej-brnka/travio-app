@@ -17,7 +17,7 @@ export class AiController {
   ) {}
 
   @Post()
-  async generate(@Param('id') tripId: string, @CurrentUser() user: { userId: string }) {
+  async generate(@Param('id') tripId: string, @CurrentUser() user: { userId: string; email?: string }) {
     const trips = await this.supabase.query(
       `SELECT id, name, date_from, date_to, interests FROM trips WHERE id = $1 AND user_id = $2`,
       [tripId, user.userId],
@@ -35,7 +35,7 @@ export class AiController {
       dateFrom: trip.date_from,
       dateTo: trip.date_to,
       interests: trip.interests ?? [],
-    });
+    }, { userId: user.userId, userEmail: user.email });
 
     const created: any[] = [];
     for (const p of aiPlaces) {
@@ -43,7 +43,10 @@ export class AiController {
       let googleData: any = null;
       try {
         const query = `${p.name} ${trip.name}`.trim();
-        const results = await this.googlePlaces.search(query);
+        const results = await this.googlePlaces.search(query, undefined, undefined, {
+          userId: user.userId,
+          userEmail: user.email,
+        });
         googleData = results[0] ?? null;
       } catch {
         googleData = null;
