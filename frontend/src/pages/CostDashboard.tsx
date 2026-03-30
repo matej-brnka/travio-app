@@ -5,7 +5,7 @@ import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { getCostSummary, CostSummary } from "@/api/costs";
 import { LLM_PRICING, calcCost } from "@/config/llmPricing";
-import { GOOGLE_PLACES_PRICING } from "@/config/googlePlacesPricing";
+import { GOOGLE_PLACES_PRICING, calcMapsJsCost } from "@/config/googlePlacesPricing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,16 +73,21 @@ const CostDashboard = () => {
 
   // ── Derived numbers ──────────────────────────────────────────────────────
 
-  const { llmTotal, gpTotal, dailyChart, llmBreakdown, gpBreakdown, llmPrev, gpPrev } = useMemo(() => {
-    if (!data) return { llmTotal: 0, gpTotal: 0, dailyChart: [], llmBreakdown: [], gpBreakdown: [], llmPrev: 0, gpPrev: 0 };
+  const { llmTotal, gpTotal, mapsTotal, dailyChart, llmBreakdown, gpBreakdown, mapsBreakdown,
+          llmPrev, gpPrev, mapsPrev, llmCurr, gpCurr, mapsCurr } = useMemo(() => {
+    if (!data) return {
+      llmTotal: 0, gpTotal: 0, mapsTotal: 0, dailyChart: [],
+      llmBreakdown: [], gpBreakdown: [], mapsBreakdown: [],
+      llmPrev: 0, gpPrev: 0, mapsPrev: 0, llmCurr: 0, gpCurr: 0, mapsCurr: 0,
+    };
 
-    const halfDays = Math.ceil(days / 2);
-    const splitDate = format(subDays(new Date(), halfDays), "yyyy-MM-dd");
+    const splitDate = format(subDays(new Date(), Math.ceil(days / 2)), "yyyy-MM-dd");
 
-    // Build day-indexed maps
     const llmByDay: Record<string, number> = {};
     const gpByDay: Record<string, number> = {};
-    let llmTotal = 0, gpTotal = 0, llmPrev = 0, gpPrev = 0;
+    const mapsByDay: Record<string, number> = {};
+    let llmTotal = 0, gpTotal = 0, mapsTotal = 0;
+    let llmPrev = 0, gpPrev = 0, mapsPrev = 0;
 
     data.llm.forEach(({ date, model, promptTokens, completionTokens }) => {
       const cost = calcLlmCost(model, promptTokens, completionTokens);
@@ -98,18 +103,26 @@ const CostDashboard = () => {
       if (date < splitDate) gpPrev += cost;
     });
 
-    // Fill every day in range for the chart
+    data.frontendEvents.forEach(({ date, event, count }) => {
+      const cost = calcMapsJsCost(event, count) ?? 0;
+      mapsByDay[date] = (mapsByDay[date] ?? 0) + cost;
+      mapsTotal += cost;
+      if (date < splitDate) mapsPrev += cost;
+    });
+
+    // Fill every day for chart
     const allDays = eachDayOfInterval({ start: subDays(new Date(), days - 1), end: new Date() });
     const dailyChart = allDays.map((d) => {
       const key = format(d, "yyyy-MM-dd");
       return {
         date: format(d, "d.M.", { locale: cs }),
-        openai: +(llmByDay[key] ?? 0).toFixed(5),
-        google: +(gpByDay[key] ?? 0).toFixed(5),
+        openai:  +(llmByDay[key]   ?? 0).toFixed(5),
+        google:  +(gpByDay[key]    ?? 0).toFixed(5),
+        maps:    +(mapsByDay[key]  ?? 0).toFixed(5),
       };
     });
 
-    // LLM breakdown by model
+    // LLM by model
     const llmMap: Record<string, { calls: number; promptTokens: number; completionTokens: number; cost: number }> = {};
     data.llm.forEach(({ model, calls, promptTokens, completionTokens }) => {
       if (!llmMap[model]) llmMap[model] = { calls: 0, promptTokens: 0, completionTokens: 0, cost: 0 };
@@ -120,7 +133,7 @@ const CostDashboard = () => {
     });
     const llmBreakdown = Object.entries(llmMap).sort((a, b) => b[1].cost - a[1].cost);
 
-    // Google Places breakdown by api_type
+    // Google Places by api_type
     const gpMap: Record<string, { calls: number; cost: number }> = {};
     data.googlePlaces.forEach(({ apiType, calls }) => {
       if (!gpMap[apiType]) gpMap[apiType] = { calls: 0, cost: 0 };
@@ -129,21 +142,26 @@ const CostDashboard = () => {
     });
     const gpBreakdown = Object.entries(gpMap).sort((a, b) => b[1].cost - a[1].cost);
 
-    const llmCurr = llmTotal - llmPrev;
-    const gpCurr = gpTotal - gpPrev;
+    // Maps JS by event
+    const mapsMap: Record<string, { count: number; cost: number }> = {};
+    data.frontendEvents.forEach(({ event, count }) => {
+      if (!mapsMap[event]) mapsMap[event] = { count: 0, cost: 0 };
+      mapsMap[event].count += count;
+      mapsMap[event].cost += calcMapsJsCost(event, count) ?? 0;
+    });
+    const mapsBreakdown = Object.entries(mapsMap).sort((a, b) => b[1].cost - a[1].cost);
 
-    return { llmTotal, gpTotal, dailyChart, llmBreakdown, gpBreakdown, llmPrev, gpPrev, llmCurr: llmCurr, gpCurr: gpCurr } as any;
+    return {
+      llmTotal, gpTotal, mapsTotal, dailyChart,
+      llmBreakdown, gpBreakdown, mapsBreakdown,
+      llmPrev, gpPrev, mapsPrev,
+      llmCurr: llmTotal - llmPrev,
+      gpCurr:  gpTotal  - gpPrev,
+      mapsCurr: mapsTotal - mapsPrev,
+    };
   }, [data, days]);
 
-  const total = llmTotal + gpTotal;
-  const llmCurr = (data?.llm ?? []).reduce((s, r) => {
-    const key = format(subDays(new Date(), Math.ceil(days / 2)), "yyyy-MM-dd");
-    return r.date >= key ? s + calcLlmCost(r.model, r.promptTokens, r.completionTokens) : s;
-  }, 0);
-  const gpCurr = (data?.googlePlaces ?? []).reduce((s, r) => {
-    const key = format(subDays(new Date(), Math.ceil(days / 2)), "yyyy-MM-dd");
-    return r.date >= key ? s + calcGpCost(r.apiType, r.calls) : s;
-  }, 0);
+  const total = llmTotal + gpTotal + mapsTotal;
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 md:px-8">
@@ -176,7 +194,7 @@ const CostDashboard = () => {
 
         {/* Summary cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="md:col-span-2">
+          <Card className="md:col-span-1">
             <CardContent className="py-4">
               <p className="text-xs text-muted-foreground">Celkem za {days} dní</p>
               <p className="text-3xl font-bold">{fmt(total)}</p>
@@ -196,6 +214,13 @@ const CostDashboard = () => {
               <Trend current={gpCurr} previous={gpPrev} />
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="py-4">
+              <p className="text-xs text-muted-foreground">Maps JS API</p>
+              <p className="text-xl font-bold">{fmt(mapsTotal)}</p>
+              <Trend current={mapsCurr} previous={mapsPrev} />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Daily chart */}
@@ -212,14 +237,15 @@ const CostDashboard = () => {
                 <Tooltip formatter={(v: number) => [`$${v.toFixed(5)}`, undefined]} />
                 <Legend />
                 <Bar dataKey="openai" name="OpenAI" stackId="a" fill="#00798c" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="google" name="Google Places" stackId="a" fill="#edae49" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="google" name="Google Places" stackId="a" fill="#edae49" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="maps" name="Maps JS" stackId="a" fill="#d1495b" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Breakdown */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           {/* OpenAI breakdown */}
           <Card>
@@ -245,7 +271,7 @@ const CostDashboard = () => {
           {/* Google Places breakdown */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Google Places – podle typu volání</CardTitle>
+              <CardTitle className="text-sm">Google Places</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {gpBreakdown.length === 0 && (
@@ -254,14 +280,36 @@ const CostDashboard = () => {
               {gpBreakdown.map(([apiType, s]) => (
                 <div key={apiType} className="flex items-center gap-2 text-sm">
                   <Badge variant="secondary" className="text-xs shrink-0">{GP_LABELS[apiType] ?? apiType}</Badge>
-                  <span className="text-xs text-muted-foreground">{s.calls}× volání</span>
+                  <span className="text-xs text-muted-foreground">{s.calls}×</span>
                   <span className="ml-auto font-medium text-xs">{fmt(s.cost)}</span>
                 </div>
               ))}
               {gpBreakdown.length > 0 && (
-                <p className="text-xs text-muted-foreground pt-1">
-                  Google poskytuje $200 kredit/měsíc.
-                </p>
+                <p className="text-xs text-muted-foreground pt-1">Google kredit $200/měsíc.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Maps JS breakdown */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Maps JavaScript API</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {mapsBreakdown.length === 0 && (
+                <p className="text-xs text-muted-foreground">Žádná data</p>
+              )}
+              {mapsBreakdown.map(([event, s]) => (
+                <div key={event} className="flex items-center gap-2 text-sm">
+                  <Badge variant="secondary" className="text-xs shrink-0">
+                    {event === 'map_load' ? 'Map Load' : event}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">{s.count}×</span>
+                  <span className="ml-auto font-medium text-xs">{fmt(s.cost)}</span>
+                </div>
+              ))}
+              {mapsBreakdown.length > 0 && (
+                <p className="text-xs text-muted-foreground pt-1">$7 / 1 000 map loadů.</p>
               )}
             </CardContent>
           </Card>

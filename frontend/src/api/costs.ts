@@ -14,10 +14,17 @@ export interface GooglePlacesDayStat {
   calls: number;
 }
 
+export interface FrontendEventDayStat {
+  date: string;
+  event: string;
+  count: number;
+}
+
 export interface CostSummary {
   days: number;
   llm: LlmDayStat[];
   googlePlaces: GooglePlacesDayStat[];
+  frontendEvents: FrontendEventDayStat[];
 }
 
 export const getCostSummary = (days: number) =>

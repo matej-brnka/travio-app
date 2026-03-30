@@ -7,6 +7,7 @@ import {
   useMap,
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
+import { sendTelemetry } from "@/api/telemetry";
 
 interface TripMapViewProps {
   places: Place[];
@@ -117,6 +118,7 @@ const MapContent = ({
 }: Omit<TripMapViewProps, "className">) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const mapLoggedRef = useRef(false);
 
   useEffect(() => {
     setActiveId(null);
@@ -146,6 +148,12 @@ const MapContent = ({
         disableDefaultUI={false}
         gestureHandling="greedy"
         style={{ width: "100%", height: "100%" }}
+        onIdle={() => {
+          if (!mapLoggedRef.current) {
+            mapLoggedRef.current = true;
+            sendTelemetry('map_load');
+          }
+        }}
       >
         <BoundsFitter
           places={places}
