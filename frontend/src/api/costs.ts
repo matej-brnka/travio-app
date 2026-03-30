@@ -10,21 +10,15 @@ export interface LlmDayStat {
 
 export interface GooglePlacesDayStat {
   date: string;           // YYYY-MM-DD
+  api: 'places' | 'maps';
   apiType: string;
   calls: number;
-}
-
-export interface FrontendEventDayStat {
-  date: string;
-  event: string;
-  count: number;
 }
 
 export interface CostSummary {
   days: number;
   llm: LlmDayStat[];
   googlePlaces: GooglePlacesDayStat[];
-  frontendEvents: FrontendEventDayStat[];
 }
 
 export const getCostSummary = (days: number) =>

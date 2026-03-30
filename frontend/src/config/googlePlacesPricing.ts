@@ -13,9 +13,12 @@
  * Poznámka: Google poskytuje $200 měsíční kredit zdarma.
  */
 export const GOOGLE_PLACES_PRICING: Record<string, number> = {
+  // Places API
   text_search:   0.032,
   place_details: 0.017,
   place_photo:   0.007,
+  // Maps JavaScript API
+  map_load:      0.007,
 };
 
 export const calcGoogleCost = (apiType: string): number | null => {

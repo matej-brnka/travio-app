@@ -7,12 +7,15 @@ export class CostSummaryController {
 
   @Post('telemetry')
   async telemetry(@Body() body: { event: string; metadata?: Record<string, any> }) {
-    const allowed = ['map_load'];
-    if (!allowed.includes(body?.event)) return { ok: false };
+    const EVENT_MAP: Record<string, { api: string; apiType: string }> = {
+      map_load: { api: 'maps', apiType: 'map_load' },
+    };
+    const mapped = EVENT_MAP[body?.event];
+    if (!mapped) return { ok: false };
     try {
       await this.supabase.query(
-        `INSERT INTO frontend_events (event, metadata) VALUES ($1, $2::jsonb)`,
-        [body.event, JSON.stringify(body.metadata ?? {})],
+        `INSERT INTO google_places_calls (api, api_type) VALUES ($1, $2)`,
+        [mapped.api, mapped.apiType],
       );
     } catch {
       // fire-and-forget – never break the client
@@ -24,7 +27,7 @@ export class CostSummaryController {
   async costs(@Query('days') daysParam?: string) {
     const days = Math.min(Math.max(parseInt(daysParam ?? '30', 10) || 30, 1), 365);
 
-    const [llmRows, gpRows, feRows] = await Promise.all([
+    const [llmRows, gpRows] = await Promise.all([
       this.supabase.query<any>(
         `SELECT
            DATE(created_at AT TIME ZONE 'UTC') AS date,
@@ -49,17 +52,6 @@ export class CostSummaryController {
          ORDER BY date ASC`,
         [days],
       ),
-      this.supabase.query<any>(
-        `SELECT
-           DATE(created_at AT TIME ZONE 'UTC') AS date,
-           event,
-           COUNT(*)::int AS count
-         FROM frontend_events
-         WHERE created_at >= NOW() - ($1 || ' days')::INTERVAL
-         GROUP BY date, event
-         ORDER BY date ASC`,
-        [days],
-      ),
     ]);
 
     return {
@@ -73,13 +65,9 @@ export class CostSummaryController {
       })),
       googlePlaces: gpRows.map((r) => ({
         date: r.date,
+        api: r.api,
         apiType: r.api_type,
         calls: r.calls,
-      })),
-      frontendEvents: feRows.map((r) => ({
-        date: r.date,
-        event: r.event,
-        count: r.count,
       })),
     };
   }

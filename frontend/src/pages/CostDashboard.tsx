@@ -5,7 +5,7 @@ import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { getCostSummary, CostSummary } from "@/api/costs";
 import { LLM_PRICING, calcCost } from "@/config/llmPricing";
-import { GOOGLE_PLACES_PRICING, calcMapsJsCost } from "@/config/googlePlacesPricing";
+import { GOOGLE_PLACES_PRICING } from "@/config/googlePlacesPricing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -96,29 +96,27 @@ const CostDashboard = () => {
       if (date < splitDate) llmPrev += cost;
     });
 
-    data.googlePlaces.forEach(({ date, apiType, calls }) => {
+    data.googlePlaces.forEach(({ date, api, apiType, calls }) => {
       const cost = calcGpCost(apiType, calls);
-      gpByDay[date] = (gpByDay[date] ?? 0) + cost;
-      gpTotal += cost;
-      if (date < splitDate) gpPrev += cost;
+      if (api === 'maps') {
+        mapsByDay[date] = (mapsByDay[date] ?? 0) + cost;
+        mapsTotal += cost;
+        if (date < splitDate) mapsPrev += cost;
+      } else {
+        gpByDay[date] = (gpByDay[date] ?? 0) + cost;
+        gpTotal += cost;
+        if (date < splitDate) gpPrev += cost;
+      }
     });
 
-    data.frontendEvents.forEach(({ date, event, count }) => {
-      const cost = calcMapsJsCost(event, count) ?? 0;
-      mapsByDay[date] = (mapsByDay[date] ?? 0) + cost;
-      mapsTotal += cost;
-      if (date < splitDate) mapsPrev += cost;
-    });
-
-    // Fill every day for chart
     const allDays = eachDayOfInterval({ start: subDays(new Date(), days - 1), end: new Date() });
     const dailyChart = allDays.map((d) => {
       const key = format(d, "yyyy-MM-dd");
       return {
         date: format(d, "d.M.", { locale: cs }),
-        openai:  +(llmByDay[key]   ?? 0).toFixed(5),
-        google:  +(gpByDay[key]    ?? 0).toFixed(5),
-        maps:    +(mapsByDay[key]  ?? 0).toFixed(5),
+        openai: +(llmByDay[key]  ?? 0).toFixed(5),
+        google: +(gpByDay[key]   ?? 0).toFixed(5),
+        maps:   +(mapsByDay[key] ?? 0).toFixed(5),
       };
     });
 
@@ -133,21 +131,21 @@ const CostDashboard = () => {
     });
     const llmBreakdown = Object.entries(llmMap).sort((a, b) => b[1].cost - a[1].cost);
 
-    // Google Places by api_type
+    // Google Places (api=places) by api_type
     const gpMap: Record<string, { calls: number; cost: number }> = {};
-    data.googlePlaces.forEach(({ apiType, calls }) => {
+    data.googlePlaces.filter(r => r.api === 'places').forEach(({ apiType, calls }) => {
       if (!gpMap[apiType]) gpMap[apiType] = { calls: 0, cost: 0 };
       gpMap[apiType].calls += calls;
       gpMap[apiType].cost += calcGpCost(apiType, calls);
     });
     const gpBreakdown = Object.entries(gpMap).sort((a, b) => b[1].cost - a[1].cost);
 
-    // Maps JS by event
-    const mapsMap: Record<string, { count: number; cost: number }> = {};
-    data.frontendEvents.forEach(({ event, count }) => {
-      if (!mapsMap[event]) mapsMap[event] = { count: 0, cost: 0 };
-      mapsMap[event].count += count;
-      mapsMap[event].cost += calcMapsJsCost(event, count) ?? 0;
+    // Maps JS (api=maps) by api_type
+    const mapsMap: Record<string, { calls: number; cost: number }> = {};
+    data.googlePlaces.filter(r => r.api === 'maps').forEach(({ apiType, calls }) => {
+      if (!mapsMap[apiType]) mapsMap[apiType] = { calls: 0, cost: 0 };
+      mapsMap[apiType].calls += calls;
+      mapsMap[apiType].cost += calcGpCost(apiType, calls);
     });
     const mapsBreakdown = Object.entries(mapsMap).sort((a, b) => b[1].cost - a[1].cost);
 
@@ -299,12 +297,12 @@ const CostDashboard = () => {
               {mapsBreakdown.length === 0 && (
                 <p className="text-xs text-muted-foreground">Žádná data</p>
               )}
-              {mapsBreakdown.map(([event, s]) => (
-                <div key={event} className="flex items-center gap-2 text-sm">
+              {mapsBreakdown.map(([apiType, s]) => (
+                <div key={apiType} className="flex items-center gap-2 text-sm">
                   <Badge variant="secondary" className="text-xs shrink-0">
-                    {event === 'map_load' ? 'Map Load' : event}
+                    {apiType === 'map_load' ? 'Map Load' : apiType}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">{s.count}×</span>
+                  <span className="text-xs text-muted-foreground">{s.calls}×</span>
                   <span className="ml-auto font-medium text-xs">{fmt(s.cost)}</span>
                 </div>
               ))}
