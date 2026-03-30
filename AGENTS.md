@@ -95,6 +95,7 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - `006_llm_calls.sql` – tabulka `llm_calls` pro servisní log OpenAI volání (prompty + tokeny)
 - `008_google_places_calls.sql` – tabulka `google_places_calls` pro servisní log Google Places/Maps API volání
 - `010_auth_invite_allowlist.sql` – tabulka `auth_signup_invites` + Auth Hook funkce `hook_check_invite_allowlist(jsonb)` pro invite-only registrace
+- `011_user_roles.sql` – tabulka `user_roles` (`admin`/`user`) + trigger pro auto-default role `user` při vytvoření účtu
 - TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
 ## Technické poznámky
@@ -106,7 +107,7 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - AI generování míst vrací i `ticket` u každého místa (`need` nebo `none`), které se ukládá do `places.ticket`.
 
 ### Servisní log OpenAI volání
-- Backend endpoint: `GET /api/llm/calls?limit=500` (aktuálně bez auth guardu pro testování)
+- Backend endpoint: `GET /api/llm/calls?limit=500` (pouze admin: `JwtAuthGuard` + `AdminGuard`)
 - Endpoint vrací poslední volání OpenAI uložená v DB tabulce `llm_calls`:
   - přesný `messages` payload (system/user)
   - `responseContent` (1:1 obsah odpovědi modelu)
@@ -129,8 +130,8 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - Invite dashboard ve frontendu: `/app/service/invites` (list/add/revoke/restore/delete pozvánek).
 - Backend endpointy pro dashboard (JWT guard): `GET/POST /api/service/invites`, `POST /api/service/invites/revoke`, `POST /api/service/invites/restore`, `DELETE /api/service/invites?email=...`.
 - Login stránka dělá před Google OAuth pre-check pozvánky přes `GET /api/service/invite-gate/check?email=...`; bez aktivní pozvánky uživatele do OAuth flow nepustí.
-- Frontend servisní stránka: `/app/service/google-places` (tabs Places / Maps, filtr podle data, odhadovaná cena)
-- Backend endpoint: `GET /api/google-places/calls?limit=500` (bez auth guardu)
+- RBAC: pouze role `admin` má přístup na servisní/report stránky a endpointy (`/app/service/*`, `/api/llm/calls`, `/api/google-places/calls`, `/api/service/costs`, `/api/service/invites*`).
+- `user_roles` lze spravovat v DB (promote/demote uživatele na admin/user). `Auth /me` vrací `role` + `isAdmin`.
 - Ceník modelů: `frontend/src/config/llmPricing.ts` – manuálně udržovaná tabulka cen (USD/1M tokenů), 3 sazby: `inputPer1M`, `cachedInputPer1M`, `outputPer1M`; `calcCost` počítá worst-case (bez cache slevy, DB cached tokeny neukládá zvlášť)
 - Migrace: `backend/supabase/migrations/006_llm_calls.sql`
 - Migrace: `backend/supabase/migrations/007_llm_response_content.sql`

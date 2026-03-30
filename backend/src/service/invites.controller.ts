@@ -10,8 +10,9 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SupabaseService } from '../supabase/supabase.service';
+import { AdminGuard } from '../auth/admin.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('service/invites')
 export class InvitesController {
   constructor(private supabase: SupabaseService) {}

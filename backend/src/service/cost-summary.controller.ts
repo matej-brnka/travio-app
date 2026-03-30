@@ -1,5 +1,7 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('service')
 export class CostSummaryController {
@@ -25,6 +27,7 @@ export class CostSummaryController {
   }
 
   @Get('costs')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   async costs(@Query('days') daysParam?: string) {
     const days = Math.min(Math.max(parseInt(daysParam ?? '30', 10) || 30, 1), 365);
 

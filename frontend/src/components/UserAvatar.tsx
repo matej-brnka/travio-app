@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { getMe } from "@/api/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ interface UserInfo {
 export const UserAvatar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Initial session fetch
@@ -31,6 +33,7 @@ export const UserAvatar = () => {
           email: session.user.email ?? "",
           avatarUrl: meta?.avatar_url ?? meta?.picture ?? null,
         });
+        getMe().then((me) => setIsAdmin(!!me.isAdmin)).catch(() => setIsAdmin(false));
       }
     });
 
@@ -43,8 +46,10 @@ export const UserAvatar = () => {
           email: session.user.email ?? "",
           avatarUrl: meta?.avatar_url ?? meta?.picture ?? null,
         });
+        getMe().then((me) => setIsAdmin(!!me.isAdmin)).catch(() => setIsAdmin(false));
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
     });
 
@@ -85,23 +90,27 @@ export const UserAvatar = () => {
             <DropdownMenuSeparator />
           </>
         )}
-        <DropdownMenuItem onClick={() => navigate("/app/service/costs")} className="cursor-pointer">
-          <Wrench className="w-4 h-4 mr-2" />
-          Náklady na provoz
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/app/service/openai")} className="cursor-pointer">
-          <Wrench className="w-4 h-4 mr-2" />
-          Servis OpenAI
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/app/service/google-places")} className="cursor-pointer">
-          <Wrench className="w-4 h-4 mr-2" />
-          Servis Google Places
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/app/service/invites")} className="cursor-pointer">
-          <Wrench className="w-4 h-4 mr-2" />
-          Pozvánky
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {isAdmin && (
+          <>
+            <DropdownMenuItem onClick={() => navigate("/app/service/costs")} className="cursor-pointer">
+              <Wrench className="w-4 h-4 mr-2" />
+              Náklady na provoz
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/app/service/openai")} className="cursor-pointer">
+              <Wrench className="w-4 h-4 mr-2" />
+              Servis OpenAI
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/app/service/google-places")} className="cursor-pointer">
+              <Wrench className="w-4 h-4 mr-2" />
+              Servis Google Places
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/app/service/invites")} className="cursor-pointer">
+              <Wrench className="w-4 h-4 mr-2" />
+              Pozvánky
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="w-4 h-4 mr-2" />
           Odhlásit se
