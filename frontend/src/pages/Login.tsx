@@ -1,18 +1,42 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import { checkInviteGate } from "@/api/invites";
+import { toast } from "sonner";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
 
   const handleGoogleLogin = async () => {
+    const normalized = email.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(normalized)) {
+      toast.error("Zadej prosím platný e-mail.");
+      return;
+    }
+
     setLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/app` },
-    });
-    setLoading(false);
+    try {
+      const gate = await checkInviteGate(normalized);
+      if (!gate.allowed) {
+        toast.error("Pro tento e-mail zatím není aktivní pozvánka.");
+        return;
+      }
+
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/app`,
+          queryParams: { login_hint: normalized },
+        },
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Nepodařilo se ověřit pozvánku.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,11 +54,20 @@ const Login = () => {
           Přihlas se a začni plánovat svůj další výlet.
         </p>
 
+        <Input
+          type="email"
+          placeholder="Tvůj e-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mb-3"
+          autoComplete="email"
+        />
+
         <Button
           size="lg"
           className="w-full rounded-md py-6 text-base bg-card text-foreground border border-border hover:bg-muted shadow-sm font-medium mb-4"
           onClick={handleGoogleLogin}
-          disabled={loading}
+          disabled={loading || !email.trim()}
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -46,7 +79,7 @@ const Login = () => {
         </Button>
 
         <p className="text-muted-foreground text-xs">
-          Nemáš účet? Začni zdarma kliknutím výše.
+          Přístup je jen na pozvánku. Bez aktivní pozvánky tě k Google přihlášení nepustíme.
         </p>
       </motion.div>
     </div>

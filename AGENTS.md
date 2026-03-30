@@ -94,6 +94,7 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - `005_day_destination_index.sql` – sloupec destination_index INT na days (přiřazení dne k destinaci)
 - `006_llm_calls.sql` – tabulka `llm_calls` pro servisní log OpenAI volání (prompty + tokeny)
 - `008_google_places_calls.sql` – tabulka `google_places_calls` pro servisní log Google Places/Maps API volání
+- `010_auth_invite_allowlist.sql` – tabulka `auth_signup_invites` + Auth Hook funkce `hook_check_invite_allowlist(jsonb)` pro invite-only registrace
 - TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
 ## Technické poznámky
@@ -122,6 +123,12 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - V `TripMapView` lze kliknout na nativní Google POI (`placeId`) a přidat místo do itineráře; před uložením se vždy vybírá cílový den (výchozí je aktuálně zvolený den/Volné).
 - Klik na POI používá client-side `PlacesService.getDetails` (fields včetně `website`/`opening_hours`), proto se do telemetry loguje jako účtované `place_details_pro_client` a promítá se do cost reportu jako `place_details_pro`.
 - Při přidání místa (z mapy i přes AddPlaceSheet) se kontrolují duplicity v rámci celé cesty (`googlePlaceId`, fallback `name+address`); při nálezu se zobrazí potvrzení, zda přidat místo podruhé.
+- Invite-only registrace: nové účty jsou povolené pouze pro e-maily v `public.auth_signup_invites` (kontrola přes Supabase Auth `before-user-created` hook).
+- Aktivace hooku se dělá v Supabase Dashboardu: `Auth -> Hooks -> Before User Created` a zvolit Postgres funkci `public.hook_check_invite_allowlist`.
+- Pozvánka pro nový účet = vložit e-mail do `public.auth_signup_invites` (např. přes SQL Editor).
+- Invite dashboard ve frontendu: `/app/service/invites` (list/add/revoke/restore/delete pozvánek).
+- Backend endpointy pro dashboard (JWT guard): `GET/POST /api/service/invites`, `POST /api/service/invites/revoke`, `POST /api/service/invites/restore`, `DELETE /api/service/invites?email=...`.
+- Login stránka dělá před Google OAuth pre-check pozvánky přes `GET /api/service/invite-gate/check?email=...`; bez aktivní pozvánky uživatele do OAuth flow nepustí.
 - Frontend servisní stránka: `/app/service/google-places` (tabs Places / Maps, filtr podle data, odhadovaná cena)
 - Backend endpoint: `GET /api/google-places/calls?limit=500` (bez auth guardu)
 - Ceník modelů: `frontend/src/config/llmPricing.ts` – manuálně udržovaná tabulka cen (USD/1M tokenů), 3 sazby: `inputPer1M`, `cachedInputPer1M`, `outputPer1M`; `calcCost` počítá worst-case (bez cache slevy, DB cached tokeny neukládá zvlášť)
