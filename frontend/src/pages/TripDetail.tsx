@@ -69,6 +69,11 @@ const TripDetail = () => {
   const [pendingMapPlace, setPendingMapPlace] = useState<GooglePlaceCandidate | null>(null);
   const [pendingMapDayIndex, setPendingMapDayIndex] = useState(0);
   const [addingMapPlace, setAddingMapPlace] = useState(false);
+  const [duplicatePrompt, setDuplicatePrompt] = useState<{
+    place: PlaceData | GooglePlaceCandidate;
+    targetDayId: string | null;
+  } | null>(null);
+  const [addingDuplicate, setAddingDuplicate] = useState(false);
 
   if (!trip) {
     return (
@@ -84,6 +89,27 @@ const TripDetail = () => {
   const totalDays = differenceInDays(parseISO(trip.dateTo), parseISO(trip.dateFrom)) + 1;
   const totalNights = totalDays > 1 ? totalDays - 1 : 0;
   const currentDayId = isUnassigned ? null : currentDay?.id || null;
+
+  const normalize = (v?: string | null) => (v ?? "").trim().toLowerCase();
+  const allTripPlaces = [...trip.days.flatMap((d) => d.places), ...trip.unassigned];
+  const findDuplicate = (place: PlaceData | GooglePlaceCandidate) => {
+    const gpId = normalize(place.googlePlaceId);
+    if (gpId) {
+      return allTripPlaces.find((p) => normalize(p.googlePlaceId) === gpId) ?? null;
+    }
+    const key = `${normalize(place.name)}|${normalize(place.address)}`;
+    return allTripPlaces.find((p) => `${normalize(p.name)}|${normalize(p.address)}` === key) ?? null;
+  };
+
+  const addPlaceWithCheck = async (place: PlaceData | GooglePlaceCandidate, targetDayId: string | null) => {
+    const duplicate = findDuplicate(place);
+    if (duplicate) {
+      setDuplicatePrompt({ place, targetDayId });
+      return false;
+    }
+    await addPlaceToDay(trip.id, targetDayId, place);
+    return true;
+  };
 
   const toggleView = (view: "list" | "map") => {
     localStorage.setItem("travio-view-mode", view);
@@ -112,7 +138,8 @@ const TripDetail = () => {
   };
 
   const handleAddPlace = async (place: PlaceData): Promise<void> => {
-    await addPlaceToDay(trip.id, currentDayId, place);
+    const added = await addPlaceWithCheck(place, currentDayId);
+    if (!added) return;
     setShowAddPlace(false);
     toast.success("Místo přidáno! 📍");
   };
@@ -129,9 +156,11 @@ const TripDetail = () => {
       : trip.days[pendingMapDayIndex]?.id ?? null;
     setAddingMapPlace(true);
     try {
-      await addPlaceToDay(trip.id, targetDayId, pendingMapPlace);
-      setPendingMapPlace(null);
-      toast.success("Místo přidáno! 📍");
+      const added = await addPlaceWithCheck(pendingMapPlace, targetDayId);
+      if (added) {
+        setPendingMapPlace(null);
+        toast.success("Místo přidáno! 📍");
+      }
     } finally {
       setAddingMapPlace(false);
     }
@@ -681,6 +710,39 @@ const TripDetail = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={duplicatePrompt !== null} onOpenChange={(v) => !v && setDuplicatePrompt(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Toto místo už v itineráři máš</AlertDialogTitle>
+            <AlertDialogDescription>
+              Místo <strong>{duplicatePrompt?.place.name}</strong> už je v této cestě.
+              Opravdu ho chceš přidat podruhé?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={addingDuplicate}>Zrušit</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={addingDuplicate}
+              onClick={async () => {
+                if (!duplicatePrompt) return;
+                setAddingDuplicate(true);
+                try {
+                  await addPlaceToDay(trip.id, duplicatePrompt.targetDayId, duplicatePrompt.place);
+                  setDuplicatePrompt(null);
+                  setPendingMapPlace(null);
+                  setShowAddPlace(false);
+                  toast.success("Místo přidáno podruhé ✅");
+                } finally {
+                  setAddingDuplicate(false);
+                }
+              }}
+            >
+              {addingDuplicate ? "Přidávám..." : "Ano, přidat znovu"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Share modal */}
       <Dialog open={shareUrl !== null} onOpenChange={(v) => !v && setShareUrl(null)}>
