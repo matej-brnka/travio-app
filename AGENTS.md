@@ -119,6 +119,8 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - Ceník Google Places/Maps: `frontend/src/config/googlePlacesPricing.ts` – ceník podle Google SKU v USD / 1 000 volání (`per1000`) + `label` + `sku`; výpočet ceny dělá `calcGoogleCost(apiType, calls)`.
 - Google Places servisní výpis (`/app/service/google-places`) zobrazuje pouze fakticky účtované API typy (`per1000 > 0`), včetně přesné SKU položky.
 - Map telemetry (`POST /api/service/telemetry`) loguje pouze účtovaný event `map_load` (Dynamic Maps). Interakce mapy (zoom/pan) se do cost výpisu nezahrnují.
+- V `TripMapView` lze kliknout na nativní Google POI (`placeId`) a přidat místo do itineráře; před uložením se vždy vybírá cílový den (výchozí je aktuálně zvolený den/Volné).
+- Klik na POI používá client-side `PlacesService.getDetails` (fields včetně `website`/`opening_hours`), proto se do telemetry loguje jako účtované `place_details_pro_client` a promítá se do cost reportu jako `place_details_pro`.
 - Frontend servisní stránka: `/app/service/google-places` (tabs Places / Maps, filtr podle data, odhadovaná cena)
 - Backend endpoint: `GET /api/google-places/calls?limit=500` (bez auth guardu)
 - Ceník modelů: `frontend/src/config/llmPricing.ts` – manuálně udržovaná tabulka cen (USD/1M tokenů), 3 sazby: `inputPer1M`, `cachedInputPer1M`, `outputPer1M`; `calcCost` počítá worst-case (bez cache slevy, DB cached tokeny neukládá zvlášť)

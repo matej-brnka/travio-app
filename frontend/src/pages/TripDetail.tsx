@@ -11,7 +11,7 @@ import PlaceCard from "@/components/PlaceCard";
 import AddPlaceSheet, { PlaceData } from "@/components/AddPlaceSheet";
 import MovePlaceModal from "@/components/MovePlaceModal";
 import EditTripModal from "@/components/EditTripModal";
-import TripMapView from "@/components/TripMapView";
+import TripMapView, { GooglePlaceCandidate } from "@/components/TripMapView";
 import PlaceDetailPanel from "@/components/PlaceDetailPanel";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -66,6 +66,9 @@ const TripDetail = () => {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareLoading, setShareLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pendingMapPlace, setPendingMapPlace] = useState<GooglePlaceCandidate | null>(null);
+  const [pendingMapDayIndex, setPendingMapDayIndex] = useState(0);
+  const [addingMapPlace, setAddingMapPlace] = useState(false);
 
   if (!trip) {
     return (
@@ -112,6 +115,26 @@ const TripDetail = () => {
     await addPlaceToDay(trip.id, currentDayId, place);
     setShowAddPlace(false);
     toast.success("Místo přidáno! 📍");
+  };
+
+  const handleMapPlaceCandidate = (place: GooglePlaceCandidate) => {
+    setPendingMapPlace(place);
+    setPendingMapDayIndex(selectedDayIndex);
+  };
+
+  const handleConfirmMapPlaceAdd = async () => {
+    if (!pendingMapPlace) return;
+    const targetDayId = pendingMapDayIndex === trip.days.length
+      ? null
+      : trip.days[pendingMapDayIndex]?.id ?? null;
+    setAddingMapPlace(true);
+    try {
+      await addPlaceToDay(trip.id, targetDayId, pendingMapPlace);
+      setPendingMapPlace(null);
+      toast.success("Místo přidáno! 📍");
+    } finally {
+      setAddingMapPlace(false);
+    }
   };
 
   const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
@@ -348,6 +371,7 @@ const TripDetail = () => {
                 places={currentPlaces}
                 onPlaceClick={handlePlaceClick}
                 onAddPlace={() => setShowAddPlace(true)}
+                onAddGooglePlace={handleMapPlaceCandidate}
                 className="w-full h-full"
                 centerLat={trip.centerLat}
                 centerLng={trip.centerLng}
@@ -504,6 +528,7 @@ const TripDetail = () => {
               <TripMapView
                 places={currentPlaces}
                 onPlaceClick={handlePlaceClick}
+                onAddGooglePlace={handleMapPlaceCandidate}
                 className="h-full"
                 hideBottomCards
                 centerLat={trip.centerLat}
@@ -599,6 +624,63 @@ const TripDetail = () => {
           }}
         />
       )}
+
+      <Dialog open={pendingMapPlace !== null} onOpenChange={(v) => !v && setPendingMapPlace(null)}>
+        <DialogContent className="max-w-sm mx-auto rounded-lg">
+          <DialogHeader>
+            <DialogTitle>Kam přidat místo?</DialogTitle>
+          </DialogHeader>
+          {pendingMapPlace && (
+            <div className="space-y-3">
+              <div className="bg-muted rounded-md p-2">
+                <p className="text-sm font-medium text-foreground">{pendingMapPlace.name}</p>
+                {pendingMapPlace.address && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{pendingMapPlace.address}</p>
+                )}
+              </div>
+              <div className="space-y-1 max-h-56 overflow-y-auto">
+                {trip.days.map((day, i) => (
+                  <button
+                    key={day.id}
+                    className={`w-full text-left px-3 py-2 rounded-md text-sm border transition-colors ${
+                      pendingMapDayIndex === i
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => setPendingMapDayIndex(i)}
+                    disabled={addingMapPlace}
+                  >
+                    Den {i + 1} · {format(parseISO(day.date), "d. M.", { locale: cs })}
+                  </button>
+                ))}
+                <button
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm border transition-colors ${
+                    pendingMapDayIndex === trip.days.length
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                  onClick={() => setPendingMapDayIndex(trip.days.length)}
+                  disabled={addingMapPlace}
+                >
+                  ⚡ Volné (nezařazené)
+                </button>
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setPendingMapPlace(null)}
+                  disabled={addingMapPlace}
+                >
+                  Zrušit
+                </Button>
+                <Button onClick={handleConfirmMapPlaceAdd} disabled={addingMapPlace}>
+                  {addingMapPlace ? "Přidávám..." : "Přidat"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Share modal */}
       <Dialog open={shareUrl !== null} onOpenChange={(v) => !v && setShareUrl(null)}>

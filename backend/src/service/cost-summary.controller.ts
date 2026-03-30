@@ -9,6 +9,7 @@ export class CostSummaryController {
   async telemetry(@Body() body: { event: string; metadata?: Record<string, any> }) {
     const EVENT_MAP: Record<string, { api: string; apiType: string }> = {
       map_load: { api: 'maps', apiType: 'map_load' },
+      place_details_pro_client: { api: 'places', apiType: 'place_details_pro' },
     };
     const mapped = EVENT_MAP[body?.event];
     if (!mapped) return { ok: false };

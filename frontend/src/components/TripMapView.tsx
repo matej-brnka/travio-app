@@ -13,6 +13,7 @@ interface TripMapViewProps {
   places: Place[];
   onPlaceClick: (placeId: string) => void;
   onAddPlace?: () => void;
+  onAddGooglePlace?: (place: GooglePlaceCandidate) => Promise<void> | void;
   className?: string;
   hideBottomCards?: boolean;
   centerLat?: number | null;
@@ -21,6 +22,16 @@ interface TripMapViewProps {
   viewportSouth?: number | null;
   viewportEast?: number | null;
   viewportWest?: number | null;
+}
+
+export interface GooglePlaceCandidate {
+  name: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+  website?: string;
+  openingHours?: string[];
+  googlePlaceId?: string;
 }
 
 /* ─── Route polyline using Maps library ─── */
@@ -103,11 +114,53 @@ const BoundsFitter = ({ places, viewportNorth, viewportSouth, viewportEast, view
   return null;
 };
 
+/* ─── POI picker from native Google map places ─── */
+const PoiPicker = ({ onPick }: { onPick?: (place: GooglePlaceCandidate) => void }) => {
+  const map = useMap();
+  const placesLib = useMapsLibrary("places");
+
+  useEffect(() => {
+    if (!map || !placesLib || !onPick) return;
+
+    const service = new placesLib.PlacesService(map);
+    const listener = map.addListener("click", (event: any) => {
+      if (!event.placeId) return;
+      // Prevent Google default place details bubble.
+      if (typeof event.stop === "function") event.stop();
+
+      service.getDetails(
+        {
+          placeId: event.placeId,
+          fields: ["place_id", "name", "formatted_address", "geometry", "website", "opening_hours"],
+        },
+        (result, status) => {
+          if (!result || status !== google.maps.places.PlacesServiceStatus.OK) return;
+          sendTelemetry("place_details_pro_client", { source: "map_poi_click" });
+          onPick({
+            name: result.name ?? "Místo",
+            address: result.formatted_address ?? undefined,
+            lat: result.geometry?.location?.lat(),
+            lng: result.geometry?.location?.lng(),
+            website: result.website ?? undefined,
+            openingHours: result.opening_hours?.weekday_text ?? undefined,
+            googlePlaceId: result.place_id ?? event.placeId,
+          });
+        },
+      );
+    });
+
+    return () => listener.remove();
+  }, [map, placesLib, onPick]);
+
+  return null;
+};
+
 /* ─── Inner map content ─── */
 const MapContent = ({
   places,
   onPlaceClick,
   onAddPlace,
+  onAddGooglePlace,
   hideBottomCards,
   centerLat,
   centerLng,
@@ -117,6 +170,8 @@ const MapContent = ({
   viewportWest,
 }: Omit<TripMapViewProps, "className">) => {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [poiCandidate, setPoiCandidate] = useState<GooglePlaceCandidate | null>(null);
+  const [addingPoi, setAddingPoi] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const mapLoggedRef = useRef(false);
 
@@ -155,6 +210,7 @@ const MapContent = ({
           }
         }}
       >
+        <PoiPicker onPick={onAddGooglePlace ? setPoiCandidate : undefined} />
         <BoundsFitter
           places={places}
           viewportNorth={viewportNorth}
@@ -201,6 +257,41 @@ const MapContent = ({
           );
         })}
       </Map>
+
+      {poiCandidate && onAddGooglePlace && (
+        <div className="absolute top-3 left-3 right-3 z-20 pointer-events-none">
+          <div className="max-w-xl mx-auto bg-card border border-border rounded-xl shadow-card p-3 pointer-events-auto">
+            <p className="text-sm font-semibold text-foreground truncate">{poiCandidate.name}</p>
+            {poiCandidate.address && (
+              <p className="text-xs text-muted-foreground truncate mt-0.5">{poiCandidate.address}</p>
+            )}
+            <div className="flex items-center gap-2 mt-3">
+              <button
+                className="px-3 py-1.5 text-xs rounded-md border border-border hover:bg-muted transition-colors"
+                onClick={() => setPoiCandidate(null)}
+                disabled={addingPoi}
+              >
+                Zavřít
+              </button>
+              <button
+                className="px-3 py-1.5 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
+                disabled={addingPoi}
+                onClick={async () => {
+                  setAddingPoi(true);
+                  try {
+                    await onAddGooglePlace(poiCandidate);
+                    setPoiCandidate(null);
+                  } finally {
+                    setAddingPoi(false);
+                  }
+                }}
+              >
+                {addingPoi ? "Přidávám..." : "Přidat do itineráře"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom card strip – mobile/tablet */}
       {!hideBottomCards && (places.length > 0 || onAddPlace) && (
@@ -282,6 +373,7 @@ const TripMapView = ({
   places,
   onPlaceClick,
   onAddPlace,
+  onAddGooglePlace,
   className = "",
   hideBottomCards = false,
   centerLat,
@@ -293,11 +385,12 @@ const TripMapView = ({
 }: TripMapViewProps) => {
   return (
     <div className={`relative w-full h-full min-h-0 ${className}`}>
-      <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_KEY ?? ""}>
+      <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_KEY ?? ""} libraries={["places"]}>
         <MapContent
           places={places}
           onPlaceClick={onPlaceClick}
           onAddPlace={onAddPlace}
+          onAddGooglePlace={onAddGooglePlace}
           hideBottomCards={hideBottomCards}
           centerLat={centerLat}
           centerLng={centerLng}
