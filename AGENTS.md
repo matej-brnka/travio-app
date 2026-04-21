@@ -13,6 +13,8 @@ Uživatel může:
 ## Struktura repozitáře
 ```
 /
+├── .env.example      # Kořenový env template pro Docker Compose / Traefik konfiguraci
+├── docker-compose.yml # Docker Compose pro Traefik + frontend + backend
 ├── frontend/          # React + Vite (TypeScript)
 │   └── src/
 │       ├── api/          # API vrstva (trips, days, places, search, weather)
@@ -59,7 +61,43 @@ cp .env.example .env    # Vyplň hodnoty
 npm run start:dev       # NestJS na http://localhost:3123
 ```
 
+### Docker Compose
+```bash
+cp .env.example .env    # Kořenový env pro compose build/runtime
+docker compose build    # pouze build image
+# docker compose up -d  # spusť až když to bude potřeba
+```
+
 ## Environment proměnné
+
+### Kořen (`/.env`) pro Docker Compose
+```
+TRAEFIK_PROD_HOST=brnka.aibr.cz
+TRAEFIK_LOCAL_HOST=localhost
+TRAEFIK_ACME_EMAIL=brnka.matej@gmail.com
+
+FRONTEND_URL=https://brnka.aibr.cz
+VITE_API_URL=/api
+
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_... nebo eyJ...
+VITE_GOOGLE_MAPS_KEY=your-google-maps-api-key
+
+SUPABASE_URL=aws-1-eu-west-1.pooler.supabase.com
+SUPABASE_PORT=6543
+SUPABASE_DATABASE=postgres
+SUPABASE_USER=postgres.your-project-ref
+SUPABASE_SERVICE_ROLE_KEY=...
+SUPABASE_PROJECT_URL=https://your-project-ref.supabase.co
+
+GOOGLE_PLACES_API_KEY=...
+YR_NO_USER_AGENT=travio/1.0 your@email.com
+
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_TEMPERATURE=0.7
+OPENAI_MAX_TOKENS=2000
+```
 
 ### Frontend (`frontend/.env`)
 ```
@@ -100,6 +138,18 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - TODO: migrace pro viewport_north/south/east/west na trips (zatím jen ve frontend modelu)
 
 ## Technické poznámky
+
+### Docker
+- `backend/Dockerfile` používá multi-stage build (`npm ci` -> `npm run build` -> production image s `dist/` + production dependencies)
+- `frontend/Dockerfile` používá multi-stage build (`vite build`) a výsledný statický build servíruje přes `nginx`
+- `Traefik` je reverse proxy pro všechny služby; vystavuje pouze porty `80` a `443`, používá Docker provider a ACME HTTP challenge
+- HTTP (`web`) se automaticky přesměrovává na HTTPS (`websecure`)
+- Let's Encrypt certifikáty se ukládají do volume na cestě `/letsencrypt/acme.json`
+- `frontend` je routovaný přes hosty `brnka.aibr.cz` a `localhost`
+- `backend` je routovaný přes stejné hosty, ale pouze pro `PathPrefix('/api')`
+- Let's Encrypt se používá pouze pro produkční host `brnka.aibr.cz`; `localhost` běží také přes HTTPS, ale s výchozím/self-signed certifikátem Traefiku
+- `frontend/nginx.conf` řeší už jen statické servírování SPA; API routing řeší Traefik
+- `docker-compose.yml` očekává kořenový `.env` a všechny služby běží s `restart: always`
 
 ### pg DATE sloupce
 `pg` defaultně parsuje DATE jako JS `Date` s lokální půlnocí → timezone bug. `SupabaseService` to řeší pomocí `types.setTypeParser(1082, val => val)` – DATE se vrací jako plain string. Viz `backend/src/supabase/supabase.service.ts`.

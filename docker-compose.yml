@@ -1,0 +1,88 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik-network
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL:-brnka.matej@gmail.com}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    restart: always
+    networks:
+      - traefik-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      PORT: 3123
+      FRONTEND_URL: ${FRONTEND_URL:-https://brnka.aibr.cz}
+    restart: always
+    networks:
+      - traefik-network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      - traefik.http.services.travio-backend.loadbalancer.server.port=3123
+      - traefik.http.routers.travio-backend-prod.rule=Host(`${TRAEFIK_PROD_HOST:-brnka.aibr.cz}`) && PathPrefix(`/api`)
+      - traefik.http.routers.travio-backend-prod.entrypoints=websecure
+      - traefik.http.routers.travio-backend-prod.tls=true
+      - traefik.http.routers.travio-backend-prod.tls.certresolver=letsencrypt
+      - traefik.http.routers.travio-backend-prod.priority=100
+      - traefik.http.routers.travio-backend-local.rule=Host(`${TRAEFIK_LOCAL_HOST:-localhost}`) && PathPrefix(`/api`)
+      - traefik.http.routers.travio-backend-local.entrypoints=websecure
+      - traefik.http.routers.travio-backend-local.tls=true
+      - traefik.http.routers.travio-backend-local.priority=100
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+        VITE_GOOGLE_MAPS_KEY: ${VITE_GOOGLE_MAPS_KEY:-}
+    env_file:
+      - ./.env
+    depends_on:
+      - backend
+      - traefik
+    restart: always
+    networks:
+      - traefik-network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      - traefik.http.services.travio-frontend.loadbalancer.server.port=80
+      - traefik.http.routers.travio-frontend-prod.rule=Host(`${TRAEFIK_PROD_HOST:-brnka.aibr.cz}`)
+      - traefik.http.routers.travio-frontend-prod.entrypoints=websecure
+      - traefik.http.routers.travio-frontend-prod.tls=true
+      - traefik.http.routers.travio-frontend-prod.tls.certresolver=letsencrypt
+      - traefik.http.routers.travio-frontend-prod.priority=10
+      - traefik.http.routers.travio-frontend-local.rule=Host(`${TRAEFIK_LOCAL_HOST:-localhost}`)
+      - traefik.http.routers.travio-frontend-local.entrypoints=websecure
+      - traefik.http.routers.travio-frontend-local.tls=true
+      - traefik.http.routers.travio-frontend-local.priority=10
+
+networks:
+  traefik-network:
+    driver: bridge
+
+volumes:
+  letsencrypt:

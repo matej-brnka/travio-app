@@ -18,6 +18,14 @@ npm run build          # produkční build
 npm run test           # Vitest testy
 ```
 
+## Docker
+- `Dockerfile` je multi-stage:
+  - build stage: `npm ci` + `npm run build`
+  - production stage: `nginx:alpine` servíruje obsah z `dist/`
+- `nginx.conf` řeší SPA fallback (`/index.html`)
+- V Docker Compose používej pro frontend build `VITE_API_URL=/api`
+- Frontend negeneruje vlastní veřejný port na hostu; publikaci řeší Traefik přes hosty `brnka.aibr.cz` a `localhost`
+
 ## Environment proměnné (.env)
 ```
 VITE_API_URL=http://localhost:3123/api

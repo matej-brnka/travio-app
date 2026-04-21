@@ -15,6 +15,15 @@ npm run build && npm run start   # produkční
 npm run test            # Jest testy
 ```
 
+## Docker
+- `Dockerfile` je multi-stage:
+  - build stage: `npm ci` + `npm run build`
+  - production stage: pouze production dependencies + `dist/`
+- Backend v kontejneru naslouchá na `0.0.0.0:3123`
+- Runtime env se v Compose bere z kořenového `/.env`; interní port kontejneru zůstává `3123`
+- V produkci backend negeneruje vlastní veřejný port na hostu; publikaci řeší Traefik
+- Traefik směruje backend přes `Host(brnka.aibr.cz|localhost) && PathPrefix(/api)`
+
 ## Environment proměnné (.env)
 ```
 PORT=3123
