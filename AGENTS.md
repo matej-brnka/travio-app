@@ -75,6 +75,7 @@ docker compose build    # pouze build image
 TRAEFIK_PROD_HOST=brnka.aibr.cz
 TRAEFIK_LOCAL_HOST=localhost
 TRAEFIK_ACME_EMAIL=brnka.matej@gmail.com
+DOCKER_SOCKET_PATH=/Users/your-user/.orbstack/run/docker.sock
 
 FRONTEND_URL=https://brnka.aibr.cz
 VITE_API_URL=/api
@@ -143,6 +144,9 @@ Migrace jsou v `backend/supabase/migrations/`. Spouštěj přes node pg skript n
 - `backend/Dockerfile` používá multi-stage build (`npm ci` -> `npm run build` -> production image s `dist/` + production dependencies)
 - `frontend/Dockerfile` používá multi-stage build (`vite build`) a výsledný statický build servíruje přes `nginx`
 - `Traefik` je reverse proxy pro všechny služby; vystavuje pouze porty `80` a `443`, používá Docker provider a ACME HTTP challenge
+- Použitá image je pinovaná na stabilní podporovanou verzi `traefik:v3.6.13`
+- U novějších Docker daemonů / OrbStack může být potřeba na Traefik service nastavit `DOCKER_API_VERSION=1.40`, aby Docker provider nepadal na příliš staré API verzi klienta
+- Na macOS s OrbStack je potřeba Traefik mountovat na reálný socket `~/.orbstack/run/docker.sock`, ne na `/var/run/docker.sock`
 - HTTP (`web`) se automaticky přesměrovává na HTTPS (`websecure`)
 - Let's Encrypt certifikáty se ukládají do volume na cestě `/letsencrypt/acme.json`
 - `frontend` je routovaný přes hosty `brnka.aibr.cz` a `localhost`
