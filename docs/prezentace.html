@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="cs">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travio – Prezentace projektu</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap"
+    rel="stylesheet" />
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    :root {
+      --primary: #00798c;
+      --accent: #edae49;
+      --destructive: #d1495b;
+      --bg: #f5f5f5;
+      --fg: #003d5b;
+      --muted: #30638e;
+      --card: #ffffff;
+      --border: #dde3ea;
+    }
+
+    .reveal {
+      font-family: "DM Sans", sans-serif;
+      color: var(--fg);
+    }
+
+    .reveal h1,
+    .reveal h2,
+    .reveal h3 {
+      font-family: "DM Sans", sans-serif;
+      color: var(--fg);
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: -0.02em;
+    }
+
+    .reveal h1 {
+      font-size: 2.4em;
+      margin: 0 0 0.2em;
+    }
+
+    .reveal h2 {
+      font-size: 1.5em;
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 0.15em;
+      display: inline-block;
+      margin: 0 0 0.3em;
+    }
+
+    .reveal h3 {
+      font-size: 1em;
+      color: var(--muted);
+      font-weight: 500;
+      margin: 0 0 0.2em;
+    }
+
+    .reveal .slides section {
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .slide-title {
+      text-align: center !important;
+    }
+
+    /* Pill badge */
+    .badge {
+      display: inline-block;
+      padding: 0.2em 0.7em;
+      border-radius: 999px;
+      font-size: 0.55em;
+      font-weight: 700;
+      vertical-align: middle;
+      margin-left: 0.4em;
+    }
+
+    .badge-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .badge-accent {
+      background: var(--accent);
+      color: var(--fg);
+    }
+
+    .badge-dest {
+      background: var(--destructive);
+      color: #fff;
+    }
+
+    /* Accent bar for title slide */
+    .title-bar {
+      width: 80px;
+      height: 6px;
+      background: var(--primary);
+      margin: 0.6em auto 1em;
+      border-radius: 3px;
+    }
+
+    /* Tables */
+    .reveal table {
+      font-size: 0.78em;
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 0.6em;
+    }
+
+    .reveal table th {
+      background: var(--primary);
+      color: #fff;
+      padding: 0.5em 0.8em;
+      font-weight: 600;
+    }
+
+    .reveal table td {
+      padding: 0.45em 0.8em;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .reveal table tr:nth-child(even) td {
+      background: #f0f7f9;
+    }
+
+    .reveal table code {
+      font-size: 0.85em;
+      background: #e8f4f6;
+      color: var(--primary);
+      padding: 0.1em 0.3em;
+      border-radius: 4px;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6em;
+      margin-top: 0.5em;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 0.7em 0.9em;
+      box-shadow: 0 2px 12px rgba(0, 61, 91, 0.08);
+      font-size: 0.76em;
+    }
+
+    .card strong {
+      display: block;
+      color: var(--primary);
+      font-size: 1.05em;
+      margin-bottom: 0.3em;
+    }
+
+    /* Chip list */
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      margin-top: 0.5em;
+    }
+
+    .chip {
+      background: #e8f4f6;
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 0.3em 0.9em;
+      font-size: 0.72em;
+      font-weight: 500;
+      border: 1px solid var(--primary);
+    }
+
+    /* Priority colours */
+    .p-must {
+      color: var(--destructive);
+      font-weight: 700;
+    }
+
+    .p-want {
+      color: #c08a00;
+      font-weight: 700;
+    }
+
+    .p-if {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1em;
+      font-size: 0.75em;
+      margin-top: 0.3em;
+    }
+
+    .flow-step {
+      background: var(--card);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 0.75rem 0.75rem 0;
+      padding: 0.28em 0.8em;
+      box-shadow: 0 1px 6px rgba(0, 61, 91, 0.06);
+      line-height: 1.4;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85em;
+      line-height: 1;
+    }
+
+    /* Highlight box */
+    .highlight-box {
+      background: linear-gradient(135deg, #e8f4f6 0%, #fff 100%);
+      border: 1px solid var(--primary);
+      border-radius: 1rem;
+      padding: 0.5em 0.9em;
+      font-size: 0.78em;
+      margin-top: 0.4em;
+    }
+
+    /* Code blocks */
+    .reveal pre {
+      font-size: 0.62em;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 12px rgba(0, 61, 91, 0.12);
+    }
+
+    /* List */
+    .reveal ul {
+      font-size: 0.82em;
+      line-height: 1.7;
+    }
+
+    .reveal ul li::marker {
+      color: var(--primary);
+    }
+
+    /* Footer */
+    .slide-footer {
+      position: absolute;
+      bottom: 0.4em;
+      right: 0.8em;
+      font-size: 0.38em;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    /* Color swatch */
+    .swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-right: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+
+    /* Two-col layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+      align-items: start;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <!-- ─── 1. TITLE ─── -->
+      <section class="slide-title">
+        <h1 style="font-size: 3em; color: var(--primary)">✈️ Travio</h1>
+        <div class="title-bar"></div>
+        <p style="font-size: 0.95em; color: var(--muted); font-weight: 500">
+          Mobilní-first plánovač cestovních itinerářů s AI asistencí
+        </p>
+        <br />
+        <div class="chip-list" style="justify-content: center">
+          <span class="chip">React 18</span>
+          <span class="chip">NestJS</span>
+          <span class="chip">Supabase</span>
+          <span class="chip">Google Maps</span>
+          <span class="chip">OpenAI GPT-4o-mini</span>
+        </div>
+      </section>
+
+      <!-- ─── 2. IDEA ─── -->
+      <section>
+        <h2>Idea</h2>
+        <p style="font-size: 0.82em; line-height: 1.5; margin-top: 0.4em">
+          Cílový uživatel: <strong>cestovatel mladší generace</strong>, který
+          chce přehledně naplánované místa v dané destinaci — bez žonglování
+          se zápisníky, tabulkami nebo generickými poznámkovými bloky.
+        </p>
+        <div class="flow" style="margin-top: 0.5em">
+          <div class="flow-step">
+            📍 Uživatel zadá <strong>destinaci + termín</strong>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            📅 Aplikace automaticky vygeneruje
+            <strong>strukturu dnů</strong>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            🗺️ Uživatel přidává místa, řadí je, označuje jako navštívená
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            🤖 Volitelně: <strong>AI sestaví kostru</strong> itineráře
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">
+            🔗 Sdílení anonymním odkazem (read-only, jako Google Drive)
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 3. DESIGN SYSTEM – barvy ─── -->
+      <section>
+        <h2>Design System</h2>
+        <h3>Barvy &amp; Priority</h3>
+        <div class="two-col" style="margin-top: 0.6em">
+          <table>
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>HEX</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="swatch" style="background: #00798c"></span>Primary
+                </td>
+                <td><code>#00798c</code></td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="swatch" style="background: #edae49"></span>Accent
+                </td>
+                <td><code>#edae49</code></td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="swatch" style="background: #d1495b"></span>Destructive
+                </td>
+                <td><code>#d1495b</code></td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="swatch" style="background: #003d5b"></span>Foreground
+                </td>
+                <td><code>#003d5b</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <div>
+            <div style="
+                  background: var(--card);
+                  border-radius: 1rem;
+                  padding: 0.8em;
+                  box-shadow: 0 2px 12px rgba(0,61,91,0.08);
+                  font-size: 0.75em;
+                  border: 1px solid var(--border);
+                ">
+              <p style="font-weight: 700; margin-bottom: 0.5em">
+                Priority míst
+              </p>
+              <p class="p-must">🔥 Must see!</p>
+              <p class="p-want">⭐ Chci vidět</p>
+              <p class="p-if">🤷 Když zbyde čas</p>
+            </div>
+            <div style="
+                  margin-top: 0.6em;
+                  font-size: 0.72em;
+                  color: var(--muted);
+                ">
+              <p>
+                <strong>Font:</strong> DM Sans · váhy 400 / 500 / 700 · 9–40
+                px
+              </p>
+              <p>
+                <strong>Border-radius:</strong> lg 16px · md 12px · sm 8px
+              </p>
+              <p>
+                <strong>Animace:</strong> slide-up 0.3s · accordion 0.2s
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 4. STACK ─── -->
+      <section>
+        <h2>Tech Stack</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Vrstva</th>
+              <th>Technologie</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Frontend</strong></td>
+              <td>React 18, Vite, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion</td>
+            </tr>
+            <tr>
+              <td><strong>Backend</strong></td>
+              <td>NestJS 11, TypeScript, REST API</td>
+            </tr>
+            <tr>
+              <td><strong>Databáze</strong></td>
+              <td>Supabase (PostgreSQL), connection pooler, Row Level Security</td>
+            </tr>
+            <tr>
+              <td><strong>Auth</strong></td>
+              <td>Supabase Auth – Google OAuth, JWT (ES256, JWKS validace)</td>
+            </tr>
+            <tr>
+              <td><strong>Mapy</strong></td>
+              <td>Google Maps JS API (<code>@vis.gl/react-google-maps</code>)</td>
+            </tr>
+            <tr>
+              <td><strong>Deployment</strong></td>
+              <td>Docker Compose, Traefik (reverse proxy, HTTPS / Let's Encrypt)</td>
+            </tr>
+            <tr>
+              <td><strong>Testování</strong></td>
+              <td>Vitest (frontend), Jest (backend), Playwright (e2e)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ─── 5. API ─── -->
+      <section>
+        <h2>REST API – přehled</h2>
+        <div class="two-col" style="margin-top: 0.5em">
+          <table>
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th>Popis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>GET/POST /api/trips</code></td>
+                <td>Seznam / vytvoření cesty</td>
+              </tr>
+              <tr>
+                <td><code>PATCH/DELETE /api/trips/:id</code></td>
+                <td>Editace / smazání</td>
+              </tr>
+              <tr>
+                <td><code>POST /api/trips/:id/days</code></td>
+                <td>Přidání dne</td>
+              </tr>
+              <tr>
+                <td><code>POST /api/trips/:id/places</code></td>
+                <td>Přidání místa</td>
+              </tr>
+              <tr>
+                <td><code>PATCH …/places/:id/move</code></td>
+                <td>Přesun místa do dne</td>
+              </tr>
+              <tr>
+                <td><code>PATCH …/days/:id/reorder</code></td>
+                <td>Pořadí míst v dni</td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th>Popis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>GET /api/trips/:id/share</code></td>
+                <td>Generování share tokenu</td>
+              </tr>
+              <tr>
+                <td><code>GET /api/shared/:token</code></td>
+                <td>Veřejný read-only detail</td>
+              </tr>
+              <tr>
+                <td><code>GET /api/places/search</code></td>
+                <td>Places autocomplete</td>
+              </tr>
+              <tr>
+                <td><code>GET /api/weather</code></td>
+                <td>Počasí z yr.no</td>
+              </tr>
+              <tr>
+                <td><code>POST …/ai-generate</code></td>
+                <td>AI generování itineráře</td>
+              </tr>
+              <tr>
+                <td><code>GET /api/auth/me</code></td>
+                <td>Přihlášený uživatel</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.68em; color:var(--muted); margin-top:0.5em">+ admin endpointy: servisní logy LLM &amp;
+          Google Places, invite allowlist, telemetrie</p>
+      </section>
+
+      <!-- ─── 6. AI WORKFLOW – request ─── -->
+      <section>
+        <h2>AI Workflow</h2>
+        <div class="flow" style="margin-top: 0.5em; font-size: 0.82em">
+          <div class="flow-step">👤 Uživatel zaškrtne „Pomoc od AI" při vytváření cesty</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">📤 Frontend odešle: <strong>destinace · dateFrom · dateTo · zájmy</strong></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">🔧 NestJS → <code>AiService.generateItinerary()</code></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">💬 System prompt: <em>„Jsi průvodce cestovního plánování..."</em></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">🤖 OpenAI <strong>GPT-4o-mini</strong> → JSON odpověď (structured output)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">💾 Backend uloží místa přes <code>PlacesService</code> (každé dle
+            <code>dayIndex</code>)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step">🗺️ Frontend zobrazí hotovou kostru itineráře</div>
+        </div>
+      </section>
+
+      <!-- ─── 6b. AI WORKFLOW – response ─── -->
+      <section>
+        <h2>AI Workflow – odpověď</h2>
+        <div class="two-col" style="margin-top: 0.5em">
+          <pre><code class="language-json">{
+  "places": [
+    {
+      "name": "Central Park",
+      "dayIndex": 0,
+      "emoji": "🌳",
+      "priority": "must-see",
+      "ticket": "none"
+    },
+    {
+      "name": "Times Square",
+      "dayIndex": 0,
+      "emoji": "✨",
+      "priority": "want-to-see",
+      "ticket": "none"
+    }
+  ]
+}</code></pre>
+          <div>
+            <div class="highlight-box">
+              <p style="font-weight:700; color:var(--primary); margin-bottom:0.4em">Logging</p>
+              <p>Každé volání → tabulka <code>llm_calls</code></p>
+              <p style="margin-top:0.3em; color:var(--muted)">prompt · response · tokeny · cena · user e-mail</p>
+              <p style="margin-top:0.3em">→ admin servisní dashboard</p>
+            </div>
+            <div class="highlight-box" style="margin-top:0.5em">
+              <p style="font-weight:700; color:var(--primary); margin-bottom:0.3em">JSON mode</p>
+              <p>Structured output → deterministické parsování, žádné hallucinated fields</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 7. LLM ─── -->
+      <section>
+        <h2>LLM</h2>
+        <div class="two-col" style="margin-top: 0.6em">
+          <div>
+            <div class="highlight-box">
+              <p style="font-size:1.1em; font-weight:700; color:var(--primary)">OpenAI GPT-4o-mini</p>
+              <p style="margin-top:0.4em">Výchozí model, konfigurovatelné přes env</p>
+            </div>
+            <pre style="margin-top:0.6em"><code class="language-bash">OPENAI_MODEL=gpt-4o-mini
+OPENAI_TEMPERATURE=0.7
+OPENAI_MAX_TOKENS=2000</code></pre>
+          </div>
+          <div style="font-size:0.78em; line-height:1.7">
+            <p>✅ <strong>Structured output (JSON mode)</strong><br />deterministické parsování odpovědi</p>
+            <p style="margin-top:0.5em">💰 <strong>Ceník sledován v</strong> <code>llmPricing.ts</code><br />USD/1M
+              tokenů: input · cached · output</p>
+            <p style="margin-top:0.5em">📊 <strong>Servisní stránka</strong>
+              <code>/app/service/openai</code><br />historie volání · filtry · tokeny · cena</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 8. RAG & MCP ─── -->
+      <section>
+        <h2>RAG &amp; MCP</h2>
+        <div class="card-grid">
+          <div class="card">
+            <strong>RAG – aktuální stav</strong>
+            <p>V MVP <strong>není</strong> – AI funguje jako <em>zero-shot / few-shot</em> promptování bez vektorové DB.
+            </p>
+            <p style="margin-top:0.5em; color:var(--muted)">
+              Přirozené rozšíření: DB recenzí + lokálních tipů + uživatelských itinerářů jako znalostní báze pro
+              personalizovaná doporučení.
+            </p>
+          </div>
+          <div class="card">
+            <strong>MCP – aktuální stav</strong>
+            <p>V projektu <strong>není</strong> implementováno.</p>
+            <p style="margin-top:0.5em; color:var(--muted)">
+              Potenciální use case: MCP server s nástroji<br />
+              <code>search_places</code> · <code>get_weather</code> · <code>get_trip_context</code><br />
+              → LLM autonomně sestaví itinerář bez hardcoded API orchestrace.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 9. AUTONOMOUS AGENT ─── -->
+      <section>
+        <h2>Autonomous Agent</h2>
+        <div class="highlight-box">
+          V MVP funguje AI jako <strong>single-turn generátor</strong> – obdrží kontext, vygeneruje itinerář, uloží
+          výsledek.
+        </div>
+        <p style="font-size:0.78em; margin-top:0.8em; font-weight:600; color:var(--muted)">Zárodky agentní architektury:
+        </p>
+        <ul>
+          <li>Backend orchestruje více kroků: vytvoření cesty → generování dnů → volání AI → uložení míst</li>
+          <li><code>POST /api/trips/:id/ai-generate</code> – re-generace pro existující cestu (opakované volání)</li>
+          <li>Admin monitoring všech AI akcí = audit trail</li>
+        </ul>
+        <div style="margin-top:0.6em; font-size:0.74em; color:var(--primary); font-weight:600;">
+          Plnohodnotný agent (vícekrokový, s memory a tool use) = přirozený krok pro roadmapu
+        </div>
+      </section>
+
+      <!-- ─── 10. TOP CHALLENGES ─── -->
+      <section>
+        <h2>Top Challenges</h2>
+        <div class="card-grid">
+          <div class="card">
+            <strong>1 · Typová bezpečnost přes celý stack</strong>
+            <p>
+              PostgreSQL <code>DATE</code> sloupce → pg driver parsuje jako JS <code>Date</code> s lokální půlnocí →
+              <strong>timezone bug</strong>.
+            </p>
+            <p style="margin-top:0.5em; color:var(--primary)">
+              Řešení: <code>types.setTypeParser(1082, val => val)</code><br />
+              DATE přichází jako plain string, bez konverze.
+            </p>
+          </div>
+          <div class="card">
+            <strong>2 · Invite-only registrace bez custom auth serveru</strong>
+            <p>
+              Closed beta – nové účty povoleny pouze pro e-maily ve whitelist tabulce.
+            </p>
+            <p style="margin-top:0.5em; color:var(--primary)">
+              Implementováno přes Supabase <code>before-user-created</code> Auth Hook (Postgres funkce).<br />
+              Frontend dělá <em>pre-check</em> před Google OAuth flow.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 11. INTERESTING FACTS ─── -->
+      <section>
+        <h2>Interesting Facts</h2>
+        <ul style="font-size:0.8em; line-height:1.8">
+          <li><strong>Mapa jako primární UI</strong> – Google Maps fullscreen, itinerář je sekundární vrstva
+            (horizontální strip karet dole na mobilu)</li>
+          <li><strong>Klik na nativní Google POI</strong> přímo přidá místo do itineráře – bez hledání</li>
+          <li><strong>Duplicita míst</strong> detekována přes <code>googlePlaceId</code> – aplikace se zeptá před
+            přidáním podruhé</li>
+          <li><strong>Admin cost dashboard</strong> – reálné náklady Google Places (dle SKU) i OpenAI tokenů + e-mail
+            uživatele pro audit</li>
+          <li><strong>Share link</strong> bez přihlášení – stejný pattern jako Google Drive</li>
+          <li><strong>Frontend vygenerován v Lovable</strong> (AI-assisted prototyping), backend postaven ručně v NestJS
+          </li>
+        </ul>
+      </section>
+
+      <!-- ─── 12. FUTURE VISION ─── -->
+      <section>
+        <h2>Future Vision</h2>
+        <div class="card-grid">
+          <div class="card">
+            <strong>🧠 RAG nad itineráři</strong>
+            Personalizovaná doporučení na základě podobných cest jiných uživatelů.
+          </div>
+          <div class="card">
+            <strong>🤖 Autonomní agent s tool use</strong>
+            LLM volá Places API, kontroluje otevírací doby, optimalizuje pořadí geograficky.
+          </div>
+          <div class="card">
+            <strong>👥 Kolaborativní plánování</strong>
+            Více uživatelů edituje cestu v reálném čase (WebSocket / CRDT).
+          </div>
+          <div class="card">
+            <strong>📄 Export PDF / Wallet</strong>
+            Offline přístup k itineráři bez aplikace.
+          </div>
+          <div class="card">
+            <strong>📶 Offline mode</strong>
+            Service Worker + lokální cache pro použití bez internetu.
+          </div>
+          <div class="card">
+            <strong>🌍 Multi-destinační cesty</strong>
+            Datový model připraven (<code>destinations</code> JSONB, migrace <code>004</code>).
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 13. CLOSING ─── -->
+      <section class="slide-title">
+        <h1 style="color:var(--primary)">✈️ Travio</h1>
+        <div class="title-bar"></div>
+        <p style="color:var(--muted); font-size:0.9em">Díky za pozornost</p>
+        <div class="chip-list" style="justify-content:center; margin-top:1.2em">
+          <span class="chip">github.com/…</span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: "c/t",
+      transition: "slide",
+      transitionSpeed: "default",
+      controls: true,
+      progress: true,
+      center: false,
+      width: 1280,
+      height: 720,
+      margin: 0.05,
+      minScale: 0.2,
+      maxScale: 2.0,
+      plugins: [RevealHighlight, RevealNotes],
+    });
+  </script>
+</body>
+
+</html>

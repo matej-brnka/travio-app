@@ -1,0 +1,49 @@
+<section>
+  <h2>API třetích stran</h2>
+  <table id="table-api">
+    <thead>
+      <tr>
+        <th>Služba</th>
+        <th>Účel</th>
+        <th>Popis</th>
+         </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>OpenAI</td>
+        <td>Generování itineráře (AI)</td>
+        <td>Bearer token (`OPENAI_API_KEY`)</td>
+      </tr>
+      <tr>
+        <td>Google Places API</td>
+        <td>Vyhledávání míst, autocomplete, fotky, detaily POI</td>
+        <td>API key (`GOOGLE_PLACES_API_KEY`)</td>
+      </tr>
+
+      <tr>
+        <td>*Google Maps JS API</td>
+        <td>Interaktivní mapa v UI (fullscreen, piny, klikání na POI)</td>
+        <td>API key (`VITE_GOOGLE_MAPS_KEY`)</td>
+      </tr>
+
+      <tr>
+        <td>Supabase</td>
+        <td>PostgreSQL databáze + Auth (Google OAuth, JWT)</td>
+        <td>API key (`VITE_GOOGLE_MAPS_KEY`)</td>
+      </tr>
+
+
+      <tr>
+        <td>yr.no (MET NORWAY)</td>
+        <td>Předpověď počasí pro termín cesty (do 9 dní)</td>
+        <td>User-Agent header</td>
+      </tr>
+
+      <tr>
+        <td>Open-Meteo</td>
+        <td>Historická data počasí (stejné datum, minulý rok) – fallback pro delší cesty</td>
+        <td>bez autentizace</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travio – Prezentace</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides" id="slides"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+
+  <script type="module">
+    const files = [
+      'slides/01-title.html',
+      'slides/02-idea.html',
+      'slides/03-stack.html',
+      'slides/04-api.html',
+      'slides/05-ai-workflow.html',
+      'slides/06-llm.html',
+      'slides/07-challenges.html',
+      'slides/08-facts.html',
+      'slides/09-future.html',
+      'slides/10-closing.html',
+
+]
+    for (const f of files) {
+      const html = await fetch(f).then(r => r.text())
+      document.getElementById('slides').insertAdjacentHTML('beforeend', html)
+    }
+
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      center: false,
+      width: 1280,
+      height: 720,
+      margin: 0.05,
+      minScale: 0.2,
+      maxScale: 2.0,
+      plugins: [RevealHighlight, RevealNotes],
+    })
+  </script>
+</body>
+</html>

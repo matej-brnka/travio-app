@@ -1,0 +1,58 @@
+<section>
+  <h2>AI Workflow</h2>
+
+  <!-- Request pipeline -->
+  <div class="ai-pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-icon">👤</div>
+      <div class="pipeline-label">Uživatel</div>
+      <div class="pipeline-desc">zaškrtne „Pomoc od AI"</div>
+    </div>
+    <div class="pipeline-connector">→</div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">📱</div>
+      <div class="pipeline-label">Frontend</div>
+      <div class="pipeline-desc">destinace · termín · zájmy</div>
+    </div>
+    <div class="pipeline-connector">→</div>
+    <div class="pipeline-step pipeline-backend">
+      <div class="pipeline-icon">🔧</div>
+      <div class="pipeline-label">NestJS</div>
+      <div class="pipeline-desc">AiService.generateItinerary()</div>
+    </div>
+    <div class="pipeline-connector">→</div>
+    <div class="pipeline-step pipeline-ai">
+      <div class="pipeline-icon">🤖</div>
+      <div class="pipeline-label">GPT-4o-mini</div>
+      <div class="pipeline-desc">system + user prompt</div>
+    </div>
+  </div>
+
+  <!-- Response pipeline -->
+  <div class="ai-pipeline" style="margin-top: 0.7em">
+    <div class="pipeline-step pipeline-ai">
+      <div class="pipeline-icon">✨</div>
+      <div class="pipeline-label">JSON odpověď</div>
+      <div class="pipeline-desc">název · dayIndex · priority</div>
+    </div>
+    <div class="pipeline-connector return">→</div>
+    <div class="pipeline-step pipeline-backend">
+      <div class="pipeline-icon">📍</div>
+      <div class="pipeline-label">Google Places</div>
+      <div class="pipeline-desc">souřadnice · adresa · web · hodiny</div>
+    </div>
+    <div class="pipeline-connector return">→</div>
+    <div class="pipeline-step pipeline-backend">
+      <div class="pipeline-icon">💾</div>
+      <div class="pipeline-label">PlacesService</div>
+      <div class="pipeline-desc">obohacená data → DB</div>
+    </div>
+    <div class="pipeline-connector return">→</div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">🗺️</div>
+      <div class="pipeline-label">Uživatel</div>
+      <div class="pipeline-desc">hotová kostra na mapě</div>
+    </div>
+  </div>
+
+</section>

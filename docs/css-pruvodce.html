@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS v Reveal.js – Kompletní průvodce</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════
+   PROMĚNNÉ – definuj jednou, používej všude
+   ═══════════════════════════════════════════════ */
+:root {
+  --bg:          #f7f4ef;
+  --bg2:         #edeae3;
+  --bg3:         #e2ddd5;
+  --ink:         #1e1c18;
+  --ink2:        #4a4640;
+  --ink3:        #8a857c;
+  --red:         #c0392b;
+  --blue:        #2563a8;
+  --green:       #1d7a4f;
+  --amber:       #b45309;
+  --border:      #d5d0c8;
+
+  font-size: 18px;
+}
+
+/* ═══════════════════════════════════════════════
+   DĚDIČNOST – nastavíš na .reveal, zdědí vše
+   ═══════════════════════════════════════════════ */
+.reveal {
+  font-family: 'Lato', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3 {
+  font-family: 'Lora', serif;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.reveal h1 { font-size: 2.8rem; line-height: 1.15; }
+.reveal h2 { font-size: 1.9rem; }
+.reveal h3 { font-size: 1rem;   color: var(--blue); font-weight: 700; margin-bottom: 0.4rem; font-family: 'Lato', sans-serif; letter-spacing: 0.04em; text-transform: uppercase; }
+.reveal p  { font-size: 0.95rem; line-height: 1.75; color: var(--ink2); }
+.reveal li { font-size: 0.92rem; line-height: 1.8; color: var(--ink2); }
+.reveal ul  { padding-left: 1.2rem; }
+
+.reveal .slides section {
+  padding: 1.6rem 2.8rem;
+  text-align: left;
+}
+
+/* ═══════════════════════════════════════════════
+   KÓD
+   ═══════════════════════════════════════════════ */
+.reveal pre {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.65;
+  background: #1e1c18;
+  color: #e8e3d8;
+  border-radius: 5px;
+  padding: 0.9rem 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  width: 100%;
+  margin: 0.5rem 0;
+  white-space: pre;
+  overflow-x: auto;
+  border: none;
+}
+
+/* Syntax highlighting – ruční */
+.reveal pre .cm  { color: #6a857a; }   /* komentář */
+.reveal pre .kw  { color: #89b4fa; }   /* klíčové slovo / selektor */
+.reveal pre .pr  { color: #f9e2af; }   /* vlastnost */
+.reveal pre .vl  { color: #a6e3a1; }   /* hodnota */
+.reveal pre .st  { color: #f38ba8; }   /* string */
+.reveal pre .hl  { color: #fab387; }   /* zvýraznění */
+
+.reveal code {
+  font-family: 'IBM Plex Mono', monospace;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--red);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════ */
+.cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.cols-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.cols-40-60 {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.cols-sidebar {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* ═══════════════════════════════════════════════
+   BOXY
+   ═══════════════════════════════════════════════ */
+.box {
+  padding: 1rem 1.2rem;
+  border-radius: 5px;
+  margin: 0.5rem 0;
+}
+
+.box-plain   { background: var(--bg2); border: 1px solid var(--border); }
+.box-blue    { background: #eff6ff; border-left: 3px solid var(--blue);  }
+.box-green   { background: #f0fdf4; border-left: 3px solid var(--green); }
+.box-amber   { background: #fffbeb; border-left: 3px solid var(--amber); }
+.box-red     { background: #fef2f2; border-left: 3px solid var(--red);   }
+.box-filled  { background: var(--ink); color: #f7f4ef; }
+.box-filled p, .box-filled li { color: #c8c3b8; }
+.box-filled h3 { color: #f9e2af; }
+.box-filled code { background: rgba(255,255,255,0.1); border-color: transparent; color: #a6e3a1; }
+
+/* ═══════════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════════ */
+.mt   { margin-top: 0.8rem; }
+.mt2  { margin-top: 1.5rem; }
+.muted { color: var(--ink3) !important; font-size: 0.82rem; }
+.tc   { text-align: center; }
+.yes  { color: var(--green); font-weight: 700; }
+.no   { color: var(--red);   font-weight: 700; }
+.hl   { color: var(--blue);  font-weight: 600; }
+.hl2  { color: var(--amber); font-weight: 600; }
+
+.tag {
+  display: inline-block;
+  padding: 0.15em 0.55em;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--bg);
+  margin-right: 0.3rem;
+  vertical-align: middle;
+}
+.tag-blue  { background: var(--blue);  color: #fff; }
+.tag-green { background: var(--green); color: #fff; }
+.tag-amber { background: var(--amber); color: #fff; }
+.tag-red   { background: var(--red);   color: #fff; }
+
+/* ═══════════════════════════════════════════════
+   SPECIÁLNÍ SLIDY
+   ═══════════════════════════════════════════════ */
+.slide-title {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  background: var(--ink) !important;
+}
+.slide-title * { color: var(--bg) !important; }
+.slide-title .label {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink3) !important;
+  margin-bottom: 1rem;
+  font-family: 'Lato', sans-serif;
+}
+.slide-title h1 span { color: #f9e2af !important; }
+.slide-title .sub { color: #8a857c !important; font-size: 0.9rem; margin-top: 1.2rem; }
+
+.slide-chapter {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--bg2) !important;
+}
+.slide-chapter .num {
+  font-family: 'Lora', serif;
+  font-size: 5rem;
+  font-weight: 700;
+  color: var(--border);
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+.slide-chapter h2 { font-size: 2.2rem; }
+.slide-chapter p  { color: var(--ink3); }
+
+/* Dělicí čára */
+hr.div {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.9rem 0;
+}
+
+/* ═══════════════════════════════════════════════
+   TABULKA
+   ═══════════════════════════════════════════════ */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.tbl th {
+  text-align: left;
+  padding: 0.45rem 0.7rem;
+  border-bottom: 2px solid var(--border);
+  color: var(--ink3);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+.tbl td {
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink2);
+  vertical-align: top;
+}
+.tbl tr:last-child td { border-bottom: none; }
+
+/* ═══════════════════════════════════════════════
+   ŽIVÉ DEMO PRVKY
+   ═══════════════════════════════════════════════ */
+.demo {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.9rem 1rem;
+  font-size: 0.82rem;
+}
+.demo * { font-size: inherit; }
+
+/* demo: potomci */
+.demo-space .nav-wrap a           { color: var(--ink3); }
+.demo-space .nav-wrap .menu-wrap a { color: var(--blue); font-weight: 600; }
+
+/* demo: přímý potomek */
+.demo-gt > p            { color: var(--green); font-weight: 600; }
+.demo-gt div p          { color: var(--ink3);  font-style: italic; font-weight: 400; }
+
+/* demo: + soused */
+.demo-plus h5           { margin: 0 0 0.2rem; color: var(--ink); font-family: 'Lato', sans-serif; font-size: 0.82rem; }
+.demo-plus h5 + p       { color: var(--blue); margin-top: 0; font-weight: 600; }
+.demo-plus p            { color: var(--ink3); margin: 0.15rem 0; }
+
+/* demo: ~ sourozenci */
+.demo-tilde h5          { color: var(--amber); font-family: 'Lato', sans-serif; font-size: 0.82rem; margin: 0 0 0.3rem; }
+.demo-tilde h5 ~ p      { color: var(--green); font-weight: 600; }
+.demo-tilde p.before    { color: var(--ink3); }
+
+/* demo: nth-child */
+.demo-nth ul            { padding-left: 1rem; margin: 0; }
+.demo-nth li            { color: var(--ink3); }
+.demo-nth li:first-child { color: var(--amber); font-weight: 700; }
+.demo-nth li:last-child  { color: var(--ink3); font-style: italic; }
+.demo-nth li:nth-child(2){ color: var(--green); font-weight: 600; }
+.demo-nth li:nth-child(odd) { background: var(--bg); }
+
+/* demo: :not() */
+.demo-not .card         { padding: 0.35rem 0.7rem; margin: 0.2rem 0; border-radius: 3px; background: #fff; border: 1px solid var(--border); }
+.demo-not .card:not(.disabled) { border-left: 3px solid var(--green); }
+.demo-not .card.disabled { opacity: 0.4; border-left: 3px solid var(--red); text-decoration: line-through; }
+
+/* demo: atributy */
+.demo-attr a             { display: block; margin: 0.2rem 0; text-decoration: none; }
+.demo-attr a[href^="https"] { color: var(--green); }
+.demo-attr a[href^="http:"] { color: var(--red); }
+.demo-attr a[href$=".pdf"]  { color: var(--amber); }
+.demo-attr a[target="_blank"]::after { content: " ↗"; font-size: 0.75em; opacity: 0.6; }
+
+/* demo: více tříd – tlačítka */
+.btn { display: inline-block; padding: 0.35em 0.9em; border-radius: 4px; margin: 0.2rem 0.15rem; font-size: 0.78rem; font-family: 'Lato', sans-serif; cursor: default; }
+.btn-outline { border: 1px solid var(--ink3); color: var(--ink2); background: transparent; }
+.btn-solid   { background: var(--ink2); color: var(--bg); }
+.btn-blue    { background: var(--blue);  color: #fff; border: none; }
+.btn-red     { background: var(--red);   color: #fff; border: none; }
+.btn-lg      { font-size: 0.95rem; padding: 0.5em 1.2em; }
+
+/* demo: ::before / ::after */
+.demo-pseudo .step { counter-increment: kroky; padding: 0.3rem 0 0.3rem 0; }
+.demo-pseudo .step::before { content: counter(kroky) ". "; color: var(--blue); font-weight: 700; }
+.demo-pseudo-counter { counter-reset: kroky; }
+.demo-after a[href$=".pdf"]::after  { content: " PDF"; font-size: 0.68rem; background: var(--amber); color: #fff; padding: 0.1em 0.35em; border-radius: 2px; margin-left: 0.3em; font-family: 'Lato', sans-serif; }
+.demo-after a[target="_blank"]::after { content: " ↗"; font-size: 0.75em; color: var(--ink3); }
+
+/* číslo snímku */
+.slide-num {
+  position: absolute;
+  bottom: 0.8rem;
+  right: 1.5rem;
+  font-size: 0.7rem;
+  color: var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+}
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+
+<!-- ══════════════════════════════════════════
+     TITULNÍ
+══════════════════════════════════════════ -->
+<section class="slide-title">
+  <div class="label">Reveal.js · CSS průvodce</div>
+  <h1>CSS<br><span>od základů</span><br>do selektorů</h1>
+  <p class="sub">syntaxe · dědičnost · layout · selektory · triky</p>
+  <span class="slide-num">01</span>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     KAPITOLA 1
+══════════════════════════════════════════ -->
+<section class="slide-chapter">
+  <div class="num">1</div>
+  <h2>Základy CSS</h2>
+  <p>Syntaxe · Kde psát · Dědičnost · Proměnné · em vs rem</p>
+  <span class="slide-num">02</span>
+</section>
+
+
+<!-- ══ SYNTAXE ══ -->
+<section>
+  <h2>Jak CSS funguje</h2>
+  <div class="cols-2">
+    <div>
+      <h3>Základní pravidlo</h3>
+      <pre><code><span class="cm">/* selektor { vlastnost: hodnota; } */</span>
+
+<span class="kw">h1</span> {
+  <span class="pr">color</span>: <span class="vl">red</span>;
+  <span class="pr">font-size</span>: <span class="vl">48px</span>;
+}
+
+<span class="kw">.box</span> {
+  <span class="pr">padding</span>: <span class="vl">1rem</span>;
+  <span class="pr">background</span>: <span class="vl">#fff</span>;
+  <span class="pr">border</span>: <span class="vl">1px solid gray</span>;
+}</code></pre>
+
+      <h3 class="mt">Kde CSS psát</h3>
+      <pre><code><span class="cm">/* 1. Inline – nouzové, nedoporučuje se */</span>
+&lt;h1 <span class="pr">style</span>=<span class="st">"color:red"</span>&gt;Text&lt;/h1&gt;
+
+<span class="cm">/* 2. Ve &lt;head&gt; – pro malé projekty */</span>
+&lt;style&gt; h1 { color: red; } &lt;/style&gt;
+
+<span class="cm">/* 3. Externí soubor – nejčistší ✓ */</span>
+&lt;link rel=<span class="st">"stylesheet"</span> href=<span class="st">"styles.css"</span>&gt;</code></pre>
+    </div>
+    <div>
+      <h3>Nejčastější vlastnosti</h3>
+      <div class="box box-plain">
+        <table class="tbl">
+          <thead><tr><th>Vlastnost</th><th>Co dělá</th></tr></thead>
+          <tbody>
+            <tr><td><code>color</code></td><td>barva textu</td></tr>
+            <tr><td><code>background</code></td><td>barva pozadí</td></tr>
+            <tr><td><code>font-size</code></td><td>velikost písma</td></tr>
+            <tr><td><code>font-family</code></td><td>typ písma</td></tr>
+            <tr><td><code>font-weight</code></td><td>tučnost</td></tr>
+            <tr><td><code>padding</code></td><td>vnitřní mezera</td></tr>
+            <tr><td><code>margin</code></td><td>vnější mezera</td></tr>
+            <tr><td><code>border</code></td><td>rámeček</td></tr>
+            <tr><td><code>width / height</code></td><td>rozměry</td></tr>
+            <tr><td><code>display</code></td><td>typ zobrazení</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">03</span>
+</section>
+
+
+<!-- ══ DĚDIČNOST ══ -->
+<section>
+  <h2>Dědičnost</h2>
+  <p>Nastavíš vlastnost na rodič → zdědí všichni potomci. Potomek může přepsat jen to, co chce změnit.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Základ pro celou prezentaci */</span>
+<span class="kw">.reveal</span> {
+  <span class="pr">font-family</span>: <span class="vl">'Lato', sans-serif</span>;
+  <span class="pr">color</span>: <span class="vl">#1e1c18</span>;      <span class="cm">← zdědí vše</span>
+  <span class="pr">background</span>: <span class="vl">#f7f4ef</span>;
+}
+
+<span class="cm">/* Nadpisy zdědí color, ale přepíší font */</span>
+<span class="kw">.reveal h1, .reveal h2</span> {
+  <span class="pr">font-family</span>: <span class="vl">'Lora', serif</span>; <span class="cm">← přepsáno</span>
+  <span class="cm">/* color se zdědí z .reveal */</span>
+}
+
+<span class="cm">/* Konkrétní prvek přepíše jen barvu */</span>
+<span class="kw">.reveal h3</span> {
+  <span class="pr">color</span>: <span class="vl">#2563a8</span>;         <span class="cm">← přepsáno</span>
+}</code></pre>
+
+      <div class="box box-amber mt">
+        <h3>Co se dědí automaticky</h3>
+        <p><code>color</code> · <code>font-family</code> · <code>font-size</code> · <code>line-height</code> · <code>text-align</code></p>
+      </div>
+    </div>
+    <div>
+      <div class="box box-red">
+        <h3>Co se NEDĚDÍ</h3>
+        <p><code>background</code> · <code>border</code> · <code>padding</code> · <code>margin</code> · <code>width / height</code></p>
+        <p class="muted mt">Tyto vlastnosti musíš nastavit každému prvku zvlášť.</p>
+      </div>
+
+      <div class="box box-plain mt">
+        <h3>Kaskáda – kdo vyhraje?</h3>
+        <pre><code><span class="cm">/* Čím specifičtější, tím silnější */</span>
+<span class="kw">h2</span>         { <span class="pr">color</span>: <span class="vl">gray</span>;  }  <span class="cm">0,0,1</span>
+<span class="kw">.box h2</span>    { <span class="pr">color</span>: <span class="vl">blue</span>;  }  <span class="cm">0,1,1 ✓</span>
+<span class="kw">#main h2</span>   { <span class="pr">color</span>: <span class="vl">green</span>; }  <span class="cm">1,0,1 ✓✓</span>
+
+<span class="cm">/* Poslední záchrana – přebije vše */</span>
+<span class="kw">.reveal h2</span> { <span class="pr">color</span>: <span class="vl">red</span> !important; }</code></pre>
+        <p class="muted"><code>!important</code> používej jen jako krajní řešení.</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">04</span>
+</section>
+
+
+<!-- ══ PROMĚNNÉ ══ -->
+<section>
+  <h2>CSS proměnné</h2>
+  <p>Definuješ barvy a fonty jednou v <code>:root</code> – změna na jednom místě aktualizuje vše.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Definice v :root (kořen stránky) */</span>
+<span class="kw">:root</span> {
+  <span class="pr">--barva-ink</span>:    <span class="vl">#1e1c18</span>;
+  <span class="pr">--barva-akcent</span>: <span class="vl">#2563a8</span>;
+  <span class="pr">--font-text</span>:    <span class="vl">'Lato', sans-serif</span>;
+  <span class="pr">--font-nadpis</span>:  <span class="vl">'Lora', serif</span>;
+}
+
+<span class="cm">/* Použití kdekoliv přes var() */</span>
+<span class="kw">.reveal</span> {
+  <span class="pr">font-family</span>: <span class="vl">var(--font-text)</span>;
+  <span class="pr">color</span>:       <span class="vl">var(--barva-ink)</span>;
+}
+<span class="kw">.reveal h1</span> {
+  <span class="pr">font-family</span>: <span class="vl">var(--font-nadpis)</span>;
+}
+<span class="kw">.zvyrazneni</span> {
+  <span class="pr">border-color</span>: <span class="vl">var(--barva-akcent)</span>;
+  <span class="pr">color</span>:        <span class="vl">var(--barva-akcent)</span>;
+}</code></pre>
+    </div>
+    <div>
+      <div class="box box-red">
+        <h3>Bez proměnných</h3>
+        <pre><code><span class="kw">h1</span>    { <span class="pr">color</span>: <span class="vl">#2563a8</span>; }
+<span class="kw">.btn</span>  { <span class="pr">color</span>: <span class="vl">#2563a8</span>; }
+<span class="kw">.box</span>  { <span class="pr">border</span>: <span class="vl">1px solid #2563a8</span>; }
+
+<span class="cm">/* Změna barvy = najít+nahradit na 3 místech */</span></code></pre>
+      </div>
+
+      <div class="box box-green mt">
+        <h3>S proměnnými</h3>
+        <pre><code><span class="kw">:root</span> { <span class="pr">--akcent</span>: <span class="vl">#2563a8</span>; }
+<span class="kw">h1</span>    { <span class="pr">color</span>: <span class="vl">var(--akcent)</span>; }
+<span class="kw">.btn</span>  { <span class="pr">color</span>: <span class="vl">var(--akcent)</span>; }
+<span class="kw">.box</span>  { <span class="pr">border</span>: <span class="vl">1px solid var(--akcent)</span>; }
+
+<span class="cm">/* Změna = 1 řádek v :root ✓ */</span></code></pre>
+      </div>
+
+      <div class="box box-blue mt">
+        <p><strong>Tip:</strong> Název začíná vždy <code>--</code> (dvě pomlčky). Hodnotu čteš přes <code>var(--nazev)</code>.</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">05</span>
+</section>
+
+
+<!-- ══ em vs rem ══ -->
+<section>
+  <h2>em vs rem</h2>
+  <p>Oba jsou relativní jednotky – ale relativní vůči <em>čemu</em> se liší.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <div class="box box-blue">
+        <h3>rem – relativní vůči :root</h3>
+        <pre><code><span class="kw">:root</span> { <span class="pr">font-size</span>: <span class="vl">17px</span>; } <span class="cm">← základ</span>
+
+<span class="kw">h1</span>  { <span class="pr">font-size</span>: <span class="vl">3rem</span>;    } <span class="cm">= 51px</span>
+<span class="kw">h2</span>  { <span class="pr">font-size</span>: <span class="vl">2rem</span>;    } <span class="cm">= 34px</span>
+<span class="kw">p</span>   { <span class="pr">font-size</span>: <span class="vl">1rem</span>;    } <span class="cm">= 17px</span>
+<span class="kw">nav</span> { <span class="pr">font-size</span>: <span class="vl">0.85rem</span>; } <span class="cm">= 14px</span>
+
+<span class="cm">/* rem je vždy předvídatelný */</span></code></pre>
+        <p class="muted">Vždy <code>17px × hodnota</code> – bez ohledu na kontext.</p>
+      </div>
+
+      <div class="box box-amber mt">
+        <h3>em – relativní vůči rodiči</h3>
+        <pre><code><span class="kw">.box</span>  { <span class="pr">font-size</span>: <span class="vl">1.2em</span>; } <span class="cm">= 20px</span>
+<span class="kw">.box p</span>{ <span class="pr">font-size</span>: <span class="vl">0.9em</span>; } <span class="cm">= 18px (od .box!)</span>
+
+<span class="cm">/* em se vrství – může překvapit */</span>
+<span class="kw">.a</span> { <span class="pr">font-size</span>: <span class="vl">1.2em</span>; }  <span class="cm">1.2 × 17 = 20px</span>
+<span class="kw">.a .b</span> { <span class="pr">font-size</span>: <span class="vl">1.2em</span>; } <span class="cm">1.2 × 20 = 24px!</span></code></pre>
+        <p class="muted">Hodí se pro <code>padding</code> a <code>margin</code> uvnitř komponent.</p>
+      </div>
+    </div>
+    <div>
+      <div class="box box-plain">
+        <h3>Kdy co použít</h3>
+        <table class="tbl">
+          <thead><tr><th>Co styluju</th><th>Jednotka</th></tr></thead>
+          <tbody>
+            <tr><td>Velikost písma (globálně)</td><td><code>rem</code> ✓</td></tr>
+            <tr><td>Padding uvnitř tlačítka</td><td><code>em</code> – škáluje s textem</td></tr>
+            <tr><td>Margin mezi bloky</td><td><code>rem</code> ✓</td></tr>
+            <tr><td>Šířka/výška prvků</td><td><code>rem</code> nebo <code>%</code></td></tr>
+            <tr><td>Border, border-radius</td><td><code>px</code> nebo <code>rem</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-filled mt">
+        <h3>Praxe v Reveal.js</h3>
+        <pre><code><span class="kw">:root</span> { <span class="pr">font-size</span>: <span class="vl">17px</span>; }
+
+<span class="kw">.reveal h2</span> { <span class="pr">font-size</span>: <span class="vl">1.9rem</span>; }
+<span class="kw">.reveal p</span>  { <span class="pr">font-size</span>: <span class="vl">0.95rem</span>; }
+
+<span class="cm">/* Padding tlačítka škáluje s fontem */</span>
+<span class="kw">.btn</span> { <span class="pr">padding</span>: <span class="vl">0.4em 1em</span>; }
+<span class="kw">.btn-lg</span> { <span class="pr">font-size</span>: <span class="vl">1.1rem</span>; }
+<span class="cm">/* padding se zvětší automaticky ✓ */</span></code></pre>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">06</span>
+</section>
+
+
+<!-- ══ LAYOUT: GRID ══ -->
+<section>
+  <h2>Rozložení sloupců (CSS Grid)</h2>
+
+  <div class="cols-2 mt">
+    <div>
+      <h3>2 stejné sloupce</h3>
+      <pre><code><span class="kw">.cols-2</span> {
+  <span class="pr">display</span>: <span class="vl">grid</span>;
+  <span class="pr">grid-template-columns</span>: <span class="vl">1fr 1fr</span>;
+  <span class="pr">gap</span>: <span class="vl">1.2rem</span>;
+  <span class="pr">align-items</span>: <span class="vl">start</span>;
+}</code></pre>
+
+      <h3 class="mt">3 stejné sloupce</h3>
+      <pre><code><span class="kw">.cols-3</span> {
+  <span class="pr">display</span>: <span class="vl">grid</span>;
+  <span class="pr">grid-template-columns</span>: <span class="vl">1fr 1fr 1fr</span>;
+  <span class="pr">gap</span>: <span class="vl">1rem</span>;
+}</code></pre>
+
+      <h3 class="mt">Sidebar (1/3 + 2/3)</h3>
+      <pre><code><span class="kw">.cols-sidebar</span> {
+  <span class="pr">display</span>: <span class="vl">grid</span>;
+  <span class="pr">grid-template-columns</span>: <span class="vl">1fr 2fr</span>;
+  <span class="pr">gap</span>: <span class="vl">1.5rem</span>;
+  <span class="pr">align-items</span>: <span class="vl">center</span>;
+}</code></pre>
+    </div>
+    <div>
+      <div class="box box-plain">
+        <h3>Co znamená <code>fr</code>?</h3>
+        <p><code>fr</code> = fraction = díl z dostupného prostoru</p>
+        <table class="tbl mt">
+          <thead><tr><th>Zápis</th><th>Výsledek</th></tr></thead>
+          <tbody>
+            <tr><td><code>1fr 1fr</code></td><td>50 % + 50 %</td></tr>
+            <tr><td><code>1fr 2fr</code></td><td>33 % + 67 %</td></tr>
+            <tr><td><code>1fr 1fr 1fr</code></td><td>33 % + 33 % + 33 %</td></tr>
+            <tr><td><code>2fr 1fr 1fr</code></td><td>50 % + 25 % + 25 %</td></tr>
+            <tr><td><code>300px 1fr</code></td><td>pevná + zbytek</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-blue mt">
+        <h3>align-items</h3>
+        <p>
+          <code>start</code> – zarovná vršky sloupců<br>
+          <code>center</code> – vertikální střed<br>
+          <code>stretch</code> – natáhne na stejnou výšku (default)
+        </p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">07</span>
+</section>
+
+
+<!-- ══ BOXY ══ -->
+<section>
+  <h2>Boxy – komponenty</h2>
+  <p>Sdílený základ <code>.box</code>, každá varianta přidává jen svůj rozdíl.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Základ – sdílené vlastnosti */</span>
+<span class="kw">.box</span> {
+  <span class="pr">padding</span>: <span class="vl">1rem 1.2rem</span>;
+  <span class="pr">border-radius</span>: <span class="vl">5px</span>;
+  <span class="pr">margin</span>: <span class="vl">0.5rem 0</span>;
+}
+
+<span class="cm">/* Varianty přidají jen svůj styl */</span>
+<span class="kw">.box-blue</span> {
+  <span class="pr">background</span>: <span class="vl">#eff6ff</span>;
+  <span class="pr">border-left</span>: <span class="vl">3px solid #2563a8</span>;
+}
+<span class="kw">.box-amber</span> {
+  <span class="pr">background</span>: <span class="vl">#fffbeb</span>;
+  <span class="pr">border-left</span>: <span class="vl">3px solid #b45309</span>;
+}
+<span class="kw">.box-filled</span> {
+  <span class="pr">background</span>: <span class="vl">#1e1c18</span>;
+  <span class="pr">color</span>: <span class="vl">#f7f4ef</span>;
+}
+
+<span class="cm">/* HTML: kombinuješ volně */</span>
+&lt;div class=<span class="st">"box box-blue"</span>&gt;Info&lt;/div&gt;
+&lt;div class=<span class="st">"box box-amber"</span>&gt;Pozor&lt;/div&gt;</code></pre>
+    </div>
+    <div>
+      <h3>Výsledek</h3>
+      <div class="box box-blue">
+        <strong>box-blue</strong> – informace, tipy
+      </div>
+      <div class="box box-green">
+        <strong>box-green</strong> – správně, úspěch
+      </div>
+      <div class="box box-amber">
+        <strong>box-amber</strong> – upozornění
+      </div>
+      <div class="box box-red">
+        <strong>box-red</strong> – chyba, varování
+      </div>
+      <div class="box box-plain">
+        <strong>box-plain</strong> – neutrální obsah
+      </div>
+      <div class="box box-filled">
+        <strong>box-filled</strong> – důraz, tmavý
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">08</span>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     KAPITOLA 2
+══════════════════════════════════════════ -->
+<section class="slide-chapter">
+  <div class="num">2</div>
+  <h2>Selektory &amp; triky</h2>
+  <p>Mezera · &gt; · + · ~ · více tříd · pseudotřídy · :not() · atributy · ::before/after</p>
+  <span class="slide-num">09</span>
+</section>
+
+
+<!-- ══ PŘEHLED SELEKTORŮ ══ -->
+<section>
+  <h2>Přehled – všechny selektory</h2>
+  <div class="cols-2 mt">
+    <div>
+      <table class="tbl">
+        <thead><tr><th>Zápis</th><th>Název</th><th>Co vybere</th></tr></thead>
+        <tbody>
+          <tr><td><code>.a .b</code></td><td>potomek</td><td>jakékoli <code>.b</code> uvnitř <code>.a</code></td></tr>
+          <tr><td><code>.a > .b</code></td><td>přímý potomek</td><td>jen <code>.b</code> o 1 úroveň níž</td></tr>
+          <tr><td><code>.a + .b</code></td><td>soused</td><td>první <code>.b</code> hned za <code>.a</code></td></tr>
+          <tr><td><code>.a ~ .b</code></td><td>sourozenci</td><td>všechna <code>.b</code> za <code>.a</code></td></tr>
+          <tr><td><code>.a.b</code></td><td>více tříd</td><td>prvek s <em>oběma</em> třídami</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table class="tbl">
+        <thead><tr><th>Zápis</th><th>Název</th><th>Co vybere</th></tr></thead>
+        <tbody>
+          <tr><td><code>:hover</code></td><td>pseudotřída</td><td>stav prvku (přejetí myší)</td></tr>
+          <tr><td><code>:nth-child(n)</code></td><td>strukturální</td><td>podle pořadí v DOM</td></tr>
+          <tr><td><code>:not(.x)</code></td><td>negace</td><td>vše kromě <code>.x</code></td></tr>
+          <tr><td><code>[attr="val"]</code></td><td>atributový</td><td>konkrétní hodnota atributu</td></tr>
+          <tr><td><code>::before</code></td><td>pseudoelement</td><td>vložený obsah přes CSS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="box box-amber mt">
+    <p><strong>Klíčový rozdíl:</strong> <code>.nav .link</code> (mezera) = link <em>kdekoliv uvnitř</em> nav &nbsp;·&nbsp; <code>.nav > .link</code> = link jako <em>přímé dítě</em> &nbsp;·&nbsp; <code>.nav.link</code> (bez mezery) = prvek s <em>oběma třídami</em></p>
+  </div>
+  <span class="slide-num">10</span>
+</section>
+
+
+<!-- ══ MEZERA vs > ══ -->
+<section>
+  <h2>Mezera vs. <span class="hl2">&gt;</span></h2>
+
+  <div class="cols-2 mt">
+    <div>
+      <h3>.rodic .potomek &nbsp;<span class="tag tag-blue">mezera</span></h3>
+      <pre><code><span class="cm">/* Vybere link kdekoliv uvnitř .nav */</span>
+<span class="kw">.nav a</span>           { <span class="pr">color</span>: <span class="vl">gray</span>; }
+<span class="kw">.nav .menu a</span>      { <span class="pr">color</span>: <span class="vl">blue</span>; }
+
+&lt;div class=<span class="st">"nav"</span>&gt;
+  &lt;a&gt;šedý&lt;/a&gt;            <span class="cm">← .nav a ✓</span>
+  &lt;div class=<span class="st">"menu"</span>&gt;
+    &lt;a&gt;modrý&lt;/a&gt;         <span class="cm">← .nav .menu a ✓</span>
+    &lt;ul&gt;&lt;li&gt;&lt;a&gt;modrý&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+      <div class="demo demo-space mt">
+        <nav class="nav-wrap">
+          <a href="#">šedý odkaz</a> &nbsp;·&nbsp;
+          <span class="menu-wrap">
+            <a href="#">modrý</a> &nbsp;·&nbsp; <a href="#">také modrý</a>
+          </span>
+        </nav>
+      </div>
+    </div>
+
+    <div>
+      <h3>.rodic > .dite &nbsp;<span class="tag tag-amber">&gt;</span></h3>
+      <pre><code><span class="cm">/* Vybere jen PŘÍMÉ dítě */</span>
+<span class="kw">.seznam > p</span> { <span class="pr">color</span>: <span class="vl">green</span>; }
+
+&lt;div class=<span class="st">"seznam"</span>&gt;
+  &lt;p&gt;zelený ✓&lt;/p&gt;   <span class="cm">← přímé dítě</span>
+  &lt;p&gt;zelený ✓&lt;/p&gt;   <span class="cm">← přímé dítě</span>
+  &lt;div&gt;
+    &lt;p&gt;šedý ✗&lt;/p&gt;   <span class="cm">← vnuk, ne dítě</span>
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+      <div class="demo mt">
+        <div class="demo-gt">
+          <p>✓ zelený – přímé dítě</p>
+          <p>✓ zelený – přímé dítě</p>
+          <div><p>✗ šedý – vnuk (ne přímé dítě)</p></div>
+        </div>
+      </div>
+
+      <div class="box box-blue mt">
+        <p><strong>Kdy použít &gt;:</strong> Chceš stylovat jen první vrstvu, ne rekurzivně. Typicky v navigačních menu nebo stromech.</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">11</span>
+</section>
+
+
+<!-- ══ + a ~ ══ -->
+<section>
+  <h2>Sourozenci: <span class="hl2">+</span> a <span class="hl">~</span></h2>
+  <p>Výběr prvků na <strong>stejné úrovni</strong> – ne potomků, ale sousedů.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <h3>A + B &nbsp;<span class="tag tag-amber">hned za</span></h3>
+      <pre><code><span class="cm">/* Jen PRVNÍ p hned za h5 */</span>
+<span class="kw">h5 + p</span> { <span class="pr">color</span>: <span class="vl">blue</span>; <span class="pr">font-weight</span>: <span class="vl">600</span>; }
+
+&lt;h5&gt;Nadpis&lt;/h5&gt;
+&lt;p&gt;Modrý ✓&lt;/p&gt;     <span class="cm">← hned za h5</span>
+&lt;p&gt;Šedý ✗&lt;/p&gt;      <span class="cm">← druhý, nefunguje</span>
+&lt;p&gt;Šedý ✗&lt;/p&gt;</code></pre>
+
+      <div class="demo demo-plus mt">
+        <h5>Nadpis sekce</h5>
+        <p>✓ modrý – hned za h5</p>
+        <p>✗ šedý – druhý odstavec</p>
+        <p>✗ šedý – třetí odstavec</p>
+      </div>
+
+      <div class="box box-amber mt">
+        <p><strong>Použití:</strong> Styl prvního odstavce po nadpisu, mezera nad tlačítkem po inputu.</p>
+      </div>
+    </div>
+
+    <div>
+      <h3>A ~ B &nbsp;<span class="tag tag-blue">všichni za</span></h3>
+      <pre><code><span class="cm">/* VŠECHNY p za h5 na stejné úrovni */</span>
+<span class="kw">h5 ~ p</span> { <span class="pr">color</span>: <span class="vl">green</span>; <span class="pr">font-weight</span>: <span class="vl">600</span>; }
+
+&lt;p&gt;Šedý ✗&lt;/p&gt;      <span class="cm">← PŘED h5, nefunguje</span>
+&lt;h5&gt;Nadpis&lt;/h5&gt;
+&lt;p&gt;Zelený ✓&lt;/p&gt;
+&lt;p&gt;Zelený ✓&lt;/p&gt;
+&lt;p&gt;Zelený ✓&lt;/p&gt;</code></pre>
+
+      <div class="demo demo-tilde mt">
+        <p class="before">✗ šedý – před h5</p>
+        <h5>Nadpis sekce</h5>
+        <p>✓ zelený</p>
+        <p>✓ zelený</p>
+        <p>✓ zelený</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">12</span>
+</section>
+
+
+<!-- ══ VÍCE TŘÍD ══ -->
+<section>
+  <h2>Více tříd <span class="hl2">.a.b</span> bez mezery</h2>
+  <p>Prvek s <strong>oběma třídami zároveň</strong>. Základ pro komponentové CSS.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Základ – sdílené vlastnosti */</span>
+<span class="kw">.btn</span> {
+  <span class="pr">display</span>: <span class="vl">inline-block</span>;
+  <span class="pr">padding</span>: <span class="vl">0.4em 1em</span>;
+  <span class="pr">border-radius</span>: <span class="vl">4px</span>;
+}
+
+<span class="cm">/* Varianta – styl */</span>
+<span class="kw">.btn-outline</span> { <span class="pr">border</span>: <span class="vl">1px solid gray</span>; }
+<span class="kw">.btn-blue</span>    { <span class="pr">background</span>: <span class="vl">blue</span>; <span class="pr">color</span>: <span class="vl">white</span>; }
+<span class="kw">.btn-red</span>     { <span class="pr">background</span>: <span class="vl">red</span>;  <span class="pr">color</span>: <span class="vl">white</span>; }
+
+<span class="cm">/* Varianta – velikost */</span>
+<span class="kw">.btn-lg</span>      { <span class="pr">font-size</span>: <span class="vl">1.1rem</span>; }
+
+<span class="cm">/* Kombinace obou variant (bez mezery!) */</span>
+<span class="kw">.btn-blue.btn-lg</span> { <span class="pr">font-weight</span>: <span class="vl">700</span>; }
+
+<span class="cm">/* HTML – kombinuješ volně */</span>
+&lt;button class=<span class="st">"btn btn-outline"</span>&gt;Outline&lt;/button&gt;
+&lt;button class=<span class="st">"btn btn-blue btn-lg"</span>&gt;Velký&lt;/button&gt;</code></pre>
+    </div>
+    <div>
+      <div class="box box-plain">
+        <h3>Výsledek</h3>
+        <div style="margin: 0.6rem 0; line-height: 2.6">
+          <span class="btn btn-outline">Outline</span>
+          <span class="btn btn-solid">Solid</span><br>
+          <span class="btn btn-blue">Blue</span>
+          <span class="btn btn-red">Red</span><br>
+          <span class="btn btn-blue btn-lg">Blue Large</span><br>
+          <span class="btn btn-red btn-lg">Red Large</span>
+        </div>
+      </div>
+
+      <div class="box box-red mt">
+        <h3>⚠ Pozor na mezeru!</h3>
+        <p>
+          <code>.btn.btn-blue</code> – prvek s oběma třídami<br>
+          <code>.btn .btn-blue</code> – btn-blue <em>uvnitř</em> btn<br>
+          <span class="muted">Je to úplně jiný selektor!</span>
+        </p>
+      </div>
+
+      <div class="box box-blue mt">
+        <h3>Kdy použít</h3>
+        <p>Tlačítka, kartičky, tagy, ikony – kdekoliv máš <em>základní komponentu</em> s <em>variantami</em>.</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">13</span>
+</section>
+
+
+<!-- ══ PSEUDOTŘÍDY ══ -->
+<section>
+  <h2>Pseudotřídy <span class="hl2">:</span></h2>
+  <p>Vybírají prvky podle <strong>stavu</strong> nebo <strong>pozice</strong> v dokumentu.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <h3>Stav prvku</h3>
+      <pre><code><span class="kw">a:hover</span>          { <span class="pr">background</span>: <span class="vl">blue</span>; }
+<span class="kw">a:focus</span>          { <span class="pr">outline</span>: <span class="vl">2px solid blue</span>; }
+<span class="kw">a:active</span>         { <span class="pr">opacity</span>: <span class="vl">0.7</span>; }
+
+<span class="kw">input:disabled</span>   { <span class="pr">opacity</span>: <span class="vl">0.4</span>; }
+<span class="kw">input:focus</span>      { <span class="pr">border-color</span>: <span class="vl">blue</span>; }</code></pre>
+
+      <h3 class="mt">Pozice v DOM</h3>
+      <pre><code><span class="kw">li:first-child</span>   { <span class="pr">color</span>: <span class="vl">gold</span>; }
+<span class="kw">li:last-child</span>    { <span class="pr">color</span>: <span class="vl">gray</span>; }
+<span class="kw">li:nth-child(2)</span>  { <span class="pr">color</span>: <span class="vl">green</span>; }
+<span class="kw">li:nth-child(odd)</span>  { <span class="pr">background</span>: <span class="vl">#f0f0f0</span>; }
+<span class="kw">li:nth-child(even)</span> { <span class="pr">background</span>: <span class="vl">white</span>; }
+
+<span class="cm">/* Vzorce */</span>
+<span class="kw">li:nth-child(2n)</span>   <span class="cm">← každý sudý</span>
+<span class="kw">li:nth-child(3n)</span>   <span class="cm">← každý 3.</span>
+<span class="kw">li:nth-child(n+4)</span>  <span class="cm">← od 4. dál</span></code></pre>
+    </div>
+
+    <div>
+      <div class="box box-plain">
+        <h3>Živá ukázka – nth-child</h3>
+        <div class="demo demo-nth mt">
+          <ul>
+            <li>první – zlatý (first-child)</li>
+            <li>druhý – zelený (nth-child(2))</li>
+            <li>třetí – normální (lichý → světlý bg)</li>
+            <li>čtvrtý – normální (sudý → bílý bg)</li>
+            <li>pátý – normální (lichý)</li>
+            <li>poslední – šedý (last-child)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="box box-blue mt">
+        <h3>Tip pro Reveal.js</h3>
+        <pre><code><span class="cm">/* Každý druhý snímek jiné pozadí */</span>
+<span class="kw">.reveal section:nth-child(even)</span> {
+  <span class="pr">background</span>: <span class="vl">#edeae3</span>;
+}
+
+<span class="cm">/* První snímek bez paddingu */</span>
+<span class="kw">.reveal section:first-child</span> {
+  <span class="pr">padding</span>: <span class="vl">0</span>;
+}</code></pre>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">14</span>
+</section>
+
+
+<!-- ══ :not() ══ -->
+<section>
+  <h2>Negace <span class="hl2">:not()</span></h2>
+  <p>Vybere vše <strong>kromě</strong> prvků, které napíšeš do závorky.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Vše kromě .disabled */</span>
+<span class="kw">.card:not(.disabled)</span> {
+  <span class="pr">border-left</span>: <span class="vl">3px solid green</span>;
+}
+
+<span class="cm">/* Každé li kromě posledního */</span>
+<span class="kw">li:not(:last-child)</span> {
+  <span class="pr">border-bottom</span>: <span class="vl">1px solid #ddd</span>;
+}
+
+<span class="cm">/* Input, ale ne submit tlačítko */</span>
+<span class="kw">input:not([type="submit"])</span> {
+  <span class="pr">border</span>: <span class="vl">1px solid gray</span>;
+}
+
+<span class="cm">/* Lze kombinovat více podmínek */</span>
+<span class="kw">.box:not(.box-filled):not(.box-red)</span> {
+  <span class="pr">opacity</span>: <span class="vl">0.9</span>;
+}
+
+<span class="cm">/* V Reveal.js – vše kromě titulního */</span>
+<span class="kw">.reveal section:not(.slide-title) h2</span> {
+  <span class="pr">border-bottom</span>: <span class="vl">1px solid #ddd</span>;
+}</code></pre>
+    </div>
+
+    <div>
+      <div class="box box-plain">
+        <h3>Živá ukázka</h3>
+        <div class="demo demo-not mt">
+          <div class="card">✓ normální karta</div>
+          <div class="card">✓ normální karta</div>
+          <div class="card disabled">✗ disabled karta</div>
+          <div class="card">✓ normální karta</div>
+          <div class="card disabled">✗ disabled karta</div>
+        </div>
+      </div>
+
+      <div class="box box-amber mt">
+        <h3>:not() vs. přepisování</h3>
+        <pre><code><span class="cm">/* Bez :not – musíš přepsat */</span>
+<span class="kw">.card</span>          { <span class="pr">border-left</span>: <span class="vl">3px solid green</span>; }
+<span class="kw">.card.disabled</span> { <span class="pr">border-left</span>: <span class="vl">3px solid red</span>; }
+
+<span class="cm">/* S :not – čistší záměr */</span>
+<span class="kw">.card:not(.disabled)</span> { <span class="pr">border-left</span>: <span class="vl">3px solid green</span>; }
+<span class="kw">.card.disabled</span>        { <span class="pr">border-left</span>: <span class="vl">3px solid red</span>; }</code></pre>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">15</span>
+</section>
+
+
+<!-- ══ ATRIBUTY ══ -->
+<section>
+  <h2>Atributové selektory <span class="hl2">[ ]</span></h2>
+  <p>Vybírají prvky podle hodnoty HTML atributů.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Má vůbec atribut href? */</span>
+<span class="kw">a[href]</span>              { <span class="pr">color</span>: <span class="vl">blue</span>; }
+
+<span class="cm">/* Přesná hodnota */</span>
+<span class="kw">input[type="text"]</span>   { <span class="pr">border</span>: <span class="vl">1px solid gray</span>; }
+<span class="kw">input[type="submit"]</span> { <span class="pr">background</span>: <span class="vl">blue</span>; }
+
+<span class="cm">/* ^ začíná na */</span>
+<span class="kw">a[href^="https"]</span>  { <span class="pr">color</span>: <span class="vl">green</span>; }
+<span class="kw">a[href^="http:"]</span>  { <span class="pr">color</span>: <span class="vl">red</span>; }
+
+<span class="cm">/* $ končí na */</span>
+<span class="kw">a[href$=".pdf"]</span>   { <span class="pr">color</span>: <span class="vl">orange</span>; }
+<span class="kw">a[href$=".zip"]</span>   { <span class="pr">color</span>: <span class="vl">purple</span>; }
+
+<span class="cm">/* * obsahuje kdekoliv */</span>
+<span class="kw">a[href*="github"]</span> { <span class="pr">font-weight</span>: <span class="vl">bold</span>; }</code></pre>
+    </div>
+
+    <div>
+      <div class="box box-plain">
+        <h3>Živá ukázka</h3>
+        <div class="demo demo-attr mt">
+          <a href="https://example.com" target="_blank">https odkaz (zelený ↗)</a>
+          <a href="http://example.com">http odkaz (červený)</a>
+          <a href="dokument.pdf">PDF soubor (zlatý)</a>
+          <a href="archiv.zip">ZIP archiv</a>
+        </div>
+      </div>
+
+      <div class="box box-plain mt">
+        <h3>Přehled operátorů</h3>
+        <table class="tbl">
+          <thead><tr><th>Operátor</th><th>Podmínka</th></tr></thead>
+          <tbody>
+            <tr><td><code>[attr]</code></td><td>atribut vůbec existuje</td></tr>
+            <tr><td><code>[attr="x"]</code></td><td>rovná se přesně</td></tr>
+            <tr><td><code>[attr^="x"]</code></td><td>začíná na x</td></tr>
+            <tr><td><code>[attr$="x"]</code></td><td>končí na x</td></tr>
+            <tr><td><code>[attr*="x"]</code></td><td>obsahuje x kdekoliv</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">16</span>
+</section>
+
+
+<!-- ══ ::before / ::after ══ -->
+<section>
+  <h2>Pseudoelementy <span class="hl2">::before</span> a <span class="hl">::after</span></h2>
+  <p>Vkládají obsah do stránky <strong>přes CSS</strong>, bez zásahu do HTML.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Povinné: content musí být vždy! */</span>
+<span class="kw">h2::before</span> {
+  <span class="pr">content</span>: <span class="st">""</span>;           <span class="cm">← prázdný = dekorace</span>
+  <span class="pr">display</span>: <span class="vl">block</span>;
+  <span class="pr">width</span>: <span class="vl">2rem</span>;
+  <span class="pr">height</span>: <span class="vl">3px</span>;
+  <span class="pr">background</span>: <span class="vl">blue</span>;
+  <span class="pr">margin-bottom</span>: <span class="vl">0.5rem</span>;
+}
+
+<span class="cm">/* Ikonka/label za odkazem */</span>
+<span class="kw">a[href$=".pdf"]::after</span> {
+  <span class="pr">content</span>: <span class="st">" PDF"</span>;
+  <span class="pr">font-size</span>: <span class="vl">0.7em</span>;
+  <span class="pr">background</span>: <span class="vl">orange</span>;
+  <span class="pr">padding</span>: <span class="vl">0.1em 0.4em</span>;
+  <span class="pr">border-radius</span>: <span class="vl">3px</span>;
+}
+
+<span class="cm">/* Automatické číslování */</span>
+<span class="kw">.seznam</span> { <span class="pr">counter-reset</span>: <span class="vl">kroky</span>; }
+<span class="kw">.krok</span>   { <span class="pr">counter-increment</span>: <span class="vl">kroky</span>; }
+<span class="kw">.krok::before</span> {
+  <span class="pr">content</span>: <span class="vl">counter(kroky) ". "</span>;
+  <span class="pr">color</span>: <span class="vl">blue</span>;
+  <span class="pr">font-weight</span>: <span class="vl">700</span>;
+}</code></pre>
+    </div>
+
+    <div>
+      <div class="box box-plain">
+        <h3>Automatické číslování</h3>
+        <div class="demo demo-pseudo demo-pseudo-counter mt">
+          <div class="step">Definuj problém</div>
+          <div class="step">Analyzuj data</div>
+          <div class="step">Navrhni řešení</div>
+          <div class="step">Implementuj a testuj</div>
+        </div>
+      </div>
+
+      <div class="box box-plain mt">
+        <h3>Ikonky z CSS</h3>
+        <div class="demo demo-after mt">
+          <a href="report.pdf">Stáhnout report</a>
+          <a href="https://example.com" target="_blank">Otevřít web</a>
+          <a href="https://docs.example.com" target="_blank">Dokumentace</a>
+        </div>
+      </div>
+
+      <div class="box box-red mt">
+        <h3>⚠ content je povinný</h3>
+        <p><code>::before { display:block; }</code> <span class="no">✗</span> nefunguje<br>
+        <code>::before { content:""; display:block; }</code> <span class="yes">✓</span></p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">17</span>
+</section>
+
+
+<!-- ══ SPECIFIČNOST ══ -->
+<section>
+  <h2>Specifičnost – kdo vyhraje?</h2>
+  <p>Když dva selektory míří na stejný prvek, zvítězí ten <strong>specifičtější</strong>.</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* Skóre: (ID, třídy, tagy) */</span>
+
+<span class="kw">p</span>               <span class="cm">← (0, 0, 1)</span>
+<span class="kw">.box</span>            <span class="cm">← (0, 1, 0)</span>
+<span class="kw">.box p</span>          <span class="cm">← (0, 1, 1)</span>
+<span class="kw">#hlavni</span>         <span class="cm">← (1, 0, 0)</span>
+<span class="kw">#hlavni .box p</span>  <span class="cm">← (1, 1, 1)</span>
+
+<span class="cm">/* Příklad konfliktu */</span>
+<span class="kw">p</span>      { <span class="pr">color</span>: <span class="vl">gray</span>;  }  <span class="cm">(0,0,1)</span>
+<span class="kw">.text</span>  { <span class="pr">color</span>: <span class="vl">green</span>; }  <span class="cm">(0,1,0) ← vyhraje</span>
+<span class="kw">#main</span>  { <span class="pr">color</span>: <span class="vl">blue</span>;  }  <span class="cm">(1,0,0) ← vždy vyhraje</span>
+
+<span class="cm">/* Reveal.js – framework má vysoké skóre */</span>
+<span class="kw">h2</span>          { <span class="pr">color</span>: <span class="vl">red</span>; }  <span class="cm">← pravděpodobně prohraje</span>
+<span class="kw">.reveal h2</span>  { <span class="pr">color</span>: <span class="vl">red</span>; }  <span class="cm">← vyhraje ✓</span></code></pre>
+    </div>
+
+    <div>
+      <div class="box box-plain">
+        <h3>Vizuální skóre</h3>
+        <table class="tbl">
+          <thead><tr><th>Selektor</th><th style="color:var(--red)">ID</th><th style="color:var(--blue)">Třídy</th><th style="color:var(--green)">Tagy</th></tr></thead>
+          <tbody>
+            <tr><td><code>p</code></td><td>0</td><td>0</td><td>1</td></tr>
+            <tr><td><code>.box</code></td><td>0</td><td>1</td><td>0</td></tr>
+            <tr><td><code>.box p</code></td><td>0</td><td>1</td><td>1</td></tr>
+            <tr><td><code>.reveal h2</code></td><td>0</td><td>1</td><td>1</td></tr>
+            <tr><td><code>#main</code></td><td>1</td><td>0</td><td>0</td></tr>
+            <tr><td><code>#main .box p</code></td><td>1</td><td>1</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-amber mt">
+        <h3>Praktická pravidla</h3>
+        <ul>
+          <li>Vždy začínej selektory s <code>.reveal</code></li>
+          <li>Vyhni se <code>#id</code> v CSS – jsou příliš silné</li>
+          <li><code>!important</code> je poslední záchrana, ne zvyk</li>
+          <li>Čím kratší selektor, tím snáze se ladí</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">18</span>
+</section>
+
+
+<!-- ══ ZÁVĚREČNÝ TAHÁK ══ -->
+<section>
+  <h2>Celková struktura CSS souboru</h2>
+  <p class="muted">Doporučené pořadí – od obecného ke konkrétnímu</p>
+
+  <div class="cols-2 mt">
+    <div>
+      <pre><code><span class="cm">/* 1. PROMĚNNÉ – paleta, fonty */</span>
+<span class="kw">:root</span> {
+  <span class="pr">--bg</span>: <span class="vl">#f7f4ef</span>;  <span class="pr">--ink</span>: <span class="vl">#1e1c18</span>;
+  <span class="pr">--akcent</span>: <span class="vl">#2563a8</span>;
+}
+
+<span class="cm">/* 2. DĚDIČNOST – základ pro vše */</span>
+<span class="kw">.reveal</span> { <span class="pr">font-family</span>: <span class="vl">var(--font)</span>; }
+<span class="kw">.reveal h1, h2</span> { <span class="pr">font-family</span>: <span class="vl">var(--nadpis)</span>; }
+
+<span class="cm">/* 3. LAYOUT – grid systém */</span>
+<span class="kw">.cols-2</span> { <span class="pr">display</span>: <span class="vl">grid</span>; <span class="pr">grid-template-columns</span>: <span class="vl">1fr 1fr</span>; }
+<span class="kw">.cols-3</span> { <span class="pr">display</span>: <span class="vl">grid</span>; <span class="pr">grid-template-columns</span>: <span class="vl">1fr 1fr 1fr</span>; }
+
+<span class="cm">/* 4. KOMPONENTY – znovupoužitelné prvky */</span>
+<span class="kw">.box</span>       { <span class="pr">padding</span>: <span class="vl">1rem</span>; <span class="pr">border-radius</span>: <span class="vl">5px</span>; }
+<span class="kw">.box-blue</span>  { <span class="pr">border-left</span>: <span class="vl">3px solid var(--akcent)</span>; }
+
+<span class="cm">/* 5. UTILITY – pomocné třídy */</span>
+<span class="kw">.mt</span>   { <span class="pr">margin-top</span>: <span class="vl">1rem</span>; }
+<span class="kw">.tc</span>   { <span class="pr">text-align</span>: <span class="vl">center</span>; }
+<span class="kw">.muted</span> { <span class="pr">color</span>: <span class="vl">gray</span>; <span class="pr">font-size</span>: <span class="vl">0.85rem</span>; }</code></pre>
+    </div>
+    <div>
+      <div class="box box-plain">
+        <h3>Tahák selektorů</h3>
+        <table class="tbl">
+          <tbody>
+            <tr><td><code>.a .b</code></td><td>b uvnitř a (jakkoliv hluboko)</td></tr>
+            <tr><td><code>.a > .b</code></td><td>b jako přímé dítě a</td></tr>
+            <tr><td><code>.a + .b</code></td><td>b hned za a</td></tr>
+            <tr><td><code>.a ~ .b</code></td><td>všechna b za a</td></tr>
+            <tr><td><code>.a.b</code></td><td>prvek s oběma třídami</td></tr>
+            <tr><td><code>:hover</code></td><td>při přejetí myší</td></tr>
+            <tr><td><code>:nth-child(n)</code></td><td>n-tý potomek</td></tr>
+            <tr><td><code>:not(.x)</code></td><td>vše kromě .x</td></tr>
+            <tr><td><code>[attr^="x"]</code></td><td>attr začíná na x</td></tr>
+            <tr><td><code>::before/after</code></td><td>obsah vložený z CSS</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-filled mt">
+        <p class="tc" style="font-size:0.85rem; color: #8a857c !important;">
+          Navigace: šipky ← → nebo mezerník<br>
+          Přehled: klávesa <strong style="color:#f9e2af">Esc</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">19</span>
+</section>
+
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    width: 1200,
+    height: 700,
+    margin: 0.04,
+    controls: true,
+    progress: true,
+    slideNumber: false,
+  });
+</script>
+</body>
+</html>
