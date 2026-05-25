@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travio – Prezentace</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+<section class="center-slide">
+  <h1>✈️ Travio</h1>
+  <p>Mobilní-first plánovač cestovních itinerářů s AI asistencí</p>
+  <br>
+  <p>Autor: Matěj Brnka</p>
+  <br>
+    <div class="chip-list" style="justify-content: center">
+    <span class="chip">React 18</span>
+    <span class="chip">NestJS</span>
+    <span class="chip">Supabase</span>
+    <span class="chip">Google Places API</span>
+  </div>
+
+</section>
+<section>
+  <h2>Idea</h2>
+  <div class="two-col">
+
+    <div style="font-size: 0.78em; line-height: 1.5">
+        <div class="highlight-box">
+      <p style="margin: 0 0 0.6em">
+        Cílový uživatel: cestovatel mladší generace, který chce přehledně naplánovaná místa v dané destinaci — bez žonglování se zápisníky a tabulkami.
+      </p></div>
+      <ol style="margin: 0; padding-left: 1.4em">
+        <li>Uživatel zadá destinaci + termín</li>
+        <li>Aplikace vygeneruje strukturu dnů</li>
+        <li>Volitelně: AI sestaví kostru itineráře</li>
+        <li>Uživatel přidává místa, řadí je, označuje jako navštívená</li>
+        <li>Sdílení anonymním odkazem (read-only, jako Google Drive)</li>
+      </ol>
+    </div>
+
+    <div style="text-align: center">
+      <img src="assets/02.png" alt="Náhled aplikace" style="max-height: 460px; width: auto" />
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Tech Stack</h2>
+  <table>
+    <thead><tr><th>Vrstva</th><th>Technologie</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>React 18, Vite, TypeScript, Tailwind CSS</td></tr>
+      <tr><td>Backend</td><td>NestJS 11, TypeScript, REST API</td></tr>
+      <tr><td>Databáze</td><td>Supabase (PostgreSQL)</td></tr>
+      <tr><td>Auth</td><td>Supabase Auth – Google OAuth</td></tr>
+      <tr><td>Mapy</td><td>Google Maps JS API</td></tr>
+      <tr><td>Deployment</td><td>Docker Compose, Traefik (reverse proxy, HTTPS / Let's Encrypt)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>API třetích stran</h2>
+  <table id="table-api">
+    <thead>
+      <tr>
+        <th>Služba</th>
+        <th>Účel</th>
+        <th>Popis</th>
+         </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>OpenAI</td>
+        <td>Generování itineráře (AI)</td>
+        <td>Bearer token (`OPENAI_API_KEY`)</td>
+      </tr>
+      <tr>
+        <td>Google Places API</td>
+        <td>Vyhledávání míst, autocomplete, fotky, detaily POI</td>
+        <td>API key (`GOOGLE_PLACES_API_KEY`)</td>
+      </tr>
+
+      <tr>
+        <td>*Google Maps JS API</td>
+        <td>Interaktivní mapa v UI (fullscreen, piny, klikání na POI)</td>
+        <td>API key (`VITE_GOOGLE_MAPS_KEY`)</td>
+      </tr>
+
+      <tr>
+        <td>Supabase</td>
+        <td>PostgreSQL databáze + Auth (Google OAuth, JWT)</td>
+        <td>API key (`VITE_GOOGLE_MAPS_KEY`)</td>
+      </tr>
+
+
+      <tr>
+        <td>yr.no (MET NORWAY)</td>
+        <td>Předpověď počasí pro termín cesty (do 9 dní)</td>
+        <td>User-Agent header</td>
+      </tr>
+
+      <tr>
+        <td>Open-Meteo</td>
+        <td>Historická data počasí (stejné datum, minulý rok) – fallback pro delší cesty</td>
+        <td>bez autentizace</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+<section>
+  <h2>AI Workflow</h2>
+
+  <!-- Request pipeline -->
+  <div class="ai-pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-icon">👤</div>
+      <div class="pipeline-label">Uživatel</div>
+      <div class="pipeline-desc">zaškrtne „Pomoc od AI"</div>
+    </div>
+    <div class="pipeline-connector">→</div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">📱</div>
+      <div class="pipeline-label">Frontend</div>
+      <div class="pipeline-desc">destinace · termín · zájmy</div>
+    </div>
+    <div class="pipeline-connector">→</div>
+    <div class="pipeline-step pipeline-backend">
+      <div class="pipeline-icon">🔧</div>
+      <div class="pipeline-label">NestJS</div>
+      <div class="pipeline-desc">AiService.generateItinerary()</div>
+    </div>
+    <div class="pipeline-connector">→</div>
+    <div class="pipeline-step pipeline-ai">
+      <div class="pipeline-icon">🤖</div>
+      <div class="pipeline-label">GPT-4o-mini</div>
+      <div class="pipeline-desc">system + user prompt</div>
+    </div>
+  </div>
+
+  <!-- Response pipeline -->
+  <div class="ai-pipeline" style="margin-top: 0.7em">
+    <div class="pipeline-step pipeline-ai">
+      <div class="pipeline-icon">✨</div>
+      <div class="pipeline-label">JSON odpověď</div>
+      <div class="pipeline-desc">název · dayIndex · priority</div>
+    </div>
+    <div class="pipeline-connector return">→</div>
+    <div class="pipeline-step pipeline-backend">
+      <div class="pipeline-icon">📍</div>
+      <div class="pipeline-label">Google Places</div>
+      <div class="pipeline-desc">souřadnice · adresa · web · hodiny</div>
+    </div>
+    <div class="pipeline-connector return">→</div>
+    <div class="pipeline-step pipeline-backend">
+      <div class="pipeline-icon">💾</div>
+      <div class="pipeline-label">PlacesService</div>
+      <div class="pipeline-desc">obohacená data → DB</div>
+    </div>
+    <div class="pipeline-connector return">→</div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">🗺️</div>
+      <div class="pipeline-label">Uživatel</div>
+      <div class="pipeline-desc">hotová kostra na mapě</div>
+    </div>
+  </div>
+
+</section>
+
+<section>
+
+  <h2>LLM</h2>
+  <div class="two-col text-sm">
+    <div>
+      <p><strong>OpenAI GPT-4o-mini</strong> — výchozí model, konfigurovatelné přes env</p>
+      <pre><code class="language-bash">OPENAI_MODEL=gpt-4o-mini
+OPENAI_TEMPERATURE=0.7
+OPENAI_MAX_TOKENS=2000</code></pre>
+      <ul>
+        <li>Output ve formě JSON</li>
+        <li>Report s historií volání</li>
+        <li>Report s náklady na provoz</li>
+      </ul>
+      <div class="warning-box">
+        Odpovědi z LLm stále nejsou ideální - vrací nízký počet míst a je třeba to dále optimalizovat - velikost modelu, prompt...
+      </div>
+    </div>
+    <div>
+       <div style="text-align: center">
+      <img src="assets/03.png" alt="Náhled aplikace" style="max-height: 460px; width: auto" />
+    </div>
+    </div>
+  </div>
+</section>
+<section>
+  <h2>Top Challenges</h2>
+  <div class="card-grid">
+
+    <div class="card">
+      <div class="card-challenge-title">🔐 Invite-only prostředí</div>
+      <div class="card-challenge-problem">
+        Cílem bylo rychlé spuštění aplikace, ale pouze pro "zvané uživatele".
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">❌ Pozastavení projektu ze strany Supabase</div>
+      <div class="card-challenge-problem">
+        Pokud je projekt delší dobu nečinný, tak Supabase pozastaví přístup k databázi. 
+      </div>
+    </div>
+
+        <div class="card">
+      <div class="card-challenge-title">🌦️ Předpověď počasí</div>
+      <div class="card-challenge-problem">
+        Bylo třeba vyřešit, jakým způsobem brát data o počasí (historický průměr nebo aktuální předpověď) a jak tato data průměrovat (nejvyšší denní teplota, průměrná denní teplota atd...)
+      </div>
+    </div>
+
+            <div class="card">
+      <div class="card-challenge-title">🪵 Logování Google Places</div>
+      <div class="card-challenge-problem">
+              Google Places API účtuje dle SKU — každý typ volání má jinou cenu. Bylo třeba sledovat reálné náklady per uživatel bez dopadu na výkon.
+      </div>
+    </div>
+    
+
+  </div>
+</section>
+
+<section>
+  <h2>Interesting Facts</h2>
+  <div class="card-grid text-sm">
+
+    <div class="card">
+      <div class="card-challenge-title">🗺️ Mapa jako primární UI</div>
+      <div class="card-challenge-problem">Google Maps fullscreen, itinerář je sekundární vrstva (strip karet dole na mobilu)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">📍 Klik na nativní Google POI</div>
+      <div class="card-challenge-problem">Přímo přidá místo do itineráře — bez hledání</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">🔁 Duplicita míst</div>
+      <div class="card-challenge-problem">Detekována přes <code>googlePlaceId</code> — aplikace se zeptá před přidáním podruhé</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">💰 Admin cost dashboard</div>
+      <div class="card-challenge-problem">Náklady Google Places (dle SKU) i OpenAI tokenů + e-mail uživatele pro audit</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">🔗 Share link bez přihlášení</div>
+      <div class="card-challenge-problem">Stejný pattern jako Google Drive — jen odkaz, žádná registrace</div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Future Vision</h2>
+  <div class="card-grid text-sm">
+
+    <div class="card">
+      <div class="card-challenge-title">🌐 Obsah od komunity</div>
+      <div class="card-challenge-problem">Uživatelé sdílejí itineráře veřejně — ostatní je mohou procházet, kopírovat a inspirovat se</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">📶 Offline mode</div>
+      <div class="card-challenge-problem">Service Worker + lokální cache — itinerář dostupný bez internetu přímo v zahraničí</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">💬 Chatbot pro přidávání míst</div>
+      <div class="card-challenge-problem">Uživatel popíše co chce a chatbot místa navrhne a přidá přímo do itineráře</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">💳 Kreditový model</div>
+      <div class="card-challenge-problem">Monetizace přes kredity — AI generování a pokročilé funkce čerpají kredit, základní plánování zdarma</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">👥 Kolaborativní plánování</div>
+      <div class="card-challenge-problem">Více uživatelů edituje cestu v reálném čase (WebSocket / CRDT)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-challenge-title">🌍 Multi-destinační cesty</div>
+      <div class="card-challenge-problem">Datový model připraven — <code>destinations</code> JSONB, migrace <code>004</code></div>
+    </div>
+
+  </div>
+</section>
+
+<section class="center-slide">
+  <h1>✈️ Travio</h1>
+  <p>Díky za pozornost</p>
+      <div style="text-align: center">
+      <img src="assets/04.png" alt="Náhled aplikace" style="max-height: 460px; width: auto" />
+    </div>
+</section>
+
+</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      center: false,
+      width: 1280,
+      height: 720,
+      margin: 0.05,
+      minScale: 0.2,
+      maxScale: 2.0,
+      plugins: [RevealHighlight, RevealNotes],
+    })
+  </script>
+</body>
+</html>
