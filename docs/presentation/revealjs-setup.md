@@ -269,3 +269,36 @@ npx playwright test --ui
 ```
 
 > Pro kontrolu prezentace je nejužitečnější **HTML report** — screenshoty z každého viewportu na jednom místě. **UI mode** se hodí když chceš krokovat a ladit konkrétní slide.
+
+### Kontrola přetékání a velikosti textu
+
+UI mode (`--ui`) je nejrychlejší — vybereš projekt (mobile, tablet, chrome) a klikáš po slidech v daném viewportu živě.
+
+Pro systematickou kontrolu použij **vizuální snapshoty** — Playwright pořídí screenshot a při každém dalším spuštění porovná pixel po pixelu. Pokud se něco posune nebo přeteče, test selže a v HTML reportu uvidíš červeno-zelený diff:
+
+```js
+test('slide 2 - idea', async ({ page }) => {
+  await page.goto('/docs/presentation/index.html')
+  await page.keyboard.press('ArrowRight')
+  await page.waitForTimeout(400)
+
+  await expect(page).toHaveScreenshot('slide-02-idea.png')
+})
+```
+
+První spuštění vygeneruje referenční screenshoty do `tests/slides.spec.js-snapshots/`. Každé další spuštění porovnává s nimi.
+
+Aktualizace referencí po záměrné změně slidu:
+
+```bash
+npx playwright test --update-snapshots
+```
+
+Reporter lze nastavit trvale v `playwright.config.js` aby nebylo potřeba příznak pokaždé:
+
+```js
+module.exports = defineConfig({
+  reporter: 'html',
+  // ...
+})
+```
