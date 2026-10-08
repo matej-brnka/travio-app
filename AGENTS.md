@@ -35,6 +35,7 @@ Uživatel může:
 ├── .github/workflows/pages.yml # Build + deploy prezentace na GitHub Pages
 ├── chunks.MD          # Implementační plán (chunky)
 ├── README.md          # Veřejný popis projektu (GitHub)
+├── LICENSE            # MIT
 └── AGENTS.md          # Tento soubor
 ```
 

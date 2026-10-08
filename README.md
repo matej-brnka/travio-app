@@ -12,9 +12,10 @@ Naplánuj cestu den po dni, nech AI navrhnout kostru itineráře a sdílej ji je
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Studentský projekt](https://img.shields.io/badge/studentsk%C3%BD%20projekt-%C4%8CZU%20PEF-6DBE45)
 
-[**🌐 Živá aplikace**](https://brnka.aibr.cz) · [**🎞️ Prezentace projektu**](https://matej-brnka.github.io/travio-app/) · [**📦 Releases**](https://github.com/matej-brnka/travio-app/releases)
+[**🎞️ Prezentace projektu**](https://matej-brnka.github.io/travio-app/) · [**📦 Releases**](https://github.com/matej-brnka/travio-app/releases)
 
 <img src="docs/presentation/assets/02.png" alt="Travio – seznam míst ve dni" width="420" />
 
@@ -37,6 +38,7 @@ Naplánuj cestu den po dni, nech AI navrhnout kostru itineráře a sdílej ji je
 - [Struktura repozitáře](#struktura-repozitáře)
 - [Roadmapa](#roadmapa)
 - [Autor](#autor)
+- [Licence](#licence)
 
 ## O projektu
 
@@ -273,3 +275,7 @@ npx serve .        # pak otevři /index.html (načítá slidy ze slides/)
 **Matěj Brnka**: [@matej-brnka](https://github.com/matej-brnka)
 
 Studentský projekt v rámci mikrocertifikátu *Generativní umělá inteligence*, ČZU v Praze, Provozně ekonomická fakulta, 2026.
+
+## Licence
+
+Projekt je dostupný pod licencí [MIT](LICENSE).
