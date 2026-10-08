@@ -27,6 +27,7 @@ Naplánuj cestu den po dni, nech AI navrhnout kostru itineráře a sdílej ji je
 
 - [O projektu](#o-projektu)
 - [Funkce](#funkce)
+- [Jak projekt vznikl](#jak-projekt-vznikl)
 - [Tech stack](#tech-stack)
 - [Architektura](#architektura)
 - [Rychlý start](#rychlý-start)
@@ -77,6 +78,16 @@ Travio je webová aplikace navržená primárně pro mobil, ve které si cestova
   <img src="docs/presentation/assets/04.png" alt="Detail" width="32%" />
 </p>
 </details>
+
+## Jak projekt vznikl
+
+Travio je vyvinuté metodou **AI‑assisted development**:
+
+1. **Frontend** vznikl v [Lovable](https://lovable.dev) z [připraveného promptu](docs/templates/prompt-pro-lovable.md). Změny z iterací jsou shrnuté v [`LOVABLE-CHANGES.MD`](docs/LOVABLE-CHANGES.MD).
+2. **Backend** byl vygenerován z [promptu](docs/templates/prompt-pro-backend.md) a dál iterován s AI agentem podle [`AGENTS.md`](AGENTS.md) a [implementačního plánu](chunks.MD).
+3. **Návrh architektury, integrace, testování a nasazení** dělal autor.
+
+Celý postup krok za krokem je popsaný v [`docs/steps.md`](docs/steps.md).
 
 ## Tech stack
 
