@@ -31,9 +31,16 @@ Uživatel může:
 │       ├── places/       # CRUD míst
 │       ├── auth/         # JWT guard (ES256 / JWKS)
 │       └── external/     # Integrace yr.no, Google Places, AI, LLM
+├── docs/presentation/ # reveal.js prezentace (slides/*.html → build.mjs → prezentace.html)
+├── .github/workflows/pages.yml # Build + deploy prezentace na GitHub Pages
 ├── chunks.MD          # Implementační plán (chunky)
+├── README.md          # Veřejný popis projektu (GitHub)
 └── AGENTS.md          # Tento soubor
 ```
+
+## Prezentace a GitHub Pages
+- Prezentace se edituje v `docs/presentation/slides/*.html`, `node build.mjs` ji složí do `prezentace.html`.
+- Workflow `.github/workflows/pages.yml` při push na `main` (změny v `docs/presentation/**`) sestaví prezentaci a nasadí ji na https://matej-brnka.github.io/travio-app/ (Pages source = GitHub Actions).
 
 ## Tech stack
 - **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, shadcn/ui, react-day-picker, framer-motion
