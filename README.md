@@ -12,6 +12,7 @@ Naplánuj cestu den po dni, nech AI navrhnout kostru itineráře a sdílej ji je
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Studentský projekt](https://img.shields.io/badge/studentsk%C3%BD%20projekt-%C4%8CZU%20PEF-6DBE45)
 
 [**🌐 Živá aplikace**](https://brnka.aibr.cz) · [**🎞️ Prezentace projektu**](https://matej-brnka.github.io/travio-app/) · [**📦 Releases**](https://github.com/matej-brnka/travio-app/releases)
 
@@ -47,6 +48,9 @@ Travio je webová aplikace navržená primárně pro mobil, ve které si cestova
 4. Cestu sdílíš **anonymním read‑only odkazem**, podobně jako v Google Drive.
 
 > Registrace funguje pouze na pozvánku (invite‑only), přihlášení probíhá přes Google.
+
+> [!NOTE]
+> 🎓 **Studentský projekt.** Travio vzniklo jako závěrečný projekt kurzu **Generativní umělá inteligence** na Provozně ekonomické fakultě [České zemědělské univerzity v Praze](https://www.pef.czu.cz/). Kurz byl zakončen prezentací projektu a udělením mikrocertifikátu (5 ECTS, úroveň 5 EQF).
 
 ## Funkce
 
@@ -85,24 +89,62 @@ Travio je webová aplikace navržená primárně pro mobil, ve které si cestova
 
 ## Architektura
 
-```
-            ┌──────────────── Traefik (80/443, Let's Encrypt) ────────────────┐
-            │                                                                 │
-   brnka.aibr.cz/*                                               brnka.aibr.cz/api/*
-            │                                                                 │
-   ┌────────▼────────┐        REST /api         ┌─────────────────────────────▼──┐
-   │ Frontend (SPA)  │ ───────────────────────▶ │ Backend (NestJS)               │
-   │ React + nginx   │                          │ trips · days · places · auth   │
-   └────────┬────────┘                          │ external: AI, Places, počasí   │
-            │ Google OAuth                      └───┬──────────┬──────────┬──────┘
-            ▼                                       │          │          │
-   ┌─────────────────┐       PostgreSQL (pg)        │          │          │
-   │  Supabase Auth  │◀─────────────────────────────┘          │          │
-   │  + PostgreSQL   │                                 OpenAI  │  Google Places
-   └─────────────────┘                                         │  yr.no / Open‑Meteo
+```mermaid
+flowchart LR
+    user(["📱 Uživatel<br/>(mobilní prohlížeč)"])
+
+    subgraph docker["Docker Compose"]
+        traefik["Traefik v3<br/>HTTPS · Let's Encrypt"]
+        fe["Frontend<br/>React SPA · nginx"]
+        be["Backend<br/>NestJS 11<br/>trips · days · places · auth"]
+    end
+
+    subgraph supabase["Supabase"]
+        auth["Auth<br/>Google OAuth · JWT ES256"]
+        db[("PostgreSQL<br/>RLS")]
+    end
+
+    subgraph ext["Externí API"]
+        openai["OpenAI<br/>GPT-4o-mini"]
+        places["Google Places API"]
+        weather["yr.no · Open-Meteo"]
+    end
+
+    gmaps["Google Maps JS API"]
+
+    user -->|"HTTPS"| traefik
+    traefik -->|"/*"| fe
+    traefik -->|"/api/*"| be
+    fe -.->|"přihlášení"| auth
+    fe -.->|"mapa, POI"| gmaps
+    be -->|"pg"| db
+    be -->|"ověření JWT (JWKS)"| auth
+    be --> openai
+    be --> places
+    be --> weather
 ```
 
-**AI workflow:** uživatel zaškrtne „Pomoc od AI“ → frontend pošle destinaci, termín a zájmy → `AiService.generateItinerary()` → GPT‑4o‑mini vrátí JSON (název, dayIndex, priorita) → Google Places doplní detaily → `PlacesService` uloží výsledek do DB → hotová kostra se zobrazí na mapě.
+**AI workflow:**
+
+```mermaid
+sequenceDiagram
+    actor U as Uživatel
+    participant FE as Frontend
+    participant BE as NestJS (AiService)
+    participant AI as OpenAI GPT-4o-mini
+    participant GP as Google Places
+    participant DB as PostgreSQL
+
+    U->>FE: zaškrtne „Pomoc od AI“
+    FE->>BE: destinace · termín · zájmy
+    BE->>AI: system + user prompt
+    AI-->>BE: JSON (název, dayIndex, priorita, ticket)
+    BE->>GP: dohledání míst
+    GP-->>BE: souřadnice · adresa · web · otevírací doba
+    BE->>DB: PlacesService uloží místa
+    BE-->>FE: hotová kostra itineráře
+    FE-->>U: místa na mapě
+```
 
 ## Rychlý start
 
@@ -229,3 +271,5 @@ npx serve .        # pak otevři /index.html (načítá slidy ze slides/)
 ## Autor
 
 **Matěj Brnka**: [@matej-brnka](https://github.com/matej-brnka)
+
+Studentský projekt v rámci mikrocertifikátu *Generativní umělá inteligence*, ČZU v Praze, Provozně ekonomická fakulta, 2026.
